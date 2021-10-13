@@ -20,7 +20,39 @@ Reasons for that - most users cannot handle rigor required for automation.
 
 Other problem which I see is embedding of the well known data structures or formats in the language. This is closely resemble following samples when communicate with API for example. For example, how I would like to describe making API call to server in English?
 
+## Ideas
+
+How to declare variable: `an apple`. This is implicitly create variable `apple`. Let's say this is declaration of the variable. How to reference variable: `the apple`.
+
+Interop with .NET
+```
+resolve an domain name =>
+   call .NET Method `Dns.GetHostAddresses` with domain name as parameter and obtain the addresses
+```
+
+it would be equivalent to following pseudo code.
+```
+resolve(domain_name):
+    addresses = Dns.GetHostAddresses(domain_name)
+```
+
+Self-contained function which calculated Fibonacci number
+```
+calulate factorial of a number =>
+    if the number is 0 then return 1
+    if the number is 1 then return 1
+    let previous number is number minus 1
+    calculate factorial of the previous number into the previous factorial
+    return the previous factorial multiply the number
+```
+After looking at this sample it is not clear to me how 
+- take reference results of function execution.
+- how define calculations into new variables. That's much easier to get right, but better be careful.
+- how to return value from function.
+- Is functions are valid constructs for humans?
+
 # Links
 - https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
 - https://github.com/pannous/english-script
 - http://inform7.com/doc/
+- https://en.wikipedia.org/wiki/Literate_programming
