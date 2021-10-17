@@ -53,6 +53,17 @@ After looking at this sample it is not clear to me how
 - how to return value from function.
 - Is functions are valid constructs for humans?
 
+Implicit return of last expression.
+```
+width is a number
+height is a number
+
+To calculate area from a width and a height:
+  multiply width to height
+```
+
+Do language support concept of an expression in itself? How we decide that specific construct is expression, and what is statement.
+
 # Links
 - https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
 - https://github.com/pannous/english-script
