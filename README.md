@@ -28,8 +28,8 @@ How to declare variable: `an apple`. This is implicitly create variable `apple`.
 
 Interop with .NET
 ```
-resolve an domain name =>
-   call .NET Method `Dns.GetHostAddresses` with domain name as parameter and obtain the addresses
+resolve an domain name ->
+   call .NET Method `Dns.GetHostAddresses` with domain name as parameter and obtain the addresses.
 ```
 
 it would be equivalent to following pseudo code.
@@ -40,12 +40,12 @@ resolve(domain_name):
 
 Self-contained function which calculated Fibonacci number
 ```
-calulate factorial of a number =>
-    if the number is 0 then return 1
-    if the number is 1 then return 1
-    let previous number is number minus 1
-    calculate factorial of the previous number into the previous factorial
-    return the previous factorial multiply the number
+Calculate factorial of a number ->
+    if the number is 0 then return 1.
+    if the number is 1 then return 1.
+    let previous number is number minus 1.
+    calculate factorial of the previous number into the previous factorial.
+    return the previous factorial multiply the number.
 ```
 After looking at this sample it is not clear to me how 
 - take reference results of function execution.
@@ -55,12 +55,26 @@ After looking at this sample it is not clear to me how
 
 Implicit return of last expression.
 ```
-width is a number
-height is a number
+width is a number.
+height is a number.
 
-To calculate area from a width and a height:
-  multiply width to height
+To calculate area from a width and a height ->
+  multiply width to height.
 ```
+
+## Sentences
+
+The statements is sentence. Statement ends with `.`. Functions is labeled list of statements. 
+```
+Label_sentence_L1 ->
+Label_sentence_L2 ->
+  statement_1.
+  statement_2.
+  .....
+  statement_3.
+```
+
+This label in itself will declare parameters, and specify how to execute call. The multiple labels can point to same set of sentences. That's allow for aliases for functions.
 
 Do language support concept of an expression in itself? How we decide that specific construct is expression, and what is statement.
 
