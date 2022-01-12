@@ -62,9 +62,32 @@ To calculate area from a width and a height ->
   multiply width to height.
 ```
 
+Do language support concept of an expression in itself? How we decide that specific construct is expression, and what is statement.
+
+### Determiners
+
+Maybe I can use determiners like articles for English for variable specification.
+What can I do for determiner-less languages like Russian(?). Have to research this article [5]
+
+Alternative determiners looks promising.
+
 ## Sentences
 
-The statements is sentence. Statement ends with `.`. Functions is labeled list of statements. 
+The statements is sentence.
+
+### Simple sentences
+
+Statement ends with `.`. Long sentences can be split by `;`.
+
+```
+statement_1 ; statement_2 ; .... ; statement_N.
+```
+
+Preferably operate using linguistic properties, and do not use `;` if possible.
+
+### Labeled sentences
+
+Functions is labeled list of statements. 
 ```
 Label_sentence_L1 ->
 Label_sentence_L2 ->
@@ -76,10 +99,17 @@ Label_sentence_L2 ->
 
 This label in itself will declare parameters, and specify how to execute call. The multiple labels can point to same set of sentences. That's allow for aliases for functions.
 
-Do language support concept of an expression in itself? How we decide that specific construct is expression, and what is statement.
+### Conditional execution
+
+Conditional statement supports only constructs which can be considered `if..then` in other languages.
+
+```
+if XXXX is YYYY, operations_list.
+```
 
 # Links
-- https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
-- https://github.com/pannous/english-script
-- http://inform7.com/doc/
-- https://en.wikipedia.org/wiki/Literate_programming
+- [1] https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
+- [2] https://github.com/pannous/english-script
+- [3] http://inform7.com/doc/
+- [4] https://en.wikipedia.org/wiki/Literate_programming
+- [5] https://tspace.library.utoronto.ca/bitstream/1807/26223/1/Piriyawiboon_Nattaya_201011_PhD_thesis.pdf
