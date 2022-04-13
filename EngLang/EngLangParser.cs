@@ -12,7 +12,8 @@ namespace EngLang
             if (parts[0] == "an" || parts[0] == "a")
             {
                 var variableName = string.Join(' ', parts.Skip(1));
-                result.VariableReferences.Add(new VariableReference() { Name = variableName });
+                var declaration = new VariableDeclaration(variableName);
+                result.VariableDeclarations.Add(declaration);
             }
 
             return result;

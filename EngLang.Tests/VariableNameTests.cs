@@ -13,9 +13,10 @@ namespace EngLang.Tests
             var parseResult = EngLangParser.Parse(sentence);
 
             var expectedVariableName = "apple";
-            var variableReference = parseResult.VariableReferences[0];
-            Assert.Equal(expectedVariableName, variableReference.Name);
+            var variableDeclaration = parseResult.VariableDeclarations[0];
+            Assert.Equal(expectedVariableName, variableDeclaration.Name);
         }
+
         [Fact]
         public void DetectVariableWithWhiteSpaces()
         {
@@ -24,8 +25,8 @@ namespace EngLang.Tests
             var parseResult = EngLangParser.Parse(sentence);
 
             var expectedVariableName = "red apple";
-            var variableReference = parseResult.VariableReferences[0];
-            Assert.Equal(expectedVariableName, variableReference.Name);
+            var variableDeclaration = parseResult.VariableDeclarations[0];
+            Assert.Equal(expectedVariableName, variableDeclaration.Name);
         }
     }
 }

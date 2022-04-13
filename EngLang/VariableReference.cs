@@ -1,7 +1,3 @@
-namespace EngLang
-{
-    public class VariableReference
-    {
-        public string Name { get; set; }
-    }
-}
+namespace EngLang;
+
+public record VariableReference(string Name);

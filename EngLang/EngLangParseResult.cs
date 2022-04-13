@@ -5,5 +5,6 @@ namespace EngLang
     public class EngLangParseResult
     {
         public List<VariableReference> VariableReferences { get; } = new();
+        public List<VariableDeclaration> VariableDeclarations { get; } = new();
     }
 }
