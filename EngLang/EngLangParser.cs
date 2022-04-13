@@ -9,14 +9,36 @@ namespace EngLang
         {
             var parts = sourceCode.Split(' ');
             var result = new EngLangParseResult();
-            if (parts[0] == "an" || parts[0] == "a")
+            switch (parts[0])
             {
-                var variableName = string.Join(' ', parts.Skip(1));
-                var declaration = new VariableDeclaration(variableName);
-                result.VariableDeclarations.Add(declaration);
+                case "a":
+                case "an":
+                    ParseVariableReference(result, string.Join(' ', parts.Skip(1)));
+                    break;
+                case "the":
+                    ParseVariableDeclaration(result, string.Join(' ', parts.Skip(1)));
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
 
             return result;
+        }
+
+        private static void ParseVariableReference(EngLangParseResult result, string content)
+        {
+            var variableName = content;
+            var variableReference = new VariableReference(variableName);
+            result.VariableReferences.Add(variableReference);
+        }
+
+        private static void ParseVariableDeclaration(EngLangParseResult result, string content)
+        {
+            var parts = content.Split(" is a ");
+            var variableName = parts[0];
+            var typeName = parts[1].Trim('.');
+            var variableDeclaration = new VariableDeclaration(variableName, typeName);
+            result.VariableDeclarations.Add(variableDeclaration);
         }
     }
 }

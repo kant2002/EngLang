@@ -1,3 +1,3 @@
 namespace EngLang;
 
-public record VariableDeclaration(string Name);
+public record VariableDeclaration(string Name, string TypeName);
