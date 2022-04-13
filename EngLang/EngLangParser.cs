@@ -9,7 +9,7 @@ namespace EngLang
         {
             var parts = sourceCode.Split(' ');
             var result = new EngLangParseResult();
-            if (parts[0] == "an")
+            if (parts[0] == "an" || parts[0] == "a")
             {
                 var variableName = string.Join(' ', parts.Skip(1));
                 result.VariableReferences.Add(new VariableReference() { Name = variableName });

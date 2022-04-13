@@ -19,7 +19,7 @@ namespace EngLang.Tests
         [Fact]
         public void DetectVariableWithWhiteSpaces()
         {
-            var sentence = "an red apple";
+            var sentence = "a red apple";
 
             var parseResult = EngLangParser.Parse(sentence);
 
