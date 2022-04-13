@@ -5,40 +5,51 @@ namespace EngLang
 
     public class EngLangParser
     {
-        public static EngLangParseResult Parse(string sourceCode)
+        public static SyntaxNode Parse(string sourceCode)
         {
             var parts = sourceCode.Split(' ');
-            var result = new EngLangParseResult();
+            //var result = new EngLangParseResult();
             switch (parts[0])
             {
                 case "a":
                 case "an":
-                    ParseVariableReference(result, string.Join(' ', parts.Skip(1)));
+                    var variableReference = ParseIdentifierReference(string.Join(' ', parts.Skip(1)));
+                    //result.VariableReferences.Add(variableReference);
+                    return variableReference;
                     break;
                 case "the":
-                    ParseVariableDeclaration(result, string.Join(' ', parts.Skip(1)));
+                    var variableDeclaration = ParseVariableDeclaration(string.Join(' ', parts.Skip(1)));
+                    //result.VariableDeclarations.Add(variableDeclaration);
+                    return variableDeclaration;
                     break;
                 default:
                     throw new NotImplementedException();
             }
 
-            return result;
+            //return result;
         }
 
-        private static void ParseVariableReference(EngLangParseResult result, string content)
+        private static IdentifierReference ParseIdentifierReference(string content)
         {
             var variableName = content;
-            var variableReference = new VariableReference(variableName);
-            result.VariableReferences.Add(variableReference);
+            var identifierReference = new IdentifierReference(variableName);
+            return identifierReference;
         }
 
-        private static void ParseVariableDeclaration(EngLangParseResult result, string content)
+        private static VariableDeclaration ParseVariableDeclaration(string content)
         {
-            var parts = content.Split(" is a ");
+            var parts = content.Split(" is ");
             var variableName = parts[0];
-            var typeName = parts[1].Trim('.');
-            var variableDeclaration = new VariableDeclaration(variableName, typeName);
-            result.VariableDeclarations.Add(variableDeclaration);
+            var typeName = parts[1];
+            var syntaxNode = Parse(typeName);
+            var identifierReference = syntaxNode as IdentifierReference;
+            if (identifierReference == null)
+            {
+                throw new InvalidOperationException($"Identifier expected. {typeName} given");
+            }
+
+            var variableDeclaration = new VariableDeclaration(variableName, identifierReference);
+            return variableDeclaration;
         }
     }
 }

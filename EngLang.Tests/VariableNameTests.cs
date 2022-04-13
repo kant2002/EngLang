@@ -13,7 +13,7 @@ namespace EngLang.Tests
             var parseResult = EngLangParser.Parse(sentence);
 
             var expectedVariableName = "apple";
-            var variableDeclaration = parseResult.VariableReferences[0];
+            var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
             Assert.Equal(expectedVariableName, variableDeclaration.Name);
         }
 
@@ -25,7 +25,7 @@ namespace EngLang.Tests
             var parseResult = EngLangParser.Parse(sentence);
 
             var expectedVariableName = "red apple";
-            var variableDeclaration = parseResult.VariableReferences[0];
+            var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
             Assert.Equal(expectedVariableName, variableDeclaration.Name);
         }
 
@@ -37,9 +37,21 @@ namespace EngLang.Tests
             var parseResult = EngLangParser.Parse(sentence);
 
             var expectedVariableName = "name";
-            var variableDeclaration = parseResult.VariableDeclarations[0];
+            var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
             Assert.Equal(expectedVariableName, variableDeclaration.Name);
-            Assert.Equal("string", variableDeclaration.TypeName);
+            Assert.Equal("string", variableDeclaration.TypeName.Name);
+        }
+
+        [Fact]
+        public void DeclareVariableWithAnType()
+        {
+            var sentence = "the name is an apple";
+
+            var parseResult = EngLangParser.Parse(sentence);
+
+            var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
+            Assert.Equal("name", variableDeclaration.Name);
+            Assert.Equal("apple", variableDeclaration.TypeName.Name);
         }
     }
 }

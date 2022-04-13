@@ -1,3 +1,3 @@
 namespace EngLang;
 
-public record VariableDeclaration(string Name, string TypeName);
+public record VariableDeclaration(string Name, IdentifierReference TypeName) : SyntaxNode;
