@@ -1,96 +1,95 @@
-namespace EngLang
+using System;
+using System.Collections.Immutable;
+using System.Linq;
+
+namespace EngLang;
+
+public class EngLangParser
 {
-    using System;
-    using System.Collections.Immutable;
-    using System.Linq;
-
-    public class EngLangParser
+    public static SyntaxNode Parse(string sourceCode)
     {
-        public static SyntaxNode Parse(string sourceCode)
+        if (sourceCode.Contains('.'))
         {
-            if (sourceCode.Contains('.'))
-            {
-                var statmementTexts = sourceCode.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                var statementsArray = statmementTexts
-                    .Select(ParseNode)
-                    .Select(ConvertToStatement)
-                    .ToArray();
-                var statements = ImmutableList.Create<Statement>(statementsArray);
-                return new BlockStatement(statements);
-            }
-
-            return ParseNode(sourceCode);
+            var statmementTexts = sourceCode.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            var statementsArray = statmementTexts
+                .Select(ParseNode)
+                .Select(ConvertToStatement)
+                .ToArray();
+            var statements = ImmutableList.Create<Statement>(statementsArray);
+            return new BlockStatement(statements);
         }
 
-        private static Statement ConvertToStatement(SyntaxNode node)
+        return ParseNode(sourceCode);
+    }
+
+    private static Statement ConvertToStatement(SyntaxNode node)
+    {
+        return node switch
         {
-            return node switch
-            {
-                VariableDeclaration variableDeclaration => new VariableDeclarationStatement(variableDeclaration),
-                _ => throw new InvalidOperationException(),
-            };
+            VariableDeclaration variableDeclaration => new VariableDeclarationStatement(variableDeclaration),
+            _ => throw new InvalidOperationException(),
+        };
+    }
+
+    private static SyntaxNode ParseNode(string sourceCode)
+    {
+        var parts = sourceCode.Split(' ');
+        switch (parts[0])
+        {
+            case "a":
+            case "an":
+                var variableReference = ParseIdentifierReference(string.Join(' ', parts.Skip(1)));
+                return variableReference;
+            case "the":
+                var variableDeclaration = ParseVariableDeclaration(string.Join(' ', parts.Skip(1)));
+                return variableDeclaration;
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
+    private static IdentifierReference ParseIdentifierReference(string content)
+    {
+        var variableName = content;
+        var identifierReference = new IdentifierReference(variableName);
+        return identifierReference;
+    }
+
+    private static VariableDeclaration ParseVariableDeclaration(string content)
+    {
+        var parts = content.Split(" is ");
+        var variableName = parts[0];
+        var variableSpecification = parts[1];
+        var specificationParts = variableSpecification.Split(" equal to");
+        var syntaxNode = Parse(specificationParts[0]);
+        var identifierReference = syntaxNode as IdentifierReference;
+        if (identifierReference == null)
+        {
+            throw new InvalidOperationException($"Identifier expected. {variableSpecification} given");
         }
 
-        private static SyntaxNode ParseNode(string sourceCode)
+        Expression? expression = null;
+        if (specificationParts.Length > 1)
         {
-            var parts = sourceCode.Split(' ');
-            switch (parts[0])
-            {
-                case "a":
-                case "an":
-                    var variableReference = ParseIdentifierReference(string.Join(' ', parts.Skip(1)));
-                    return variableReference;
-                case "the":
-                    var variableDeclaration = ParseVariableDeclaration(string.Join(' ', parts.Skip(1)));
-                    return variableDeclaration;
-                default:
-                    throw new NotImplementedException();
-            }
+            expression = ParseExpression(specificationParts[1].Trim());
         }
 
-        private static IdentifierReference ParseIdentifierReference(string content)
+        var variableDeclaration = new VariableDeclaration(variableName, identifierReference, expression);
+        return variableDeclaration;
+    }
+
+    private static Expression ParseExpression(string expressionString)
+    {
+        if (expressionString.StartsWith('"'))
         {
-            var variableName = content;
-            var identifierReference = new IdentifierReference(variableName);
-            return identifierReference;
+            return new StringLiteralExpression(expressionString.Trim('"'));
         }
 
-        private static VariableDeclaration ParseVariableDeclaration(string content)
+        if (char.IsNumber(expressionString[0]))
         {
-            var parts = content.Split(" is ");
-            var variableName = parts[0];
-            var variableSpecification = parts[1];
-            var specificationParts = variableSpecification.Split(" equal to");
-            var syntaxNode = Parse(specificationParts[0]);
-            var identifierReference = syntaxNode as IdentifierReference;
-            if (identifierReference == null)
-            {
-                throw new InvalidOperationException($"Identifier expected. {variableSpecification} given");
-            }
-
-            Expression? expression = null;
-            if (specificationParts.Length > 1)
-            {
-                expression = ParseExpression(specificationParts[1].Trim());
-            }
-
-            var variableDeclaration = new VariableDeclaration(variableName, identifierReference, expression);
-            return variableDeclaration;
+            return new IntLiteralExpression(int.Parse(expressionString));
         }
 
-        private static Expression ParseExpression(string expressionString)
-        {
-            if (expressionString.StartsWith('"'))
-            {
-                return new StringLiteralExpression(expressionString.Trim('"'));
-            }
-
-            if (char.IsNumber(expressionString[0]))
-            {
-                return new IntLiteralExpression(int.Parse(expressionString));
-            }
-
-            throw new InvalidOperationException($"Cannot parse expression '{expressionString}'");
-        }
+        throw new InvalidOperationException($"Cannot parse expression '{expressionString}'");
     }
 }
