@@ -52,6 +52,21 @@ namespace EngLang.Tests
             var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
             Assert.Equal("name", variableDeclaration.Name);
             Assert.Equal("apple", variableDeclaration.TypeName.Name);
+            Assert.Null(variableDeclaration.Expression);
+        }
+
+        [Fact]
+        public void DeclareVariableWithAnInitializer()
+        {
+            var sentence = "the greetings is an string equal to \"Hello\"";
+
+            var parseResult = EngLangParser.Parse(sentence);
+
+            var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
+            Assert.Equal("greetings", variableDeclaration.Name);
+            Assert.Equal("string", variableDeclaration.TypeName.Name);
+            var stringLiteralExpression = Assert.IsType<StringLiteralExpression>(variableDeclaration.Expression);
+            Assert.Equal("Hello", stringLiteralExpression.Value);
         }
 
         [Fact]

@@ -59,16 +59,33 @@ namespace EngLang
         {
             var parts = content.Split(" is ");
             var variableName = parts[0];
-            var typeName = parts[1];
-            var syntaxNode = Parse(typeName);
+            var variableSpecification = parts[1];
+            var specificationParts = variableSpecification.Split(" equal to");
+            var syntaxNode = Parse(specificationParts[0]);
             var identifierReference = syntaxNode as IdentifierReference;
             if (identifierReference == null)
             {
-                throw new InvalidOperationException($"Identifier expected. {typeName} given");
+                throw new InvalidOperationException($"Identifier expected. {variableSpecification} given");
             }
 
-            var variableDeclaration = new VariableDeclaration(variableName, identifierReference);
+            Expression? expression = null;
+            if (specificationParts.Length > 1)
+            {
+                expression = ParseExpression(specificationParts[1].Trim());
+            }
+
+            var variableDeclaration = new VariableDeclaration(variableName, identifierReference, expression);
             return variableDeclaration;
+        }
+
+        private static Expression ParseExpression(string expressionString)
+        {
+            if (expressionString.StartsWith('"'))
+            {
+                return new StringLiteralExpression(expressionString.Trim('"'));
+            }
+
+            throw new InvalidOperationException($"Cannot parse expression '{expressionString}'");
         }
     }
 }
