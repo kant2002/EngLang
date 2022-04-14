@@ -53,5 +53,20 @@ namespace EngLang.Tests
             Assert.Equal("name", variableDeclaration.Name);
             Assert.Equal("apple", variableDeclaration.TypeName.Name);
         }
+
+        [Fact]
+        public void ParseVariableDeclarationSatement()
+        {
+            var sentence = "the name is an apple.";
+
+            var parseResult = EngLangParser.Parse(sentence);
+
+            var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+            Assert.Single(blockStatement.Statements);
+
+            var variableStatement = Assert.IsType<VariableDeclarationStatement>(blockStatement.Statements[0]);
+            Assert.Equal("name", variableStatement.Declaration.Name);
+            Assert.Equal("apple", variableStatement.Declaration.TypeName.Name);
+        }
     }
 }

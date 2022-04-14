@@ -1,32 +1,51 @@
 namespace EngLang
 {
     using System;
+    using System.Collections.Immutable;
     using System.Linq;
 
     public class EngLangParser
     {
         public static SyntaxNode Parse(string sourceCode)
         {
+            if (sourceCode.Contains('.'))
+            {
+                var statmementTexts = sourceCode.Split('.', StringSplitOptions.RemoveEmptyEntries);
+                var statementsArray = statmementTexts
+                    .Select(ParseNode)
+                    .Select(ConvertToStatement)
+                    .ToArray();
+                var statements = ImmutableList.Create<Statement>(statementsArray);
+                return new BlockStatement(statements);
+            }
+
+            return ParseNode(sourceCode);
+        }
+
+        private static Statement ConvertToStatement(SyntaxNode node)
+        {
+            return node switch
+            {
+                VariableDeclaration variableDeclaration => new VariableDeclarationStatement(variableDeclaration),
+                _ => throw new InvalidOperationException(),
+            };
+        }
+
+        private static SyntaxNode ParseNode(string sourceCode)
+        {
             var parts = sourceCode.Split(' ');
-            //var result = new EngLangParseResult();
             switch (parts[0])
             {
                 case "a":
                 case "an":
                     var variableReference = ParseIdentifierReference(string.Join(' ', parts.Skip(1)));
-                    //result.VariableReferences.Add(variableReference);
                     return variableReference;
-                    break;
                 case "the":
                     var variableDeclaration = ParseVariableDeclaration(string.Join(' ', parts.Skip(1)));
-                    //result.VariableDeclarations.Add(variableDeclaration);
                     return variableDeclaration;
-                    break;
                 default:
                     throw new NotImplementedException();
             }
-
-            //return result;
         }
 
         private static IdentifierReference ParseIdentifierReference(string content)
