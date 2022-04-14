@@ -96,6 +96,7 @@ namespace EngLang.Tests
             var variableStatement = Assert.IsType<VariableDeclarationStatement>(blockStatement.Statements[0]);
             Assert.Equal("name", variableStatement.Declaration.Name);
             Assert.Equal("apple", variableStatement.Declaration.TypeName.Name);
+            Assert.Null(variableStatement.Declaration.Expression);
         }
     }
 }
