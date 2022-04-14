@@ -56,7 +56,7 @@ namespace EngLang.Tests
         }
 
         [Fact]
-        public void DeclareVariableWithAnInitializer()
+        public void DeclareVariableWithAnStringLiteralInitializer()
         {
             var sentence = "the greetings is an string equal to \"Hello\"";
 
@@ -67,6 +67,20 @@ namespace EngLang.Tests
             Assert.Equal("string", variableDeclaration.TypeName.Name);
             var stringLiteralExpression = Assert.IsType<StringLiteralExpression>(variableDeclaration.Expression);
             Assert.Equal("Hello", stringLiteralExpression.Value);
+        }
+
+        [Fact]
+        public void DeclareVariableWithAnIntLiteralInitializer()
+        {
+            var sentence = "the answer to all things is an number equal to 42";
+
+            var parseResult = EngLangParser.Parse(sentence);
+
+            var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
+            Assert.Equal("answer to all things", variableDeclaration.Name);
+            Assert.Equal("number", variableDeclaration.TypeName.Name);
+            var intLiteralExpression = Assert.IsType<IntLiteralExpression>(variableDeclaration.Expression);
+            Assert.Equal(42, intLiteralExpression.Value);
         }
 
         [Fact]

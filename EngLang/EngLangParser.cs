@@ -85,6 +85,11 @@ namespace EngLang
                 return new StringLiteralExpression(expressionString.Trim('"'));
             }
 
+            if (char.IsNumber(expressionString[0]))
+            {
+                return new IntLiteralExpression(int.Parse(expressionString));
+            }
+
             throw new InvalidOperationException($"Cannot parse expression '{expressionString}'");
         }
     }
