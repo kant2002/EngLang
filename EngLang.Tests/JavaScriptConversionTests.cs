@@ -42,4 +42,56 @@ public class JavaScriptConversionTests
         var expectedCode = "let answer_to_all_things = 42";
         Assert.Equal(expectedCode, result);
     }
+
+    [Fact]
+    public void ConvertAddition()
+    {
+        var sentence = "add 42 to a value";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = new JavaScriptConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = "value += 42";
+        Assert.Equal(expectedCode, result);
+    }
+
+    [Fact]
+    public void ConvertSubstraction()
+    {
+        var sentence = "substract 42 from a value";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = new JavaScriptConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = "value -= 42";
+        Assert.Equal(expectedCode, result);
+    }
+
+    [Fact]
+    public void ConvertMultiplication()
+    {
+        var sentence = "multiply a value by 42";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = new JavaScriptConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = "value *= 42";
+        Assert.Equal(expectedCode, result);
+    }
+
+    [Fact]
+    public void ConvertDivision()
+    {
+        var sentence = "divide a value by 42";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = new JavaScriptConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = "value /= 42";
+        Assert.Equal(expectedCode, result);
+    }
 }
