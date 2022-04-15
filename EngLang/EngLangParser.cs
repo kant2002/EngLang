@@ -43,6 +43,11 @@ public class EngLangParser
             case "the":
                 var variableDeclaration = ParseVariableDeclaration(string.Join(' ', parts.Skip(1)));
                 return variableDeclaration;
+            case "add":
+            case "substract":
+            case "multiply":
+            case "divide":
+                return ParseExpression(sourceCode);
             default:
                 throw new NotImplementedException();
         }
@@ -71,7 +76,7 @@ public class EngLangParser
         Expression? expression = null;
         if (specificationParts.Length > 1)
         {
-            expression = ParseExpression(specificationParts[1].Trim());
+            expression = ParseLiteralExpression(specificationParts[1].Trim());
         }
 
         var variableDeclaration = new VariableDeclaration(variableName, identifierReference, expression);
@@ -79,6 +84,44 @@ public class EngLangParser
     }
 
     private static Expression ParseExpression(string expressionString)
+    {
+        var parts = expressionString.Split(new[] { ' ' }, 2);
+        switch (parts[0])
+        {
+            case "add":
+                {
+                    var subParts = parts[1].Split(" to");
+                    var addend = ParseLiteralExpression(subParts[0]);
+                    var target = (IdentifierReference)ParseNode(subParts[1].Trim());
+                    return new AdditionExpression(addend, target);
+                }
+            case "substract":
+                {
+                    var subParts = parts[1].Split(" from");
+                    var addend = ParseLiteralExpression(subParts[0]);
+                    var target = (IdentifierReference)ParseNode(subParts[1].Trim());
+                    return new SubstractExpression(addend, target);
+                }
+            case "multiply":
+                {
+                    var subParts = parts[1].Split(" by");
+                    var target = (IdentifierReference)ParseNode(subParts[0].Trim());
+                    var addend = ParseLiteralExpression(subParts[1].Trim());
+                    return new MultiplyExpression(addend, target);
+                }
+            case "divide":
+                {
+                    var subParts = parts[1].Split(" by");
+                    var target = (IdentifierReference)ParseNode(subParts[0].Trim());
+                    var addend = ParseLiteralExpression(subParts[1].Trim());
+                    return new DivisionExpression(addend, target);
+                }
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
+    private static Expression ParseLiteralExpression(string expressionString)
     {
         if (expressionString.StartsWith('"'))
         {
