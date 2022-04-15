@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Xunit;
-
-namespace EngLang.Tests;
+﻿namespace EngLang.Tests;
 
 public class CSharpConversionTests : BaseLanguageConversionTests
 {

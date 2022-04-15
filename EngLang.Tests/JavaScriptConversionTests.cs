@@ -1,6 +1,4 @@
-﻿using Xunit;
-
-namespace EngLang.Tests;
+﻿namespace EngLang.Tests;
 
 public class JavaScriptConversionTests : BaseLanguageConversionTests
 {

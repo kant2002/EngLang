@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace englang
+﻿namespace englang
 {
     class Program
     {
