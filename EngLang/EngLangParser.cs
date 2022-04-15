@@ -27,6 +27,7 @@ public class EngLangParser
         return node switch
         {
             VariableDeclaration variableDeclaration => new VariableDeclarationStatement(variableDeclaration),
+            AssignmentExpression assignmentExpression => new AssignmentStatement(assignmentExpression),
             _ => throw new InvalidOperationException(),
         };
     }
@@ -48,9 +49,19 @@ public class EngLangParser
             case "multiply":
             case "divide":
                 return ParseExpression(sourceCode);
+            case "put":
+                return ParseAssignment(string.Join(' ', parts.Skip(1)));
             default:
                 throw new NotImplementedException();
         }
+    }
+
+    private static SyntaxNode ParseAssignment(string sourceCode)
+    {
+        var parts = sourceCode.Split(" into");
+        var expression = ParseLiteralExpression(parts[0].Trim());
+        var target = (IdentifierReference)ParseNode(parts[1].Trim());
+        return new AssignmentExpression(target, expression);
     }
 
     private static IdentifierReference ParseIdentifierReference(string content)

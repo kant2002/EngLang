@@ -2,96 +2,23 @@
 
 namespace EngLang.Tests;
 
-public class JavaScriptConversionTests
+public class JavaScriptConversionTests : BaseLanguageConversionTests
 {
-    [Fact]
-    public void ConvertVariable()
-    {
-        var sentence = "the name is an apple.";
-        var parseResult = EngLangParser.Parse(sentence);
-        var converter = new JavaScriptConverter();
+    protected override ILanguageConverter CreateConverter() => new JavaScriptConverter();
 
-        var result = converter.Convert(parseResult);
+    protected override string GetExpectedVariable() => "let name;\r\n";
 
-        var expectedCode = "let name;\r\n";
-        Assert.Equal(expectedCode, result);
-    }
+    protected override string GetExpectedVariableWithStringLiteral() => "let greetings = \"Hello\"";
 
-    [Fact]
-    public void ConvertVariableWithStringLiteral()
-    {
-        var sentence = "the greetings is an string equal to \"Hello\"";
-        var parseResult = EngLangParser.Parse(sentence);
-        var converter = new JavaScriptConverter();
+    protected override string GetExpectedVariableWithIntLiteral() => "let answer_to_all_things = 42";
 
-        var result = converter.Convert(parseResult);
+    protected override string GetExpectedAdditionCode() => "value += 42";
 
-        var expectedCode = "let greetings = \"Hello\"";
-        Assert.Equal(expectedCode, result);
-    }
+    protected override string GetExpectedSubstractionCode() => "value -= 42";
 
-    [Fact]
-    public void ConvertVariableWithIntLiteral()
-    {
-        var sentence = "the answer to all things is an number equal to 42";
-        var parseResult = EngLangParser.Parse(sentence);
-        var converter = new JavaScriptConverter();
+    protected override string GetExpectedMultiplicationCode() => "value *= 42";
 
-        var result = converter.Convert(parseResult);
+    protected override string GetExpectedDivisionCode() => "value /= 42";
 
-        var expectedCode = "let answer_to_all_things = 42";
-        Assert.Equal(expectedCode, result);
-    }
-
-    [Fact]
-    public void ConvertAddition()
-    {
-        var sentence = "add 42 to a value";
-        var parseResult = EngLangParser.Parse(sentence);
-        var converter = new JavaScriptConverter();
-
-        var result = converter.Convert(parseResult);
-
-        var expectedCode = "value += 42";
-        Assert.Equal(expectedCode, result);
-    }
-
-    [Fact]
-    public void ConvertSubstraction()
-    {
-        var sentence = "substract 42 from a value";
-        var parseResult = EngLangParser.Parse(sentence);
-        var converter = new JavaScriptConverter();
-
-        var result = converter.Convert(parseResult);
-
-        var expectedCode = "value -= 42";
-        Assert.Equal(expectedCode, result);
-    }
-
-    [Fact]
-    public void ConvertMultiplication()
-    {
-        var sentence = "multiply a value by 42";
-        var parseResult = EngLangParser.Parse(sentence);
-        var converter = new JavaScriptConverter();
-
-        var result = converter.Convert(parseResult);
-
-        var expectedCode = "value *= 42";
-        Assert.Equal(expectedCode, result);
-    }
-
-    [Fact]
-    public void ConvertDivision()
-    {
-        var sentence = "divide a value by 42";
-        var parseResult = EngLangParser.Parse(sentence);
-        var converter = new JavaScriptConverter();
-
-        var result = converter.Convert(parseResult);
-
-        var expectedCode = "value /= 42";
-        Assert.Equal(expectedCode, result);
-    }
+    protected override string GetExpectedAssignmentCode() => "value = 40";
 }

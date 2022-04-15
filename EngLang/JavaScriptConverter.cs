@@ -3,7 +3,7 @@ using System.Text;
 
 namespace EngLang;
 
-public class JavaScriptConverter
+public class JavaScriptConverter: ILanguageConverter
 {
     public string Convert(SyntaxNode node)
     {
@@ -50,6 +50,8 @@ public class JavaScriptConverter
                 return $"{ConvertToIdentifier(multiplyExpression.TargetVariable.Name)} *= {ConvertExpression(multiplyExpression.Factor)}";
             case DivisionExpression divisionExpression:
                 return $"{ConvertToIdentifier(divisionExpression.TargetVariable.Name)} /= {ConvertExpression(divisionExpression.Denominator)}";
+            case AssignmentExpression assignmentExpression:
+                return $"{ConvertToIdentifier(assignmentExpression.Variable.Name)} = {ConvertExpression(assignmentExpression.Expression)}";
             default:
                 throw new NotImplementedException();
         }
@@ -70,6 +72,9 @@ public class JavaScriptConverter
             case VariableDeclarationStatement variableDeclarationStatement:
                 var declaration = variableDeclarationStatement.Declaration;
                 return $"{Convert(declaration)};";
+            case AssignmentStatement assignmentStatement:
+                var assignmentExpression = assignmentStatement.Expression;
+                return $"{Convert(assignmentExpression)};";
             default:
                 throw new NotImplementedException();
         }

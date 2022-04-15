@@ -97,4 +97,21 @@ public class VariableNameTests
         Assert.Equal("apple", variableStatement.Declaration.TypeName.Name);
         Assert.Null(variableStatement.Declaration.Expression);
     }
+
+    [Fact]
+    public void ParseVariableAssignment()
+    {
+        var sentence = "put 40 into a value.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+        Assert.Single(blockStatement.Statements);
+
+        var assignmentStatement = Assert.IsType<AssignmentStatement>(blockStatement.Statements[0]);
+        var assignmentExpression = assignmentStatement.Expression;
+        Assert.Equal("value", assignmentExpression.Variable.Name);
+        var expression = Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression);
+        Assert.Equal(40, expression.Value);
+    }
 }
