@@ -28,8 +28,8 @@ How to declare variable: `an apple`. This is implicitly create variable `apple`.
 
 Interop with .NET
 ```
-resolve an domain name ->
-   call .NET Method `Dns.GetHostAddresses` with domain name as parameter and obtain the addresses.
+resolve a domain name ->
+   call .NET Method `Dns.GetHostAddresses` with a domain name as parameter into the addresses.
 ```
 
 it would be equivalent to following pseudo code.
@@ -41,11 +41,11 @@ resolve(domain_name):
 Self-contained function which calculated Fibonacci number
 ```
 Calculate factorial of a number ->
-    if the number is 0 then return 1.
-    if the number is 1 then return 1.
-    let previous number is number minus 1.
-    calculate factorial of the previous number into the previous factorial.
-    return the previous factorial multiply the number.
+    if a number is 0 then return 1.
+    if a number is 1 then return 1.
+    let a previous number is a number minus 1.
+    calculate factorial of a previous number into a previous factorial.
+    return a previous factorial multiply a number.
 ```
 After looking at this sample it is not clear to me how 
 - take reference results of function execution.
@@ -106,6 +106,25 @@ Conditional statement supports only constructs which can be considered `if..then
 ```
 if XXXX is YYYY, operations_list.
 ```
+
+### Arithmetics
+
+It seems to be that math operations carried in usual language is quite interesting.
+
+```
+let a value equals 10
+add 20 to a value
+multiply a value by 42
+```
+
+Can be rougly translated to
+```
+let value = 10;
+value += 20;
+value *= 42;
+```
+
+This is not best way to write mathematical expression, but best way to validate calculations by humans without special training.
 
 # Links
 - [1] https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
