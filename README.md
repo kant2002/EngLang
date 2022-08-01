@@ -55,8 +55,8 @@ After looking at this sample it is not clear to me how
 
 Implicit return of last expression.
 ```
-width is a number.
-height is a number.
+the width is a number.
+the height is a number.
 
 To calculate area from a width and a height ->
   multiply width to height.
