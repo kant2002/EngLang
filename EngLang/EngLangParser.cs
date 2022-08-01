@@ -10,8 +10,9 @@ public class EngLangParser
     {
         if (sourceCode.Contains('.'))
         {
-            var statmementTexts = sourceCode.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            var statmementTexts = sourceCode.Split(new[] { '.', ';' }, StringSplitOptions.RemoveEmptyEntries);
             var statementsArray = statmementTexts
+                .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Select(ParseNode)
                 .Select(ConvertToStatement)
                 .ToArray();
@@ -28,13 +29,17 @@ public class EngLangParser
         {
             VariableDeclaration variableDeclaration => new VariableDeclarationStatement(variableDeclaration),
             AssignmentExpression assignmentExpression => new AssignmentStatement(assignmentExpression),
-            _ => throw new InvalidOperationException(),
+            AdditionExpression additionExpression => new AdditionStatement(additionExpression),
+            SubstractExpression substractExpression => new SubstractStatement(substractExpression),
+            MultiplyExpression multiplyExpression => new MultiplyStatement(multiplyExpression),
+            DivisionExpression divisionExpression => new DivisionStatement(divisionExpression),
+            _ => throw new InvalidOperationException($"Node of type {node.GetType().Name} cannot be represented as statement"),
         };
     }
 
     private static SyntaxNode ParseNode(string sourceCode)
     {
-        var parts = sourceCode.Split(' ');
+        var parts = sourceCode.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         switch (parts[0])
         {
             case "a":
@@ -96,7 +101,7 @@ public class EngLangParser
 
     private static Expression ParseExpression(string expressionString)
     {
-        var parts = expressionString.Split(new[] { ' ' }, 2);
+        var parts = expressionString.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
         switch (parts[0])
         {
             case "add":
