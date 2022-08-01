@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32414.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngLang", "EngLang\EngLang.csproj", "{753D5B95-4BE9-4DAD-9365-ABDE3D914DFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngLang", "EngLang\EngLang.csproj", "{753D5B95-4BE9-4DAD-9365-ABDE3D914DFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngLang.Tests", "EngLang.Tests\EngLang.Tests.csproj", "{66261F56-B31C-4CF4-A556-9F43F5CE8861}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngLang.Tests", "EngLang.Tests\EngLang.Tests.csproj", "{66261F56-B31C-4CF4-A556-9F43F5CE8861}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3312CFEC-44AE-4BCC-BBA5-2C1B2B5D7E48}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +20,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{753D5B95-4BE9-4DAD-9365-ABDE3D914DFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -44,5 +46,11 @@ Global
 		{66261F56-B31C-4CF4-A556-9F43F5CE8861}.Release|x64.Build.0 = Release|Any CPU
 		{66261F56-B31C-4CF4-A556-9F43F5CE8861}.Release|x86.ActiveCfg = Release|Any CPU
 		{66261F56-B31C-4CF4-A556-9F43F5CE8861}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5EF84A7C-83AE-4C45-951D-740AA281EB76}
 	EndGlobalSection
 EndGlobal
