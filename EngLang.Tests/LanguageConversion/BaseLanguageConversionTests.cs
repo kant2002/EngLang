@@ -1,6 +1,7 @@
-﻿using Xunit;
+﻿namespace EngLang.Tests.LanguageConversion;
 
-namespace EngLang.Tests;
+using EngLang.LanguageConversion;
+using Xunit;
 
 public abstract class BaseLanguageConversionTests
 {

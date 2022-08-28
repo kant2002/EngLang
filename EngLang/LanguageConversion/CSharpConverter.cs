@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Text;
 
-namespace EngLang;
+namespace EngLang.LanguageConversion;
 
-public class CSharpConverter: ILanguageConverter
+public class CSharpConverter : ILanguageConverter
 {
     public string Convert(SyntaxNode node)
     {
