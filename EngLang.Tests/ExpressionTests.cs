@@ -24,7 +24,7 @@ public class ExpressionTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var substractExpression = Assert.IsType<SubstractExpression>(parseResult);
+        var substractExpression = Assert.IsType<SubtractExpression>(parseResult);
         var subtrahend = Assert.IsType<IntLiteralExpression>(substractExpression.Subtrahend);
         Assert.Equal(42, subtrahend.Value);
         Assert.Equal("value", substractExpression.TargetVariable.Name);

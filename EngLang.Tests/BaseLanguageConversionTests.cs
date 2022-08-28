@@ -125,4 +125,19 @@ public abstract class BaseLanguageConversionTests
     }
 
     protected abstract string GetExpectedAssignmentCode();
+
+    [Fact]
+    public void ConvertStatements()
+    {
+        var sentence = "put 40 into a value. add 42 to a value; substract 42 from a value; multiply a value by 42; divide a value by 42.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedStatementsCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedStatementsCode();
 }

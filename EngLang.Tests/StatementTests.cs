@@ -29,7 +29,7 @@ public class StatementTests
         var blockStatement = Assert.IsType<BlockStatement>(parseResult);
         Assert.Equal(4, blockStatement.Statements.Count);
         Assert.IsType<AdditionStatement>(blockStatement.Statements[0]);
-        Assert.IsType<SubstractStatement>(blockStatement.Statements[1]);
+        Assert.IsType<SubtractStatement>(blockStatement.Statements[1]);
         Assert.IsType<MultiplyStatement>(blockStatement.Statements[2]);
         Assert.IsType<DivisionStatement>(blockStatement.Statements[3]);
     }
@@ -44,7 +44,7 @@ public class StatementTests
         var blockStatement = Assert.IsType<BlockStatement>(parseResult);
         Assert.Equal(4, blockStatement.Statements.Count);
         Assert.IsType<AdditionStatement>(blockStatement.Statements[0]);
-        Assert.IsType<SubstractStatement>(blockStatement.Statements[1]);
+        Assert.IsType<SubtractStatement>(blockStatement.Statements[1]);
         Assert.IsType<MultiplyStatement>(blockStatement.Statements[2]);
         Assert.IsType<DivisionStatement>(blockStatement.Statements[3]);
     }
