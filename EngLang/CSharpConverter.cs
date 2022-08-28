@@ -45,7 +45,7 @@ public class CSharpConverter: ILanguageConverter
                 return $"\"{stringLiteralExpression.Value}\"";
             case AdditionExpression additionExpression:
                 return $"{ConvertToIdentifier(additionExpression.TargetVariable.Name)} += {ConvertExpression(additionExpression.Addend)}";
-            case SubstractExpression substractExpression:
+            case SubtractExpression substractExpression:
                 return $"{ConvertToIdentifier(substractExpression.TargetVariable.Name)} -= {ConvertExpression(substractExpression.Subtrahend)}";
             case MultiplyExpression multiplyExpression:
                 return $"{ConvertToIdentifier(multiplyExpression.TargetVariable.Name)} *= {ConvertExpression(multiplyExpression.Factor)}";
@@ -76,6 +76,18 @@ public class CSharpConverter: ILanguageConverter
             case AssignmentStatement assignmentStatement:
                 var assignmentExpression = assignmentStatement.Expression;
                 return $"{Convert(assignmentExpression)};";
+            case AdditionStatement additionStatement:
+                var additionExpression = additionStatement.Expression;
+                return $"{Convert(additionExpression)};";
+            case SubtractStatement subtractStatement:
+                var subtractExpression = subtractStatement.Expression;
+                return $"{Convert(subtractExpression)};";
+            case MultiplyStatement multiplyStatement:
+                var multiplyExpression = multiplyStatement.Expression;
+                return $"{Convert(multiplyExpression)};";
+            case DivisionStatement divisionStatement:
+                var divisionExpression = divisionStatement.Expression;
+                return $"{Convert(divisionExpression)};";
             default:
                 throw new NotImplementedException();
         }

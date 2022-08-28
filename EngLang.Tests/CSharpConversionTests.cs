@@ -1,10 +1,12 @@
 ﻿namespace EngLang.Tests;
+using static System.Environment;
 
 public class CSharpConversionTests : BaseLanguageConversionTests
 {
     protected override ILanguageConverter CreateConverter() => new CSharpConverter();
 
-    protected override string GetExpectedVariable() => "apple name;\r\n";
+    protected override string GetExpectedVariable() => @"apple name;
+".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedVariableWithStringLiteral() => "string greetings = \"Hello\"";
 
@@ -19,4 +21,11 @@ public class CSharpConversionTests : BaseLanguageConversionTests
     protected override string GetExpectedDivisionCode() => "value /= 42";
 
     protected override string GetExpectedAssignmentCode() => "value = 40";
+
+    protected override string GetExpectedStatementsCode() => @"value = 40;
+value += 42;
+value -= 42;
+value *= 42;
+value /= 42;
+".ReplaceLineEndings(NewLine);
 }
