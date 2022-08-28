@@ -77,7 +77,7 @@ The statements is sentence.
 
 ### Simple sentences
 
-Statement ends with `.`. Long sentences can be split by `;`.
+Statement is a sentnce which ends with `.`. Long sentences can be split by `;`, each part of this sentence will become their own sentence.
 
 ```
 statement_1 ; statement_2 ; .... ; statement_N.
