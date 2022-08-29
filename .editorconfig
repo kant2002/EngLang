@@ -1,0 +1,17 @@
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+indent_size = 4
+tab_width = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+
+# Markdown uses the trailing whitespaces.
+# https://daringfireball.net/projects/markdown/syntax#block
+# When you do want to insert a <br /> break tag using Markdown, you end a line with two or more spaces, then type return.
+trim_trailing_whitespace = false
