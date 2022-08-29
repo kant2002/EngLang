@@ -16,7 +16,7 @@ public class CSharpConversionTests : BaseLanguageConversionTests
 
     protected override string GetExpectedAdditionCode() => "value += 42";
 
-    protected override string GetExpectedSubstractionCode() => "value -= 42";
+    protected override string GetExpectedSubtractionCode() => "value -= 42";
 
     protected override string GetExpectedMultiplicationCode() => "value *= 42";
 

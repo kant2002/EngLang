@@ -20,9 +20,9 @@ public class StatementTests
     }
 
     [Fact]
-    public void MultipleStatmentsSeparateByDot()
+    public void MultipleStatementsSeparateByDot()
     {
-        var sentence = "add 42 to a value. substract 42 from a value. multiply a value by 42. divide a value by 42";
+        var sentence = "add 42 to a value. subtract 42 from a value. multiply a value by 42. divide a value by 42";
 
         var parseResult = EngLangParser.Parse(sentence);
 
@@ -35,9 +35,9 @@ public class StatementTests
     }
 
     [Fact]
-    public void MultipleStatmentsSeparateBySemicolon()
+    public void MultipleStatementsSeparateBySemicolon()
     {
-        var sentence = "add 42 to a value; substract 42 from a value; multiply a value by 42; divide a value by 42. ";
+        var sentence = "add 42 to a value; subtract 42 from a value; multiply a value by 42; divide a value by 42. ";
 
         var parseResult = EngLangParser.Parse(sentence);
 
