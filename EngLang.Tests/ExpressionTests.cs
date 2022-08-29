@@ -18,16 +18,16 @@ public class ExpressionTests
     }
 
     [Fact]
-    public void SubstractValueFromVariable()
+    public void SubtractValueFromVariable()
     {
-        var sentence = "substract 42 from a value";
+        var sentence = "subtract 42 from a value";
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var substractExpression = Assert.IsType<SubtractExpression>(parseResult);
-        var subtrahend = Assert.IsType<IntLiteralExpression>(substractExpression.Subtrahend);
+        var subtractExpression = Assert.IsType<SubtractExpression>(parseResult);
+        var subtrahend = Assert.IsType<IntLiteralExpression>(subtractExpression.Subtrahend);
         Assert.Equal(42, subtrahend.Value);
-        Assert.Equal("value", substractExpression.TargetVariable.Name);
+        Assert.Equal("value", subtractExpression.TargetVariable.Name);
     }
 
     [Fact]
@@ -37,10 +37,10 @@ public class ExpressionTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var substractExpression = Assert.IsType<MultiplyExpression>(parseResult);
-        var subtrahend = Assert.IsType<IntLiteralExpression>(substractExpression.Factor);
-        Assert.Equal(42, subtrahend.Value);
-        Assert.Equal("value", substractExpression.TargetVariable.Name);
+        var multiplyExpression = Assert.IsType<MultiplyExpression>(parseResult);
+        var multiplicative = Assert.IsType<IntLiteralExpression>(multiplyExpression.Factor);
+        Assert.Equal(42, multiplicative.Value);
+        Assert.Equal("value", multiplyExpression.TargetVariable.Name);
     }
 
     [Fact]
@@ -50,9 +50,9 @@ public class ExpressionTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var substractExpression = Assert.IsType<DivisionExpression>(parseResult);
-        var subtrahend = Assert.IsType<IntLiteralExpression>(substractExpression.Denominator);
-        Assert.Equal(42, subtrahend.Value);
-        Assert.Equal("value", substractExpression.TargetVariable.Name);
+        var divisionExpression = Assert.IsType<DivisionExpression>(parseResult);
+        var divisor = Assert.IsType<IntLiteralExpression>(divisionExpression.Denominator);
+        Assert.Equal(42, divisor.Value);
+        Assert.Equal("value", divisionExpression.TargetVariable.Name);
     }
 }

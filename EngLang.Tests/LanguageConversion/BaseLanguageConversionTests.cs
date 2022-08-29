@@ -68,9 +68,9 @@ public abstract class BaseLanguageConversionTests
     protected abstract string GetExpectedAdditionCode();
 
     [Fact]
-    public void ConvertSubstraction()
+    public void ConvertSubtraction()
     {
-        var sentence = "substract 42 from a value";
+        var sentence = "subtract 42 from a value";
         var parseResult = EngLangParser.Parse(sentence);
         var converter = CreateConverter();
 
@@ -80,7 +80,7 @@ public abstract class BaseLanguageConversionTests
         Assert.Equal(expectedCode, result);
     }
 
-    protected abstract string GetExpectedSubstractionCode();
+    protected abstract string GetExpectedSubtractionCode();
 
     [Fact]
     public void ConvertMultiplication()
@@ -130,7 +130,7 @@ public abstract class BaseLanguageConversionTests
     [Fact]
     public void ConvertStatements()
     {
-        var sentence = "put 40 into a value. add 42 to a value; substract 42 from a value; multiply a value by 42; divide a value by 42.";
+        var sentence = "put 40 into a value. add 42 to a value; subtract 42 from a value; multiply a value by 42; divide a value by 42.";
         var parseResult = EngLangParser.Parse(sentence);
         var converter = CreateConverter();
 

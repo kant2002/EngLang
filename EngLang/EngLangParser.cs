@@ -30,7 +30,7 @@ public class EngLangParser
             VariableDeclaration variableDeclaration => new VariableDeclarationStatement(variableDeclaration),
             AssignmentExpression assignmentExpression => new AssignmentStatement(assignmentExpression),
             AdditionExpression additionExpression => new AdditionStatement(additionExpression),
-            SubtractExpression substractExpression => new SubtractStatement(substractExpression),
+            SubtractExpression subtractExpression => new SubtractStatement(subtractExpression),
             MultiplyExpression multiplyExpression => new MultiplyStatement(multiplyExpression),
             DivisionExpression divisionExpression => new DivisionStatement(divisionExpression),
             _ => throw new InvalidOperationException($"Node of type {node.GetType().Name} cannot be represented as statement"),
@@ -50,7 +50,7 @@ public class EngLangParser
                 var variableDeclaration = ParseVariableDeclaration(string.Join(' ', parts.Skip(1)));
                 return variableDeclaration;
             case "add":
-            case "substract":
+            case "subtract":
             case "multiply":
             case "divide":
                 return ParseExpression(sourceCode);
@@ -111,7 +111,7 @@ public class EngLangParser
                     var target = (IdentifierReference)ParseNode(subParts[1].Trim());
                     return new AdditionExpression(addend, target);
                 }
-            case "substract":
+            case "subtract":
                 {
                     var subParts = parts[1].Split(" from");
                     var addend = ParseLiteralExpression(subParts[0]);
