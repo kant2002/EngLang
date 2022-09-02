@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+        "library": "bootstrap@5.2.0",
+        "destination": "wwwroot/libs/boostrap"
+    },
+    {
+        "library": "open-iconic@1.1.1",
+        "destination": "wwwroot/libs/open-iconic"
+    }
+  ]
+}

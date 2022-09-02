@@ -1,0 +1,17 @@
+@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<div class="d-flex flex-sm-column flex-xl-row">
+    <div class="w-100 pe-3">
+        <label for="source-code" class="form-label">Source code:</label>
+        <textarea name="source-code" @bind="SourceCode" class="form-control"></textarea>
+    </div>
+    <div class="w-100">
+        <Compiler SourceCode="@SourceCode" />
+    </div>
+</div>
+
+@code {
+    public string SourceCode { get; set; }
+}

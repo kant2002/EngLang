@@ -1,0 +1,39 @@
+@using EngLang
+@using EngLang.LanguageConversion
+@if (CompilerError != null)
+{
+    <div class="alert alert-danger">
+        @CompilerError
+    </div>
+}
+<pre>
+    @CompiledOutput
+</pre>
+@code {
+
+    [Parameter]
+    public string SourceCode { get; set; }
+    public string CompiledOutput { get; set; }
+    public string CompilerError { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        try
+        {
+            CompilerError = null;
+            if (SourceCode == null)
+            {
+                CompiledOutput = string.Empty;
+                return;
+            }
+
+            var converter = new CSharpConverter();
+            var parseResult = EngLangParser.Parse(SourceCode);
+            CompiledOutput = converter.Convert(parseResult);
+        }
+        catch (Exception ex)
+        {
+            CompilerError = ex.ToString();
+        }
+    }
+}
