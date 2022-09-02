@@ -41,25 +41,24 @@ resolve(domain_name):
 Self-contained function which calculated Fibonacci number
 ```
 Calculate factorial of a number ->
-    if a number is 0 then return 1.
-    if a number is 1 then return 1.
+    if a number is 0 then result is 1.
+    if a number is 1 then result is 1.
     let a previous number is a number minus 1.
     calculate factorial of a previous number into a previous factorial.
-    return a previous factorial multiply a number.
+    result is a previous factorial multiply a number.
 ```
 After looking at this sample it is not clear to me how 
-- take reference results of function execution.
+- take reference to results of function execution.
 - how define calculations into new variables. That's much easier to get right, but better be careful.
-- how to return value from function.
 - Is functions are valid constructs for humans?
 
-Implicit return of last expression.
+Implicit return of last expression (eventually, I cannot build linguistic construct which looks natural).
 ```
 the width is a number.
 the height is a number.
 
 To calculate area from a width and a height ->
-  multiply width to height.
+  result is multiply width to height.
 ```
 
 Do language support concept of an expression in itself? How we decide that specific construct is expression, and what is statement.
@@ -117,7 +116,7 @@ add 20 to a value
 multiply a value by 42
 ```
 
-Can be rougly translated to
+Can be roughly translated to
 ```
 let value = 10;
 value += 20;
