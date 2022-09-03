@@ -39,7 +39,7 @@ public class EngLangParser
 
     private static SyntaxNode ParseNode(string sourceCode)
     {
-        var parts = sourceCode.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var parts = sourceCode.Split(new[] { ' ', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries);
         switch (parts[0])
         {
             case "a":
@@ -57,7 +57,7 @@ public class EngLangParser
             case "put":
                 return ParseAssignment(string.Join(' ', parts.Skip(1)));
             default:
-                throw new NotImplementedException();
+                throw new NotImplementedException($"Cannot parse expression starting from `{parts[0]}`");
         }
     }
 
@@ -101,7 +101,7 @@ public class EngLangParser
 
     private static Expression ParseExpression(string expressionString)
     {
-        var parts = expressionString.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+        var parts = expressionString.Split(new[] { ' ', '\n', '\r', '\t' }, 2, StringSplitOptions.RemoveEmptyEntries);
         switch (parts[0])
         {
             case "add":
