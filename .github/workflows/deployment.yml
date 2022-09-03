@@ -33,10 +33,12 @@ jobs:
         run: dotnet build -c Release --no-restore
       - name: Test
         run: dotnet test -c Release --no-build --verbosity normal
+      - name: Test
+        run: dotnet publish -c Release --no-build --verbosity normal
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: ./Workbench/bin/Release/net6.0
+          path: ./Workbench/bin/Release/net6.0/publish/wwwroot
 
   # Deployment job
   deploy:
