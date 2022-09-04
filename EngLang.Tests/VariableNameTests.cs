@@ -29,6 +29,18 @@ public class VariableNameTests
     }
 
     [Fact]
+    public void WhitespacesInVariableNameNormalized()
+    {
+        var sentence = "a red   apple";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var expectedVariableName = "red apple";
+        var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
+        Assert.Equal(expectedVariableName, variableDeclaration.Name);
+    }
+
+    [Fact]
     public void DeclareVariableWithType()
     {
         var sentence = "the name is a string";
