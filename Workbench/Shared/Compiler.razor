@@ -12,9 +12,10 @@
 @code {
 
     [Parameter]
-    public string SourceCode { get; set; }
-    public string CompiledOutput { get; set; }
-    public string CompilerError { get; set; }
+    public string? SourceCode { get; set; }
+
+    private string? CompiledOutput { get; set; }
+    private string? CompilerError { get; set; }
 
     protected override void OnParametersSet()
     {
