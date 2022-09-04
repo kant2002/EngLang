@@ -43,13 +43,13 @@ public class CSharpConverter : ILanguageConverter
                 return intLiteralExpression.Value.ToString();
             case StringLiteralExpression stringLiteralExpression:
                 return $"\"{stringLiteralExpression.Value}\"";
-            case AdditionExpression additionExpression:
+            case InPlaceAdditionExpression additionExpression:
                 return $"{ConvertToIdentifier(additionExpression.TargetVariable.Name)} += {ConvertExpression(additionExpression.Addend)}";
-            case SubtractExpression substractExpression:
+            case InPlaceSubtractExpression substractExpression:
                 return $"{ConvertToIdentifier(substractExpression.TargetVariable.Name)} -= {ConvertExpression(substractExpression.Subtrahend)}";
-            case MultiplyExpression multiplyExpression:
+            case InPlaceMultiplyExpression multiplyExpression:
                 return $"{ConvertToIdentifier(multiplyExpression.TargetVariable.Name)} *= {ConvertExpression(multiplyExpression.Factor)}";
-            case DivisionExpression divisionExpression:
+            case InPlaceDivisionExpression divisionExpression:
                 return $"{ConvertToIdentifier(divisionExpression.TargetVariable.Name)} /= {ConvertExpression(divisionExpression.Denominator)}";
             case AssignmentExpression assignmentExpression:
                 return $"{ConvertToIdentifier(assignmentExpression.Variable.Name)} = {ConvertExpression(assignmentExpression.Expression)}";

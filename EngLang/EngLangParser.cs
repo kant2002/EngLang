@@ -11,49 +11,87 @@ using Yoakke.SynKit.Parser.Attributes;
 [Parser(typeof(EngLangTokenType))]
 public partial class EngLangParser
 {
-    [Rule("identifier_reference : IndefiniteArticleKeyword long_identifier")]
-    private static IdentifierReference MakeIdentifierReference(
-        IToken<EngLangTokenType> indefiniteArticleKeyword,
-        string identifier)
-        => new IdentifierReference(identifier);
+    private const string IdentifierReference = "identifier_reference";
+    private const string LongIdentifier = "long_identifier";
 
-    [Rule("long_identifier : Identifier+")]
+    [Rule($"{LongIdentifier} : Identifier+")]
     private static string MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
     {
         return string.Join(' ', identifierParts.Select(_ => _.Text));
     }
 
-    [Rule("expression : literal_expression")]
+    [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier}")]
+    private static IdentifierReference MakeIdentifierReference(
+        IToken<EngLangTokenType> indefiniteArticleKeyword,
+        string identifier)
+        => new IdentifierReference(identifier);
+
+    [Rule($"variable_expression : {IdentifierReference}")]
+    private static VariableExpression MakeVariableExpression(IdentifierReference e) => new (e);
+
+    [Rule("primitive_expression : literal_expression")]
+    [Rule($"primitive_expression : variable_expression")]
+    private static Expression MakePrimitiveExpression(Expression e) => e;
+
+    [Rule("math_expression : primitive_expression")]
+    [Rule("math_expression : addition_expression")]
+    private static Expression MakeMathExpression(Expression e) => e;
+
+    [Rule("expression : math_expression")]
     [Rule("expression : assignment_expression")]
-    [Rule("expression : addition_expression")]
-    [Rule("expression : subtract_expression")]
-    [Rule("expression : multiply_expression")]
-    [Rule("expression : divide_expression")]
+    [Rule("expression : inplace_addition_expression")]
+    [Rule("expression : inplace_subtract_expression")]
+    [Rule("expression : inplace_multiply_expression")]
+    [Rule("expression : inplace_divide_expression")]
     private static Expression MakeExpression(Expression e) => e;
 
-    [Rule("addition_expression : 'add' literal_expression 'to' identifier_reference")]
-    private static AdditionExpression MakeAdditionExpression(
+    [Rule($"addition_expression : primitive_expression 'plus' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'minus' primitive_expression")]
+    private static MathExpression MakeAdditionExpression(
+        Expression firstExpression,
+        IToken<EngLangTokenType> mathToken,
+        Expression secondExpression) => new(ToMathOperator(mathToken), firstExpression, secondExpression);
+
+    [Rule($"addition_expression : primitive_expression 'multiply' 'by' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'divide' 'by' primitive_expression")]
+    private static MathExpression MakeAdditionExpression(
+        Expression firstExpression,
+        IToken<EngLangTokenType> mathToken,
+        IToken<EngLangTokenType> byToken,
+        Expression secondExpression) => new(ToMathOperator(mathToken), firstExpression, secondExpression);
+
+    private static MathOperator ToMathOperator(IToken<EngLangTokenType> token) => token.Text switch
+    {
+        "plus" => MathOperator.Plus,
+        "minus" => MathOperator.Minus,
+        "multiply" => MathOperator.Multiply,
+        "divide" => MathOperator.Divide,
+        _ => throw new InvalidOperationException($"Unexpected token {token} for math expression"),
+    };
+
+    [Rule($"inplace_addition_expression : 'add' literal_expression 'to' {IdentifierReference}")]
+    private static InPlaceAdditionExpression MakeInPlaceAdditionExpression(
         IToken<EngLangTokenType> addToken,
         Expression literalExpression,
         IToken<EngLangTokenType> toToken,
         IdentifierReference identifierReference) => new(literalExpression, identifierReference);
 
-    [Rule("subtract_expression : 'subtract' literal_expression 'from' identifier_reference")]
-    private static SubtractExpression MakeSubtractExpression(
+    [Rule($"inplace_subtract_expression : 'subtract' literal_expression 'from' {IdentifierReference}")]
+    private static InPlaceSubtractExpression MakeInPlaceSubtractExpression(
         IToken<EngLangTokenType> subtractToken,
         Expression literalExpression,
         IToken<EngLangTokenType> fromToken,
         IdentifierReference identifierReference) => new(literalExpression, identifierReference);
 
-    [Rule("multiply_expression : 'multiply' identifier_reference 'by' literal_expression")]
-    private static MultiplyExpression MakeMultiplyExpression(
+    [Rule($"inplace_multiply_expression : 'multiply' {IdentifierReference} 'by' literal_expression")]
+    private static InPlaceMultiplyExpression MakeInPlaceMultiplyExpression(
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> byToken,
         Expression literalExpression) => new(literalExpression, identifierReference);
 
-    [Rule("divide_expression : 'divide' identifier_reference 'by' literal_expression")]
-    private static DivisionExpression MakeDivisionExpression(
+    [Rule($"inplace_divide_expression : 'divide' {IdentifierReference} 'by' literal_expression")]
+    private static InPlaceDivisionExpression MakeInPlaceDivisionExpression(
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> byToken,
@@ -70,7 +108,7 @@ public partial class EngLangParser
             _ => throw new InvalidOperationException()
         };
 
-    [Rule("variable_declaration: DefiniteArticleKeyword long_identifier 'is' identifier_reference ('equal' 'to' literal_expression)?")]
+    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('equal' 'to' literal_expression)?")]
     private static VariableDeclaration MakeVariableDeclaration(
         IToken<EngLangTokenType> definiteArticle,
         string identifier,
@@ -81,12 +119,20 @@ public partial class EngLangParser
         Expression literalExpression)? x)
         => new VariableDeclaration(identifier, identifierReference, x?.literalExpression);
 
-    [Rule("assignment_expression: PutKeyword literal_expression 'into' identifier_reference")]
+    [Rule($"assignment_expression: PutKeyword literal_expression 'into' {IdentifierReference}")]
     private static AssignmentExpression MakeAssignmentExpression(
         IToken<EngLangTokenType> putToken,
         Expression expression,
         IToken<EngLangTokenType> intoToken,
         IdentifierReference identifierReference)
+        => new AssignmentExpression(identifierReference, expression);
+
+    [Rule($"assignment_expression: 'let' {IdentifierReference} 'is' math_expression ")]
+    private static AssignmentExpression MakeAlternateAssignmentExpression(
+        IToken<EngLangTokenType> letToken,
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> isToken,
+        Expression expression)
         => new AssignmentExpression(identifierReference, expression);
 
     [Rule("simple_statement : expression_statement")]
@@ -121,15 +167,16 @@ public partial class EngLangParser
         => new VariableDeclarationStatement(declaration);
 
     [Rule("expression_statement : assignment_expression")]
-    [Rule("expression_statement : addition_expression")]
-    [Rule("expression_statement : subtract_expression")]
-    [Rule("expression_statement : multiply_expression")]
-    [Rule("expression_statement : divide_expression")]
+    [Rule("expression_statement : math_expression")]
+    [Rule("expression_statement : inplace_addition_expression")]
+    [Rule("expression_statement : inplace_subtract_expression")]
+    [Rule("expression_statement : inplace_multiply_expression")]
+    [Rule("expression_statement : inplace_divide_expression")]
     private static ExpressionStatement MakeExpressionStatement(
         Expression expression)
         => new ExpressionStatement(expression);
 
-    [Rule("if_statement : 'if' identifier_reference 'is' literal_expression 'then' expression_statement")]
+    [Rule($"if_statement : 'if' {IdentifierReference} 'is' literal_expression 'then' expression_statement")]
     private static IfStatement MakeIfStatement(
         IToken<EngLangTokenType> ifToken,
         IdentifierReference identifierReference,

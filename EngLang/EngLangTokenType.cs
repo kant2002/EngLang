@@ -15,9 +15,10 @@ public enum EngLangTokenType
     [Token(";")] SemicolonKeyword,
     [Token(".")] DotKeyword,
 
-    [Regex("(add|subtract|multiply|divide)")] MathOperationKeyword,
+    [Regex("(add|subtract|multiply|divide|plus|minus)")] MathOperationKeyword,
 
     [Token("put")] PutKeyword,
+    [Token("let")] LetKeyword,
 
     [Token("if")] IfKeyword,
     [Token("is")] IsKeyword,
