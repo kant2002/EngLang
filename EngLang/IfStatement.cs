@@ -1,6 +1,3 @@
-﻿namespace EngLang;
+namespace EngLang;
 
-public class IfStatement
-{
-    
-}
+public record IfStatement(Expression Condition, Statement Then) : Statement;

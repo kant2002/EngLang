@@ -91,7 +91,7 @@ public partial class EngLangParser
 
     [Rule("simple_statement : expression_statement")]
     [Rule("simple_statement : variable_declaration_statement")]
-    //[Rule("simple_statement : block_statement")]
+    [Rule("simple_statement : if_statement")]
     private static Statement MakeSimpleStatement(
         Statement statement)
         => statement;
@@ -128,6 +128,16 @@ public partial class EngLangParser
     private static ExpressionStatement MakeExpressionStatement(
         Expression expression)
         => new ExpressionStatement(expression);
+
+    [Rule("if_statement : 'if' identifier_reference 'is' literal_expression 'then' expression_statement")]
+    private static IfStatement MakeIfStatement(
+        IToken<EngLangTokenType> ifToken,
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> isToken,
+        Expression literalExpression,
+        IToken<EngLangTokenType> thenToken,
+        Statement declaration)
+        => new IfStatement(new EqualityExpression(identifierReference, literalExpression), declaration);
 
     [Rule("block_statement : (simple_statement (';' simple_statement)*)")]
     private static BlockStatement MakeBlockStatement(
