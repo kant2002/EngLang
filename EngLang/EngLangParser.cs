@@ -1,5 +1,3 @@
-using Yoakke.SynKit.Parser;
-
 namespace EngLang;
 
 using System;
@@ -7,27 +5,22 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Yoakke.SynKit.Lexer;
+using Yoakke.SynKit.Parser;
 using Yoakke.SynKit.Parser.Attributes;
 
 [Parser(typeof(EngLangTokenType))]
 public partial class EngLangParser
 {
-    //[Rule("statement : expression")]
-    //private static Statement MakeExpressionStatement(Expression expression) => new ExpressionStatement(expression);
-
     [Rule("identifier_reference : IndefiniteArticleKeyword long_identifier")]
     private static IdentifierReference MakeIdentifierReference(
-        IToken<EngLangTokenType> IndefiniteArticleKeyword,
+        IToken<EngLangTokenType> indefiniteArticleKeyword,
         string identifier)
         => new IdentifierReference(identifier);
 
     [Rule("long_identifier : Identifier+")]
-    private static string MakeLongIdentifier(
-        IReadOnlyList<IToken<EngLangTokenType>> reminder
-        //Punctuated<IToken<EngLangTokenType>, IToken<EngLangTokenType>> elements
-    )
+    private static string MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
     {
-        return string.Join(' ', reminder.Select(_ => _.Text));
+        return string.Join(' ', identifierParts.Select(_ => _.Text));
     }
 
     [Rule("expression : literal_expression")]
@@ -96,6 +89,51 @@ public partial class EngLangParser
         IdentifierReference identifierReference)
         => new AssignmentExpression(identifierReference, expression);
 
+    [Rule("simple_statement : expression_statement")]
+    [Rule("simple_statement : variable_declaration_statement")]
+    //[Rule("simple_statement : block_statement")]
+    private static Statement MakeSimpleStatement(
+        Statement statement)
+        => statement;
+
+    [Rule("statement : simple_statement '.'")]
+    [Rule("statement : block_statement '.'")]
+    private static Statement MakeStatement(
+        Statement statement,
+        IToken<EngLangTokenType> dotToken)
+        => statement;
+
+    [Rule("statement_list : statement*")]
+    private static BlockStatement MakeStatementList(
+        IReadOnlyList<Statement> statements)
+    {
+        if (statements.Count == 1 && statements[0] is BlockStatement blockStatement)
+        {
+            return blockStatement;
+        }
+
+        return new BlockStatement(statements.ToImmutableList());
+    }
+
+    [Rule("variable_declaration_statement : variable_declaration")]
+    private static VariableDeclarationStatement MakeVariableDeclarationStatement(
+        VariableDeclaration declaration)
+        => new VariableDeclarationStatement(declaration);
+
+    [Rule("expression_statement : assignment_expression")]
+    [Rule("expression_statement : addition_expression")]
+    [Rule("expression_statement : subtract_expression")]
+    [Rule("expression_statement : multiply_expression")]
+    [Rule("expression_statement : divide_expression")]
+    private static ExpressionStatement MakeExpressionStatement(
+        Expression expression)
+        => new ExpressionStatement(expression);
+
+    [Rule("block_statement : (simple_statement (';' simple_statement)*)")]
+    private static BlockStatement MakeBlockStatement(
+        Punctuated<Statement, IToken<EngLangTokenType>> statements)
+        => new BlockStatement(statements.Select(s => s.Value).ToImmutableList());
+
     public static SyntaxNode Parse(string sourceCode)
     {
         if (!sourceCode.Contains('.'))
@@ -110,34 +148,15 @@ public partial class EngLangParser
 
     private static BlockStatement ParseBlockStatement(string sourceCode)
     {
-        var statementTexts = sourceCode.Split(new[] { '.', ';' }, StringSplitOptions.RemoveEmptyEntries);
-        var statementsArray = statementTexts
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(ParseStatement)
-            .ToArray();
-        var statements = ImmutableList.Create<Statement>(statementsArray);
-        return new BlockStatement(statements);
-
-    }
-
-    private static Statement ParseStatement(string content)
-    {
-        var expression = ParseNode(content);
-        return ConvertToStatement(expression);
-    }
-
-    private static Statement ConvertToStatement(SyntaxNode node)
-    {
-        return node switch
+        var parser = new EngLangParser(new EngLangLexer(sourceCode));
+        var blockStatmentResult = parser.ParseStatementList();
+        if (blockStatmentResult.IsOk)
         {
-            VariableDeclaration variableDeclaration => new VariableDeclarationStatement(variableDeclaration),
-            AssignmentExpression assignmentExpression => new AssignmentStatement(assignmentExpression),
-            AdditionExpression additionExpression => new AdditionStatement(additionExpression),
-            SubtractExpression subtractExpression => new SubtractStatement(subtractExpression),
-            MultiplyExpression multiplyExpression => new MultiplyStatement(multiplyExpression),
-            DivisionExpression divisionExpression => new DivisionStatement(divisionExpression),
-            _ => throw new InvalidOperationException($"Node of type {node.GetType().Name} cannot be represented as statement"),
-        };
+            var variableReference = blockStatmentResult.Ok.Value;
+            return variableReference;
+        }
+
+        throw new Exception($"Parser error. Got {blockStatmentResult.Error.Got} at position {blockStatmentResult.Error.Position}");
     }
 
     private static SyntaxNode ParseNode(string sourceCode)

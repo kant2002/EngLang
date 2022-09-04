@@ -120,8 +120,8 @@ public class VariableNameTests
         var blockStatement = Assert.IsType<BlockStatement>(parseResult);
         Assert.Single(blockStatement.Statements);
 
-        var assignmentStatement = Assert.IsType<AssignmentStatement>(blockStatement.Statements[0]);
-        var assignmentExpression = assignmentStatement.Expression;
+        var assignmentStatement = Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]);
+        var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
         Assert.Equal("value", assignmentExpression.Variable.Name);
         var expression = Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression);
         Assert.Equal(40, expression.Value);

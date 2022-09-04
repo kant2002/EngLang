@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace EngLang.LanguageConversion;
@@ -72,21 +72,9 @@ public class JavaScriptConverter : ILanguageConverter
             case VariableDeclarationStatement variableDeclarationStatement:
                 var declaration = variableDeclarationStatement.Declaration;
                 return $"{Convert(declaration)};";
-            case AssignmentStatement assignmentStatement:
-                var assignmentExpression = assignmentStatement.Expression;
-                return $"{Convert(assignmentExpression)};";
-            case AdditionStatement additionStatement:
-                var additionExpression = additionStatement.Expression;
+            case ExpressionStatement expressionStatement:
+                var additionExpression = expressionStatement.Expression;
                 return $"{Convert(additionExpression)};";
-            case SubtractStatement subtractStatement:
-                var subtractExpression = subtractStatement.Expression;
-                return $"{Convert(subtractExpression)};";
-            case MultiplyStatement multiplyStatement:
-                var multiplyExpression = multiplyStatement.Expression;
-                return $"{Convert(multiplyExpression)};";
-            case DivisionStatement divisionStatement:
-                var divisionExpression = divisionStatement.Expression;
-                return $"{Convert(divisionExpression)};";
             default:
                 throw new NotImplementedException();
         }

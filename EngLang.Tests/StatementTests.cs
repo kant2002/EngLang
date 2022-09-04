@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 
 namespace EngLang.Tests;
 
@@ -12,8 +12,8 @@ public class StatementTests
         var parseResult = EngLangParser.Parse(sentence);
 
         var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var additionStatement = Assert.IsType<AdditionStatement>(Assert.Single(blockStatement.Statements));
-        var additionExpression = additionStatement.Expression;
+        var additionStatement = Assert.IsType<ExpressionStatement>(Assert.Single(blockStatement.Statements));
+        var additionExpression = Assert.IsType<AdditionExpression>(additionStatement.Expression);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.Addend);
         Assert.Equal(42, addend.Value);
         Assert.Equal("value", additionExpression.TargetVariable.Name);
@@ -22,16 +22,16 @@ public class StatementTests
     [Fact]
     public void MultipleStatementsSeparateByDot()
     {
-        var sentence = "add 42 to a value. subtract 42 from a value. multiply a value by 42. divide a value by 42";
+        var sentence = "add 42 to a value. subtract 42 from a value. multiply a value by 42. divide a value by 42.";
 
         var parseResult = EngLangParser.Parse(sentence);
 
         var blockStatement = Assert.IsType<BlockStatement>(parseResult);
         Assert.Equal(4, blockStatement.Statements.Count);
-        Assert.IsType<AdditionStatement>(blockStatement.Statements[0]);
-        Assert.IsType<SubtractStatement>(blockStatement.Statements[1]);
-        Assert.IsType<MultiplyStatement>(blockStatement.Statements[2]);
-        Assert.IsType<DivisionStatement>(blockStatement.Statements[3]);
+        Assert.IsType<AdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
+        Assert.IsType<SubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
+        Assert.IsType<MultiplyExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[2]).Expression);
+        Assert.IsType<DivisionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[3]).Expression);
     }
 
     [Fact]
@@ -43,9 +43,9 @@ public class StatementTests
 
         var blockStatement = Assert.IsType<BlockStatement>(parseResult);
         Assert.Equal(4, blockStatement.Statements.Count);
-        Assert.IsType<AdditionStatement>(blockStatement.Statements[0]);
-        Assert.IsType<SubtractStatement>(blockStatement.Statements[1]);
-        Assert.IsType<MultiplyStatement>(blockStatement.Statements[2]);
-        Assert.IsType<DivisionStatement>(blockStatement.Statements[3]);
+        Assert.IsType<AdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
+        Assert.IsType<SubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
+        Assert.IsType<MultiplyExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[2]).Expression);
+        Assert.IsType<DivisionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[3]).Expression);
     }
 }

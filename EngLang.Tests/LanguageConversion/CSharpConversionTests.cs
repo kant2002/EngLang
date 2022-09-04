@@ -1,4 +1,4 @@
-﻿namespace EngLang.Tests.LanguageConversion;
+namespace EngLang.Tests.LanguageConversion;
 
 using EngLang.LanguageConversion;
 using static System.Environment;
@@ -29,5 +29,6 @@ value += 42;
 value -= 42;
 value *= 42;
 value /= 42;
+
 ".ReplaceLineEndings(NewLine);
 }
