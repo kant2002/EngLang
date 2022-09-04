@@ -52,6 +52,8 @@ public class JavaScriptConverter : ILanguageConverter
                 return $"{ConvertToIdentifier(divisionExpression.TargetVariable.Name)} /= {ConvertExpression(divisionExpression.Denominator)}";
             case AssignmentExpression assignmentExpression:
                 return $"{ConvertToIdentifier(assignmentExpression.Variable.Name)} = {ConvertExpression(assignmentExpression.Expression)}";
+            case EqualityExpression equalityExpression:
+                return $"{ConvertToIdentifier(equalityExpression.Variable.Name)} == {ConvertExpression(equalityExpression.Expression)}";
             default:
                 throw new NotImplementedException();
         }
@@ -75,6 +77,11 @@ public class JavaScriptConverter : ILanguageConverter
             case ExpressionStatement expressionStatement:
                 var additionExpression = expressionStatement.Expression;
                 return $"{Convert(additionExpression)};";
+            case IfStatement expressionStatement:
+                var ifConditionExpression = expressionStatement.Condition;
+                return @$"if ({Convert(ifConditionExpression)}) {{" + Environment.NewLine
+                    + "    " + Convert(expressionStatement.Then) + Environment.NewLine
+                    + "}" + Environment.NewLine;
             default:
                 throw new NotImplementedException();
         }

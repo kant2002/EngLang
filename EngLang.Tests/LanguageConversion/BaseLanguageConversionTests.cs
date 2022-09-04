@@ -1,4 +1,4 @@
-﻿namespace EngLang.Tests.LanguageConversion;
+namespace EngLang.Tests.LanguageConversion;
 
 using EngLang.LanguageConversion;
 using Xunit;
@@ -141,4 +141,19 @@ public abstract class BaseLanguageConversionTests
     }
 
     protected abstract string GetExpectedStatementsCode();
+
+    [Fact]
+    public void ConvertIfStatement()
+    {
+        var sentence = "if a number is 0 then add 42 to a value.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedIfStatementCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedIfStatementCode();
 }

@@ -31,4 +31,10 @@ value *= 42;
 value /= 42;
 
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedIfStatementCode() => @"if (number == 0) {
+    value += 42;
+}
+
+".ReplaceLineEndings(NewLine);
 }
