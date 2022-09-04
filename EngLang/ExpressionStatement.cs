@@ -1,3 +1,3 @@
-﻿namespace EngLang;
+namespace EngLang;
 
-internal record ExpressionStatement(Expression Expression) : Statement;
+public record ExpressionStatement(Expression Expression) : Statement;

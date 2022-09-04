@@ -12,6 +12,9 @@ public enum EngLangTokenType
     [Regex("(a|an)")] IndefiniteArticleKeyword,
     [Token("the")] DefiniteArticleKeyword,
 
+    [Token(";")] SemicolonKeyword,
+    [Token(".")] DotKeyword,
+
     [Regex("(add|subtract|multiply|divide)")] MathOperationKeyword,
 
     [Token("put")] PutKeyword,
