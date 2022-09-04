@@ -1,26 +1,129 @@
-using System;
-using System.Collections.Immutable;
-using System.Linq;
+using Yoakke.SynKit.Parser;
 
 namespace EngLang;
 
-public class EngLangParser
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using Yoakke.SynKit.Lexer;
+using Yoakke.SynKit.Parser.Attributes;
+
+[Parser(typeof(EngLangTokenType))]
+public partial class EngLangParser
 {
+    //[Rule("statement : expression")]
+    //private static Statement MakeExpressionStatement(Expression expression) => new ExpressionStatement(expression);
+
+    [Rule("identifier_reference : IndefiniteArticleKeyword long_identifier")]
+    private static IdentifierReference MakeIdentifierReference(
+        IToken<EngLangTokenType> IndefiniteArticleKeyword,
+        string identifier)
+        => new IdentifierReference(identifier);
+
+    [Rule("long_identifier : Identifier+")]
+    private static string MakeLongIdentifier(
+        IReadOnlyList<IToken<EngLangTokenType>> reminder
+        //Punctuated<IToken<EngLangTokenType>, IToken<EngLangTokenType>> elements
+    )
+    {
+        return string.Join(' ', reminder.Select(_ => _.Text));
+    }
+
+    [Rule("expression : literal_expression")]
+    [Rule("expression : assignment_expression")]
+    [Rule("expression : addition_expression")]
+    [Rule("expression : subtract_expression")]
+    [Rule("expression : multiply_expression")]
+    [Rule("expression : divide_expression")]
+    private static Expression MakeExpression(Expression e) => e;
+
+    [Rule("addition_expression : 'add' literal_expression 'to' identifier_reference")]
+    private static AdditionExpression MakeAdditionExpression(
+        IToken<EngLangTokenType> addToken,
+        Expression literalExpression,
+        IToken<EngLangTokenType> toToken,
+        IdentifierReference identifierReference) => new(literalExpression, identifierReference);
+
+    [Rule("subtract_expression : 'subtract' literal_expression 'from' identifier_reference")]
+    private static SubtractExpression MakeSubtractExpression(
+        IToken<EngLangTokenType> subtractToken,
+        Expression literalExpression,
+        IToken<EngLangTokenType> fromToken,
+        IdentifierReference identifierReference) => new(literalExpression, identifierReference);
+
+    [Rule("multiply_expression : 'multiply' identifier_reference 'by' literal_expression")]
+    private static MultiplyExpression MakeMultiplyExpression(
+        IToken<EngLangTokenType> multiplyToken,
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> byToken,
+        Expression literalExpression) => new(literalExpression, identifierReference);
+
+    [Rule("divide_expression : 'divide' identifier_reference 'by' literal_expression")]
+    private static DivisionExpression MakeDivisionExpression(
+        IToken<EngLangTokenType> multiplyToken,
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> byToken,
+        Expression literalExpression) => new(literalExpression, identifierReference);
+
+    [Rule("literal_expression : StringLiteral")]
+    [Rule("literal_expression : IntLiteral")]
+    private static Expression MakeIdentifierReference(
+        IToken<EngLangTokenType> token)
+        => token.Kind switch
+        {
+            EngLangTokenType.StringLiteral => new StringLiteralExpression(token.Text.Trim('"')),
+            EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text)),
+            _ => throw new InvalidOperationException()
+        };
+
+    [Rule("variable_declaration: DefiniteArticleKeyword long_identifier 'is' identifier_reference ('equal' 'to' literal_expression)?")]
+    private static VariableDeclaration MakeVariableDeclaration(
+        IToken<EngLangTokenType> definiteArticle,
+        string identifier,
+        IToken<EngLangTokenType> isToken,
+        IdentifierReference identifierReference,
+        (IToken<EngLangTokenType> equalToken,
+        IToken<EngLangTokenType> toToken,
+        Expression literalExpression)? x)
+        => new VariableDeclaration(identifier, identifierReference, x?.literalExpression);
+
+    [Rule("assignment_expression: PutKeyword literal_expression 'into' identifier_reference")]
+    private static AssignmentExpression MakeAssignmentExpression(
+        IToken<EngLangTokenType> putToken,
+        Expression expression,
+        IToken<EngLangTokenType> intoToken,
+        IdentifierReference identifierReference)
+        => new AssignmentExpression(identifierReference, expression);
+
     public static SyntaxNode Parse(string sourceCode)
     {
-        if (sourceCode.Contains('.'))
+        if (!sourceCode.Contains('.'))
         {
-            var statmementTexts = sourceCode.Split(new[] { '.', ';' }, StringSplitOptions.RemoveEmptyEntries);
-            var statementsArray = statmementTexts
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(ParseNode)
-                .Select(ConvertToStatement)
-                .ToArray();
-            var statements = ImmutableList.Create<Statement>(statementsArray);
-            return new BlockStatement(statements);
+            // Fallback to expression parsing.
+            return ParseNode(sourceCode);
         }
 
-        return ParseNode(sourceCode);
+        return ParseBlockStatement(sourceCode);
+
+    }
+
+    private static BlockStatement ParseBlockStatement(string sourceCode)
+    {
+        var statementTexts = sourceCode.Split(new[] { '.', ';' }, StringSplitOptions.RemoveEmptyEntries);
+        var statementsArray = statementTexts
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(ParseStatement)
+            .ToArray();
+        var statements = ImmutableList.Create<Statement>(statementsArray);
+        return new BlockStatement(statements);
+
+    }
+
+    private static Statement ParseStatement(string content)
+    {
+        var expression = ParseNode(content);
+        return ConvertToStatement(expression);
     }
 
     private static Statement ConvertToStatement(SyntaxNode node)
@@ -39,116 +142,43 @@ public class EngLangParser
 
     private static SyntaxNode ParseNode(string sourceCode)
     {
+        var parser = new EngLangParser(new EngLangLexer(sourceCode));
         var parts = sourceCode.Split(new[] { ' ', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries);
         switch (parts[0])
         {
             case "a":
             case "an":
-                var variableReference = ParseIdentifierReference(string.Join(' ', parts.Skip(1)));
-                return variableReference;
+                var variableReferenceResult = parser.ParseIdentifierReference();
+                if (variableReferenceResult.IsOk)
+                {
+                    var variableReference = variableReferenceResult.Ok.Value;
+                    return variableReference;
+                }
+
+                throw new Exception($"Parser error. Got {variableReferenceResult.Error.Got} at position {variableReferenceResult.Error.Position}");
             case "the":
-                var variableDeclaration = ParseVariableDeclaration(string.Join(' ', parts.Skip(1)));
-                return variableDeclaration;
+                var variableDeclarationResult = parser.ParseVariableDeclaration();
+                if (variableDeclarationResult.IsOk)
+                {
+                    var variableDeclaration = variableDeclarationResult.Ok.Value;
+                    return variableDeclaration;
+                }
+
+                throw new Exception($"Parser error. Got {variableDeclarationResult.Error.Got} at position {variableDeclarationResult.Error.Position}");
             case "add":
             case "subtract":
             case "multiply":
             case "divide":
-                return ParseExpression(sourceCode);
             case "put":
-                return ParseAssignment(string.Join(' ', parts.Skip(1)));
+                var assignmentExpressionResult = parser.ParseExpression();
+                if (assignmentExpressionResult.IsOk)
+                {
+                    return assignmentExpressionResult.Ok.Value;
+                }
+
+                throw new Exception($"Parser error. Got {assignmentExpressionResult.Error.Got} at position {assignmentExpressionResult.Error.Position}");
             default:
                 throw new NotImplementedException($"Cannot parse expression starting from `{parts[0]}`");
         }
-    }
-
-    private static SyntaxNode ParseAssignment(string sourceCode)
-    {
-        var parts = sourceCode.Split(" into");
-        var expression = ParseLiteralExpression(parts[0].Trim());
-        var target = (IdentifierReference)ParseNode(parts[1].Trim());
-        return new AssignmentExpression(target, expression);
-    }
-
-    private static IdentifierReference ParseIdentifierReference(string content)
-    {
-        var variableName = content;
-        var identifierReference = new IdentifierReference(variableName);
-        return identifierReference;
-    }
-
-    private static VariableDeclaration ParseVariableDeclaration(string content)
-    {
-        var parts = content.Split(" is ");
-        var variableName = parts[0];
-        var variableSpecification = parts[1];
-        var specificationParts = variableSpecification.Split(" equal to");
-        var syntaxNode = Parse(specificationParts[0]);
-        var identifierReference = syntaxNode as IdentifierReference;
-        if (identifierReference == null)
-        {
-            throw new InvalidOperationException($"Identifier expected. {variableSpecification} given");
-        }
-
-        Expression? expression = null;
-        if (specificationParts.Length > 1)
-        {
-            expression = ParseLiteralExpression(specificationParts[1].Trim());
-        }
-
-        var variableDeclaration = new VariableDeclaration(variableName, identifierReference, expression);
-        return variableDeclaration;
-    }
-
-    private static Expression ParseExpression(string expressionString)
-    {
-        var parts = expressionString.Split(new[] { ' ', '\n', '\r', '\t' }, 2, StringSplitOptions.RemoveEmptyEntries);
-        switch (parts[0])
-        {
-            case "add":
-                {
-                    var subParts = parts[1].Split(" to");
-                    var addend = ParseLiteralExpression(subParts[0]);
-                    var target = (IdentifierReference)ParseNode(subParts[1].Trim());
-                    return new AdditionExpression(addend, target);
-                }
-            case "subtract":
-                {
-                    var subParts = parts[1].Split(" from");
-                    var addend = ParseLiteralExpression(subParts[0]);
-                    var target = (IdentifierReference)ParseNode(subParts[1].Trim());
-                    return new SubtractExpression(addend, target);
-                }
-            case "multiply":
-                {
-                    var subParts = parts[1].Split(" by");
-                    var target = (IdentifierReference)ParseNode(subParts[0].Trim());
-                    var addend = ParseLiteralExpression(subParts[1].Trim());
-                    return new MultiplyExpression(addend, target);
-                }
-            case "divide":
-                {
-                    var subParts = parts[1].Split(" by");
-                    var target = (IdentifierReference)ParseNode(subParts[0].Trim());
-                    var addend = ParseLiteralExpression(subParts[1].Trim());
-                    return new DivisionExpression(addend, target);
-                }
-            default:
-                throw new NotImplementedException();
-        }
-    }
-
-    private static Expression ParseLiteralExpression(string expressionString)
-    {
-        if (expressionString.StartsWith('"'))
-        {
-            return new StringLiteralExpression(expressionString.Trim('"'));
-        }
-
-        if (char.IsNumber(expressionString[0]))
-        {
-            return new IntLiteralExpression(int.Parse(expressionString));
-        }
-
-        throw new InvalidOperationException($"Cannot parse expression '{expressionString}'");
     }
 }
