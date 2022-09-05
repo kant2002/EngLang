@@ -42,6 +42,8 @@ public class JavaScriptConverter : ILanguageConverter
                 return intLiteralExpression.Value.ToString();
             case StringLiteralExpression stringLiteralExpression:
                 return $"\"{stringLiteralExpression.Value}\"";
+            case VariableExpression variableExpression:
+                return $"{ConvertToIdentifier(variableExpression.Identifier.Name)}";
             case InPlaceAdditionExpression additionExpression:
                 return $"{ConvertToIdentifier(additionExpression.TargetVariable.Name)} += {ConvertExpression(additionExpression.Addend)}";
             case InPlaceSubtractExpression substractExpression:
@@ -54,9 +56,23 @@ public class JavaScriptConverter : ILanguageConverter
                 return $"{ConvertToIdentifier(assignmentExpression.Variable.Name)} = {ConvertExpression(assignmentExpression.Expression)}";
             case EqualityExpression equalityExpression:
                 return $"{ConvertToIdentifier(equalityExpression.Variable.Name)} == {ConvertExpression(equalityExpression.Expression)}";
+            case MathExpression mathExpression:
+                return $"{ConvertExpression(mathExpression.FirstOperand)} {Convert(mathExpression.Operator)} {ConvertExpression(mathExpression.SecondOperand)}";
             default:
                 throw new NotImplementedException();
         }
+    }
+
+    private string Convert(MathOperator @operator)
+    {
+        return @operator switch
+        {
+            MathOperator.Plus => "+",
+            MathOperator.Minus => "-",
+            MathOperator.Multiply => "*",
+            MathOperator.Divide => "/",
+            _ => throw new NotImplementedException($"Operator {@operator} does not supported"),
+        };
     }
 
     private string ConvertStatement(Statement statement)
