@@ -17,6 +17,8 @@ public enum EngLangTokenType
 
     [Regex("(add|subtract|multiply|divide|plus|minus)")] MathOperationKeyword,
 
+    [Regex("(smaller|bigger|less|greater)")] LogicalOperationKeyword,
+
     [Token("put")] PutKeyword,
     [Token("let")] LetKeyword,
 

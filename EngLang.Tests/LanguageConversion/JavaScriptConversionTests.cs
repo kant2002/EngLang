@@ -32,7 +32,13 @@ value /= 42;
 
 ".ReplaceLineEndings(NewLine);
 
-    protected override string GetExpectedIfStatementCode() => @"if (number == 0) {
+    protected override string GetExpectedIfEqualsStatementCode() => @"if (number == 0) {
+    value += 42;
+}
+
+".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedIfLessThanStatementCode() => @"if (number < 0) {
     value += 42;
 }
 

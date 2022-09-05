@@ -143,7 +143,7 @@ public abstract class BaseLanguageConversionTests
     protected abstract string GetExpectedStatementsCode();
 
     [Fact]
-    public void ConvertIfStatement()
+    public void ConvertIfEqualsStatement()
     {
         var sentence = "if a number is 0 then add 42 to a value.";
         var parseResult = EngLangParser.Parse(sentence);
@@ -151,9 +151,24 @@ public abstract class BaseLanguageConversionTests
 
         var result = converter.Convert(parseResult);
 
-        var expectedCode = GetExpectedIfStatementCode();
+        var expectedCode = GetExpectedIfEqualsStatementCode();
         Assert.Equal(expectedCode, result);
     }
 
-    protected abstract string GetExpectedIfStatementCode();
+    protected abstract string GetExpectedIfEqualsStatementCode();
+
+    [Fact]
+    public void ConvertIfLessThanStatement()
+    {
+        var sentence = "if a number smaller than 0 then add 42 to a value.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedIfLessThanStatementCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedIfLessThanStatementCode();
 }

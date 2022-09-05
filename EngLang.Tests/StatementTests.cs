@@ -59,7 +59,21 @@ public class StatementTests
         var blockStatement = Assert.IsType<BlockStatement>(parseResult);
         var statement = Assert.Single(blockStatement.Statements);
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
-        Assert.IsType<EqualityExpression>(ifStatement.Condition);
+        Assert.IsType<LogicalExpression>(ifStatement.Condition);
+        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
+    }
+
+    [Fact]
+    public void IfSmallerStatement()
+    {
+        var sentence = "if a number smaller than 0 then add 42 to a value.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+        var statement = Assert.Single(blockStatement.Statements);
+        IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
+        Assert.IsType<LogicalExpression>(ifStatement.Condition);
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
     }
 
@@ -81,6 +95,21 @@ public class StatementTests
     public void AlternateAssignmentStatement()
     {
         var sentence = "let a value is 20.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+        var statement = Assert.Single(blockStatement.Statements);
+        var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
+        var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
+        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal(20, Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression).Value);
+    }
+
+    [Fact(Skip = "English-script derivative")]
+    public void LongerAlternateAssignmentStatement()
+    {
+        var sentence = "let the initial value of a number be x.";
 
         var parseResult = EngLangParser.Parse(sentence);
 

@@ -55,13 +55,24 @@ public class CSharpConverter : ILanguageConverter
                 return $"{ConvertToIdentifier(divisionExpression.TargetVariable.Name)} /= {ConvertExpression(divisionExpression.Denominator)}";
             case AssignmentExpression assignmentExpression:
                 return $"{ConvertToIdentifier(assignmentExpression.Variable.Name)} = {ConvertExpression(assignmentExpression.Expression)}";
-            case EqualityExpression equalityExpression:
-                return $"{ConvertToIdentifier(equalityExpression.Variable.Name)} == {ConvertExpression(equalityExpression.Expression)}";
+            case LogicalExpression equalityExpression:
+                return $"{ConvertExpression(equalityExpression.FirstOperand)} {Convert(equalityExpression.Operator)} {ConvertExpression(equalityExpression.SecondOperand)}";
             case MathExpression mathExpression:
                 return $"{ConvertExpression(mathExpression.FirstOperand)} {Convert(mathExpression.Operator)} {ConvertExpression(mathExpression.SecondOperand)}";
             default:
                 throw new NotImplementedException($"Expression of type {expression.GetType()} is not supported");
         }
+    }
+
+    private string Convert(LogicalOperator @operator)
+    {
+        return @operator switch
+        {
+            LogicalOperator.Equals => "==",
+            LogicalOperator.Less => "<",
+            LogicalOperator.Greater => ">",
+            _ => throw new NotImplementedException($"Operator {@operator} does not supported"),
+        };
     }
 
     private string Convert(MathOperator @operator)
