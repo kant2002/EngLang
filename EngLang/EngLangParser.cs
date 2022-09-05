@@ -177,14 +177,25 @@ public partial class EngLangParser
         => new ExpressionStatement(expression);
 
     [Rule($"if_statement : 'if' {IdentifierReference} 'is' literal_expression 'then' expression_statement")]
-    private static IfStatement MakeIfStatement(
+    private static IfStatement MakeIfEqualsStatement(
         IToken<EngLangTokenType> ifToken,
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         Expression literalExpression,
         IToken<EngLangTokenType> thenToken,
-        Statement declaration)
-        => new IfStatement(new EqualityExpression(identifierReference, literalExpression), declaration);
+        Statement statement)
+        => new IfStatement(new LogicalExpression(LogicalOperator.Equals, new VariableExpression(identifierReference), literalExpression), statement);
+
+    [Rule($"if_statement : 'if' {IdentifierReference} LogicalOperationKeyword 'than' literal_expression 'then' expression_statement")]
+    private static IfStatement MakeIfLessStatement(
+        IToken<EngLangTokenType> ifToken,
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> operatorToken,
+        IToken<EngLangTokenType> thanToken,
+        Expression literalExpression,
+        IToken<EngLangTokenType> thenToken,
+        Statement statement)
+        => new IfStatement(new LogicalExpression(LogicalOperator.Less, new VariableExpression(identifierReference), literalExpression), statement);
 
     [Rule("block_statement : (simple_statement (';' simple_statement)*)")]
     private static BlockStatement MakeBlockStatement(
