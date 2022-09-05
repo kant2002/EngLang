@@ -8,10 +8,15 @@
         <textarea name="source-code" @bind="SourceCode" class="form-control"></textarea>
     </div>
     <div class="w-100">
-        <Compiler SourceCode="@SourceCode" />
+        <select @bind="Language" class="form-control">
+            <option value="csharp">C#</option>
+            <option value="js">JS</option>
+        </select>
+        <Compiler SourceCode="@SourceCode" Language="@Language" />
     </div>
 </div>
 
 @code {
     private string? SourceCode { get; set; }
+    private string? Language { get; set; } = "csharp";
 }
