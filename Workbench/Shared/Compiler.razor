@@ -13,6 +13,8 @@
 
     [Parameter]
     public string? SourceCode { get; set; }
+    [Parameter]
+    public string? Language { get; set; }
 
     private string? CompiledOutput { get; set; }
     private string? CompilerError { get; set; }
@@ -28,7 +30,7 @@
                 return;
             }
 
-            var converter = new CSharpConverter();
+            var converter = CreateConverter();
             var parseResult = EngLangParser.Parse(SourceCode);
             CompiledOutput = converter.Convert(parseResult);
         }
@@ -36,5 +38,15 @@
         {
             CompilerError = ex.ToString();
         }
+    }
+
+    private ILanguageConverter CreateConverter()
+    {
+        if (Language == "js")
+        {
+            return new JavaScriptConverter();
+        }
+
+        return new CSharpConverter();
     }
 }
