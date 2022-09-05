@@ -47,6 +47,35 @@ Calculate factorial of a number ->
     calculate factorial of a previous number into a previous factorial.
     result is a previous factorial multiply a number.
 ```
+
+Maybe something more pythonnish
+```
+define the factorial of a number as
+    if number is 0 then result is 1.
+    result is a number times factorial of a number minus one.
+
+let a number is factorial of 5
+```
+or 
+```
+define the factorial of a number as
+    if number is 0 then result is 1.
+    let a previous factorial be factorial of number minus one.
+    result is a number times a previous factorial.
+
+let a number is factorial of 5
+```
+or
+```
+
+to calculate the fibonacci of a number ->
+   result is 1 if number is smaller 2.
+   let a last be fibonacci of a number minus 1.
+   let a one before last be fibonacci of a number minus 2.
+   result is a last plus a one before last.
+end
+```
+
 After looking at this sample it is not clear to me how 
 - take reference to results of function execution.
 - how define calculations into new variables. That's much easier to get right, but better be careful.
