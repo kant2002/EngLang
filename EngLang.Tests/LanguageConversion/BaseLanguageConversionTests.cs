@@ -171,4 +171,34 @@ public abstract class BaseLanguageConversionTests
     }
 
     protected abstract string GetExpectedIfLessThanStatementCode();
+
+    [Fact]
+    public void ConvertResultStatement()
+    {
+        var sentence = "result is 42.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedResultStatementCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedResultStatementCode();
+
+    [Fact]
+    public void ConvertResultInsideIfStatement()
+    {
+        var sentence = "if a number smaller than 0 then result is 42.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedResultInsideIfStatementCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedResultInsideIfStatementCode();
 }

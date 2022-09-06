@@ -110,6 +110,8 @@ public class CSharpConverter : ILanguageConverter
                 return @$"if ({Convert(ifConditionExpression)}) {{" + Environment.NewLine
                     + "    " + Convert(expressionStatement.Then) + Environment.NewLine
                     + "}" + Environment.NewLine;
+            case ResultStatement resultStatement:
+                return $"return {Convert(resultStatement.Value)};";
             default:
                 throw new NotImplementedException();
         }

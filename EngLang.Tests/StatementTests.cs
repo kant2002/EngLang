@@ -76,4 +76,17 @@ public class StatementTests
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
     }
+
+    [Fact]
+    public void ResultStatement()
+    {
+        var sentence = "result is 1.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+        var statement = Assert.Single(blockStatement.Statements);
+        var resultStatement = Assert.IsType<ResultStatement>(statement);
+        Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
+    }
 }

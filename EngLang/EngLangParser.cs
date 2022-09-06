@@ -47,6 +47,8 @@ public partial class EngLangParser
 
     [Rule($"addition_expression : primitive_expression 'plus' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'minus' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'multiply' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'divide' primitive_expression")]
     private static MathExpression MakeAdditionExpression(
         Expression firstExpression,
         IToken<EngLangTokenType> mathToken,
@@ -136,7 +138,13 @@ public partial class EngLangParser
         Expression expression)
         => new AssignmentExpression(identifierReference, expression);
 
-    [Rule("simple_statement : expression_statement")]
+    [Rule("expression_or_return_statement : expression_statement")]
+    [Rule("expression_or_return_statement : result_statement")]
+    private static Statement MakeExpressionOrReturnStatement(
+        Statement statement)
+        => statement;
+
+    [Rule("simple_statement : expression_or_return_statement")]
     [Rule("simple_statement : variable_declaration_statement")]
     [Rule("simple_statement : if_statement")]
     private static Statement MakeSimpleStatement(
@@ -177,7 +185,7 @@ public partial class EngLangParser
         Expression expression)
         => new ExpressionStatement(expression);
 
-    [Rule($"if_statement : 'if' {IdentifierReference} 'is' literal_expression 'then' expression_statement")]
+    [Rule($"if_statement : 'if' {IdentifierReference} 'is' literal_expression 'then' expression_or_return_statement")]
     private static IfStatement MakeIfEqualsStatement(
         IToken<EngLangTokenType> ifToken,
         IdentifierReference identifierReference,
@@ -187,7 +195,7 @@ public partial class EngLangParser
         Statement statement)
         => new IfStatement(new LogicalExpression(LogicalOperator.Equals, new VariableExpression(identifierReference), literalExpression), statement);
 
-    [Rule($"if_statement : 'if' {IdentifierReference} LogicalOperationKeyword 'than' literal_expression 'then' expression_statement")]
+    [Rule($"if_statement : 'if' {IdentifierReference} LogicalOperationKeyword 'than' literal_expression 'then' expression_or_return_statement")]
     private static IfStatement MakeIfLessStatement(
         IToken<EngLangTokenType> ifToken,
         IdentifierReference identifierReference,
@@ -197,6 +205,13 @@ public partial class EngLangParser
         IToken<EngLangTokenType> thenToken,
         Statement statement)
         => new IfStatement(new LogicalExpression(LogicalOperator.Less, new VariableExpression(identifierReference), literalExpression), statement);
+
+    [Rule("result_statement : 'result' 'is' math_expression")]
+    private static ResultStatement MakeBlockStatement(
+        IToken<EngLangTokenType> resultToken,
+        IToken<EngLangTokenType> isToken,
+        Expression expression)
+        => new ResultStatement(expression);
 
     [Rule("block_statement : (simple_statement (';' simple_statement)*)")]
     private static BlockStatement MakeBlockStatement(
@@ -218,14 +233,14 @@ public partial class EngLangParser
     private static BlockStatement ParseBlockStatement(string sourceCode)
     {
         var parser = new EngLangParser(new EngLangLexer(sourceCode));
-        var blockStatmentResult = parser.ParseStatementList();
-        if (blockStatmentResult.IsOk)
+        var blockStatementResult = parser.ParseStatementList();
+        if (blockStatementResult.IsOk)
         {
-            var variableReference = blockStatmentResult.Ok.Value;
+            var variableReference = blockStatementResult.Ok.Value;
             return variableReference;
         }
 
-        throw new Exception($"Parser error. Got {blockStatmentResult.Error.Got} at position {blockStatmentResult.Error.Position}");
+        throw new Exception($"Parser error. Got {blockStatementResult.Error.Got} at position {blockStatementResult.Error.Position}");
     }
 
     private static SyntaxNode ParseNode(string sourceCode)
