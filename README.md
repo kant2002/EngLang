@@ -140,9 +140,9 @@ if XXXX is YYYY, operations_list.
 It seems to be that math operations carried in usual language is quite interesting.
 
 ```
-let a value equals 10
-add 20 to a value
-multiply a value by 42
+let a value equals 10.
+add 20 to a value.
+multiply a value by 42.
 ```
 
 Can be roughly translated to
