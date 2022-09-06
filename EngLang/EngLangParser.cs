@@ -108,7 +108,7 @@ public partial class EngLangParser
             _ => throw new InvalidOperationException()
         };
 
-    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('equal' 'to' literal_expression)?")]
+    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} (EqualKeyword 'to' literal_expression)?")]
     private static VariableDeclaration MakeVariableDeclaration(
         IToken<EngLangTokenType> definiteArticle,
         string identifier,
@@ -128,6 +128,7 @@ public partial class EngLangParser
         => new AssignmentExpression(identifierReference, expression);
 
     [Rule($"assignment_expression: 'let' {IdentifierReference} 'is' math_expression ")]
+    [Rule($"assignment_expression: 'let' {IdentifierReference} EqualKeyword math_expression ")]
     private static AssignmentExpression MakeAlternateAssignmentExpression(
         IToken<EngLangTokenType> letToken,
         IdentifierReference identifierReference,

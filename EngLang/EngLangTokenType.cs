@@ -24,7 +24,7 @@ public enum EngLangTokenType
 
     [Token("if")] IfKeyword,
     [Token("is")] IsKeyword,
-    [Token("equal")] EqualKeyword,
+    [Regex("(equal|equals)")] EqualKeyword,
     [Token("into")] IntoKeyword,
     [Token("by")] ByKeyword,
 
