@@ -1,0 +1,24 @@
+<h2 class="d-flex justify-content-between">
+    @Title <button @onclick="Try" class="btn btn-primary btn-sm">Try</button>
+</h2>
+<pre>
+    @Code
+</pre>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public string? Title { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public string? Code { get; set; }
+
+    [Parameter]
+    public EventCallback<SampleEventArgs> OnTryCallback { get; set; }
+
+    public Task Try()
+    {
+        return OnTryCallback.InvokeAsync(new SampleEventArgs() { SampleCode = Code ?? string.Empty });
+    }
+}
