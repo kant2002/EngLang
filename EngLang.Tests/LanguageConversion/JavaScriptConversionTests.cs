@@ -43,4 +43,13 @@ value /= 42;
 }
 
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedResultStatementCode() => @"return 42;
+".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedResultInsideIfStatementCode() => @"if (number < 0) {
+    return 42;
+}
+
+".ReplaceLineEndings(NewLine);
 }
