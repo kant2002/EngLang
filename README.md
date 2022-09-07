@@ -160,3 +160,4 @@ This is not best way to write mathematical expression, but best way to validate 
 - [3] http://inform7.com/doc/
 - [4] https://en.wikipedia.org/wiki/Literate_programming
 - [5] https://tspace.library.utoronto.ca/bitstream/1807/26223/1/Piriyawiboon_Nattaya_201011_PhD_thesis.pdf
+- [6] https://hyperscript.org/reference/
