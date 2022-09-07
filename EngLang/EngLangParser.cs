@@ -207,7 +207,15 @@ public partial class EngLangParser
         => new IfStatement(new LogicalExpression(LogicalOperator.Less, new VariableExpression(identifierReference), literalExpression), statement);
 
     [Rule("result_statement : 'result' 'is' math_expression")]
-    private static ResultStatement MakeBlockStatement(
+    private static ResultStatement MakeResultStatement(
+        IToken<EngLangTokenType> resultToken,
+        IToken<EngLangTokenType> isToken,
+        Expression expression)
+        => new ResultStatement(expression);
+
+    [Rule("result_statement : 'the' 'result' 'is' math_expression")]
+    private static ResultStatement MakeResultStatement(
+        IToken<EngLangTokenType> theToken,
         IToken<EngLangTokenType> resultToken,
         IToken<EngLangTokenType> isToken,
         Expression expression)
