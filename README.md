@@ -162,3 +162,4 @@ This is not best way to write mathematical expression, but best way to validate 
 - [5] https://tspace.library.utoronto.ca/bitstream/1807/26223/1/Piriyawiboon_Nattaya_201011_PhD_thesis.pdf
 - [6] https://hyperscript.org/reference/
 - [7] http://attempto.ifi.uzh.ch/site/
+- [8] https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
