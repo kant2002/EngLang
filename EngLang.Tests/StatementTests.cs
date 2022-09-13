@@ -77,16 +77,32 @@ public class StatementTests
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
     }
 
-    [Fact]
-    public void ResultStatement()
+    [Theory]
+    [InlineData("result is 1.")]
+    [InlineData("return 1.")]
+    public void ResultStatement(string sentence)
     {
-        var sentence = "result is 1.";
-
         var parseResult = EngLangParser.Parse(sentence);
 
         var blockStatement = Assert.IsType<BlockStatement>(parseResult);
         var statement = Assert.Single(blockStatement.Statements);
         var resultStatement = Assert.IsType<ResultStatement>(statement);
+        Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
+    }
+
+    [Theory]
+    [InlineData("to do something: result is 1.")]
+    [InlineData("To do something: result is 1.")]
+    public void LabeledStatement(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+        var statement = Assert.Single(blockStatement.Statements);
+        var labeledStatement = Assert.IsType<LabeledStatement>(statement);
+        Assert.Equal("do something", labeledStatement.Marker);
+        var innerBlockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        var resultStatement = Assert.IsType<ResultStatement>(Assert.Single(innerBlockStatement.Statements));
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
     }
 }

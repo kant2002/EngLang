@@ -111,6 +111,10 @@ public class JavaScriptConverter : ILanguageConverter
                     + "}" + Environment.NewLine;
             case ResultStatement resultStatement:
                 return $"return {Convert(resultStatement.Value)};";
+            case LabeledStatement labeledStatement:
+                return $"function {labeledStatement.Marker.Replace(" ", "_")}() {{" + Environment.NewLine
+                    + "    " + Convert(labeledStatement.Statement)
+                    + "}" + Environment.NewLine;
             default:
                 throw new NotImplementedException();
         }

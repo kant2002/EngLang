@@ -201,4 +201,19 @@ public abstract class BaseLanguageConversionTests
     }
 
     protected abstract string GetExpectedResultInsideIfStatementCode();
+
+    [Fact]
+    public void ConvertLabeledStatement()
+    {
+        var sentence = "to do something: result is 1.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedLabeledStatementCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedLabeledStatementCode();
 }
