@@ -85,14 +85,14 @@ public partial class EngLangParser
         IToken<EngLangTokenType> fromToken,
         IdentifierReference identifierReference) => new(literalExpression, identifierReference);
 
-    [Rule($"inplace_multiply_expression : 'multiply' {IdentifierReference} 'by' literal_expression")]
+    [Rule($"inplace_multiply_expression : 'multiply' {IdentifierReference} 'by' primitive_expression")]
     private static InPlaceMultiplyExpression MakeInPlaceMultiplyExpression(
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> byToken,
         Expression literalExpression) => new(literalExpression, identifierReference);
 
-    [Rule($"inplace_divide_expression : 'divide' {IdentifierReference} 'by' literal_expression")]
+    [Rule($"inplace_divide_expression : 'divide' {IdentifierReference} 'by' primitive_expression")]
     private static InPlaceDivisionExpression MakeInPlaceDivisionExpression(
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
@@ -153,6 +153,7 @@ public partial class EngLangParser
 
     [Rule("statement : simple_statement '.'")]
     [Rule("statement : block_statement '.'")]
+    [Rule("statement : labeled_statement '.'")]
     private static Statement MakeStatement(
         Statement statement,
         IToken<EngLangTokenType> dotToken)
@@ -221,10 +222,26 @@ public partial class EngLangParser
         Expression expression)
         => new ResultStatement(expression);
 
+    [Rule("result_statement : 'return' math_expression")]
+    private static ResultStatement MakeResultStatement(
+        IToken<EngLangTokenType> returnToken,
+        Expression expression)
+        => new ResultStatement(expression);
+
     [Rule("block_statement : (simple_statement (';' simple_statement)*)")]
     private static BlockStatement MakeBlockStatement(
         Punctuated<Statement, IToken<EngLangTokenType>> statements)
         => new BlockStatement(statements.Select(s => s.Value).ToImmutableList());
+
+    [Rule("labeled_statement : 'to' (Identifier)+ ':' block_statement")]
+    [Rule("labeled_statement : 'To' (Identifier)+ ':' block_statement")]
+    [Rule("labeled_statement : 'TO' (Identifier)+ ':' block_statement")]
+    private static LabeledStatement MakeLabeledStatement(
+        IToken<EngLangTokenType> toToken,
+        IReadOnlyList<IToken<EngLangTokenType>> identifierTokens,
+        IToken<EngLangTokenType> colonToken,
+        Statement statement)
+        => new LabeledStatement(string.Join(" ", identifierTokens.Select(i => i.Text)), Array.Empty<IdentifierReference>(), statement);
 
     public static SyntaxNode Parse(string sourceCode)
     {

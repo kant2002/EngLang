@@ -52,4 +52,11 @@ value /= 42;
 }
 
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedLabeledStatementCode() => @"void do_something()
+{
+    return 1;
+}
+
+".ReplaceLineEndings(NewLine);
 }

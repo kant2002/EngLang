@@ -85,3 +85,15 @@ To Inspect Car Before Barrier:
 ```
 
 I want to distinguish between these process-like classes and regular classes/objects because objects operate on data, but these processes operate in the context. Technically objects which form context are still some data, but mostly these objects are some mechanism to perform action, so they clearly separate from regular data in the original sense.
+
+# Embedding expression in text
+
+Based on reading code from AppleScript and EnglishScript I came to conclusion that 
+embedding simple mathy expressions is noble goal, and make language more practical. 
+Reading formulas is already better for anybody who is somewhat technical. Reading 
+same formulas in pure text is most likely inconvinience for everybody.
+
+# Events
+
+Based on reading code from AppleScript and EnglishScript I see events handling as first-class citizen.
+Subscript to events are pretty easy to implement, but how to declare them?

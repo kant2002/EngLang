@@ -112,6 +112,11 @@ public class CSharpConverter : ILanguageConverter
                     + "}" + Environment.NewLine;
             case ResultStatement resultStatement:
                 return $"return {Convert(resultStatement.Value)};";
+            case LabeledStatement labeledStatement:
+                return $"void {labeledStatement.Marker.Replace(" ", "_")}()" + Environment.NewLine
+                    + "{" + Environment.NewLine
+                    + "    " + Convert(labeledStatement.Statement)
+                    + "}" + Environment.NewLine;
             default:
                 throw new NotImplementedException();
         }
