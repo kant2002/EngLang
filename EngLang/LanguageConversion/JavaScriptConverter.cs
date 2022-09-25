@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 
 namespace EngLang.LanguageConversion;
@@ -112,7 +113,8 @@ public class JavaScriptConverter : ILanguageConverter
             case ResultStatement resultStatement:
                 return $"return {Convert(resultStatement.Value)};";
             case LabeledStatement labeledStatement:
-                return $"function {labeledStatement.Marker.Replace(" ", "_")}() {{" + Environment.NewLine
+                var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
+                return $"function {labeledStatement.Marker.Replace(" ", "_")}({parameterString}) {{" + Environment.NewLine
                     + "    " + Convert(labeledStatement.Statement)
                     + "}" + Environment.NewLine;
             default:

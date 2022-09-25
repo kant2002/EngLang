@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 
 namespace EngLang.LanguageConversion;
@@ -113,7 +114,8 @@ public class CSharpConverter : ILanguageConverter
             case ResultStatement resultStatement:
                 return $"return {Convert(resultStatement.Value)};";
             case LabeledStatement labeledStatement:
-                return $"void {labeledStatement.Marker.Replace(" ", "_")}()" + Environment.NewLine
+                var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
+                return $"void {labeledStatement.Marker.Replace(" ", "_")}({parameterString})" + Environment.NewLine
                     + "{" + Environment.NewLine
                     + "    " + Convert(labeledStatement.Statement)
                     + "}" + Environment.NewLine;
