@@ -105,4 +105,20 @@ public class StatementTests
         var resultStatement = Assert.IsType<ResultStatement>(Assert.Single(innerBlockStatement.Statements));
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
     }
+
+    [Theory]
+    [InlineData("to do something a parameter identi: result is 1.", "do something")]
+    [InlineData("To calculate area from a width and a height: result is 1.", "calculate area from")]
+    public void LabeledWithParameterStatement(string sentence, string marker)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+        var statement = Assert.Single(blockStatement.Statements);
+        var labeledStatement = Assert.IsType<LabeledStatement>(statement);
+        Assert.Equal(marker, labeledStatement.Marker);
+        var innerBlockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        var resultStatement = Assert.IsType<ResultStatement>(Assert.Single(innerBlockStatement.Statements));
+        Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
+    }
 }

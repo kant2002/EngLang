@@ -216,4 +216,19 @@ public abstract class BaseLanguageConversionTests
     }
 
     protected abstract string GetExpectedLabeledStatementCode();
+
+    [Fact]
+    public void ConvertLabeledStatementWithParameters()
+    {
+        var sentence = "To calculate area from a width and a height: result is 1.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedLabeledStatementParametersCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedLabeledStatementParametersCode();
 }

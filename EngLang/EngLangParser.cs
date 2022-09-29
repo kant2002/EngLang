@@ -233,15 +233,16 @@ public partial class EngLangParser
         Punctuated<Statement, IToken<EngLangTokenType>> statements)
         => new BlockStatement(statements.Select(s => s.Value).ToImmutableList());
 
-    [Rule("labeled_statement : 'to' (Identifier)+ ':' block_statement")]
-    [Rule("labeled_statement : 'To' (Identifier)+ ':' block_statement")]
-    [Rule("labeled_statement : 'TO' (Identifier)+ ':' block_statement")]
+    //[Rule($"labeled_statement : 'to' (Identifier+ {IdentifierReference}?)+ ':' block_statement")]
+    [Rule($"labeled_statement : 'to' Identifier+ (Identifier* {IdentifierReference})* ':' block_statement")]
+    [Rule($"labeled_statement : 'To' Identifier+ (Identifier* {IdentifierReference})* ':' block_statement")]
     private static LabeledStatement MakeLabeledStatement(
         IToken<EngLangTokenType> toToken,
-        IReadOnlyList<IToken<EngLangTokenType>> identifierTokens,
+        IReadOnlyList<IToken<EngLangTokenType>> firstToken,
+        IReadOnlyList<(IReadOnlyList<IToken<EngLangTokenType>>, IdentifierReference)> identifierTokens,
         IToken<EngLangTokenType> colonToken,
         Statement statement)
-        => new LabeledStatement(string.Join(" ", identifierTokens.Select(i => i.Text)), Array.Empty<IdentifierReference>(), statement);
+        => new LabeledStatement(string.Join(" ", firstToken.Union(identifierTokens.SelectMany(_ => _.Item1)).Select(i => i.Text)), identifierTokens.Where(_ => _.Item2 != null).Select(_ => _.Item2!).ToArray(), statement);
 
     public static SyntaxNode Parse(string sourceCode)
     {
