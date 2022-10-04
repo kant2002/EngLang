@@ -8,10 +8,12 @@ public class JavaScriptConverter : ILanguageConverter
 {
     public string Convert(SyntaxNode node)
     {
+        IndentedStringBuilder builder = new(string.Empty);
         switch (node)
         {
             case Statement statement:
-                return ConvertStatement(statement);
+                ConvertStatement(builder, statement);
+                return builder.ToString();
             case Expression expression:
                 return ConvertExpression(expression);
             case VariableDeclaration variableDeclaration:
@@ -89,45 +91,54 @@ public class JavaScriptConverter : ILanguageConverter
         };
     }
 
-    private string ConvertStatement(Statement statement)
+    private void ConvertStatement(IndentedStringBuilder builder, Statement statement)
     {
         switch (statement)
         {
             case BlockStatement blockStatement:
-                StringBuilder builder = new();
                 foreach (var childStatement in blockStatement.Statements)
                 {
-                    builder.AppendLine(ConvertStatement(childStatement));
+                    ConvertStatement(builder, childStatement);
                 }
 
-                return builder.ToString();
+                break;
             case VariableDeclarationStatement variableDeclarationStatement:
                 var declaration = variableDeclarationStatement.Declaration;
-                return $"{Convert(declaration)};";
+                builder.AppendLine($"{Convert(declaration)};");
+                break;
             case ExpressionStatement expressionStatement:
                 var additionExpression = expressionStatement.Expression;
-                return $"{Convert(additionExpression)};";
+                builder.AppendLine($"{Convert(additionExpression)};");
+                break;
             case IfStatement expressionStatement:
                 var ifConditionExpression = expressionStatement.Condition;
-                return @$"if ({Convert(ifConditionExpression)}) {{" + Environment.NewLine
-                    + "    " + Convert(expressionStatement.Then) + Environment.NewLine
-                    + "}" + Environment.NewLine;
+                builder.AppendLine($"if ({Convert(ifConditionExpression)}) {{");
+                builder.PushIndent();
+                ConvertStatement(builder, expressionStatement.Then);
+                builder.PopIndent();
+                builder.AppendLine("}");
+                break;
             case ResultStatement resultStatement:
-                return $"return {Convert(resultStatement.Value)};";
+                builder.AppendLine($"return {Convert(resultStatement.Value)};");
+                break;
             case LabeledStatement labeledStatement:
                 var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
-                return $"function {labeledStatement.Marker.Replace(" ", "_")}({parameterString}) {{" + Environment.NewLine
-                    + "    " + Convert(labeledStatement.Statement)
-                    + "}" + Environment.NewLine;
+                builder.Append($"function {labeledStatement.Marker.Replace(" ", "_")}({parameterString}) ");
+                builder.OpenBraces();
+                ConvertStatement(builder, labeledStatement.Statement);
+                builder.CloseBraces();
+                break;
             case InvocationStatement invocationStatement:
                 var invocationParameterString = string.Join(", ", invocationStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
                 var invocationStatementText = $"{invocationStatement.Marker.Replace(" ", "_")}({invocationParameterString});";
                 if (invocationStatement.ResultIdentifier != null)
                 {
-                    return $"{Convert(invocationStatement.ResultIdentifier)} = {invocationStatementText}";
+                    builder.AppendLine($"{Convert(invocationStatement.ResultIdentifier)} = {invocationStatementText}");
+                    break;
                 }
 
-                return invocationStatementText;
+                builder.AppendLine(invocationStatementText);
+                break;
             default:
                 throw new NotImplementedException();
         }
