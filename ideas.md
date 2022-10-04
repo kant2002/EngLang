@@ -97,3 +97,29 @@ same formulas in pure text is most likely inconvinience for everybody.
 
 Based on reading code from AppleScript and EnglishScript I see events handling as first-class citizen.
 Subscript to events are pretty easy to implement, but how to declare them?
+
+# Linguistic underpinning
+
+I would base my terms based on how Catalyst report linguistic tokens, not how they are linguistically correct.
+
+Variable declaration.
+
+```
+the console is a console.
+the red console is a console.
+the my console is a console.
+the red vibrating console is a console.
+```
+
+translates to 
+```
+DET(the) NOUN(console) VERB(is) DET(a) NOUN(console) PUNCT(.)
+DET(the) ADJ(red) NOUN(console) VERB(is) DET(a) NOUN(console) PUNCT(.)
+DET(the) DET(my) NOUN(console) VERB(is) DET(a) NOUN(console) PUNCT(.)
+DET(the) ADJ(red) NOUN(vibrating) NOUN(console) VERB(is) DET(a) NOUN(console) PUNCT(.)
+```
+
+so let's say variable declaration is
+```
+DET(the) DET? ADJ+ NOUN+ VERB(is) DET(a|an) DET? ADJ+ NOUN+ PUNCT(.)
+```
