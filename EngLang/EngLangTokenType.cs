@@ -7,7 +7,8 @@ public enum EngLangTokenType
 {
     [Error] Error,
     [End] End,
-    [Ignore] [Regex("[ \t\r\n]+")] Whitespace,
+    [Ignore] [Regex("([ \t]+((\r\n|\n|\r)[ \t]*)?|(\r\n|\n|\r))")] Whitespace,
+    [Regex("(\r\n|\n|\r){2,}")] Multiline,
 
     [Regex("(a|an)")] IndefiniteArticleKeyword,
     [Token("the")] DefiniteArticleKeyword,

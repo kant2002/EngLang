@@ -152,12 +152,23 @@ public partial class EngLangParser
         => statement;
 
     [Rule("statement : simple_statement '.'")]
+    [Rule("statement : labeled_statement_simple '.'")]
     [Rule("statement : block_statement '.'")]
-    [Rule("statement : labeled_statement '.'")]
     [Rule("statement : invocation_statement '.'")]
     private static Statement MakeStatement(
         Statement statement,
         IToken<EngLangTokenType> dotToken)
+        => statement;
+
+    [Rule("statement : labeled_statement")]
+    private static Statement MakeStatement(
+        Statement statement)
+        => statement;
+
+    [Rule("paragraph : statement_list Multiline")]
+    private static Statement MakeParagraph(
+        BlockStatement statement,
+        IToken<EngLangTokenType> paragraphToken)
         => statement;
 
     [Rule("statement_list : statement*")]
@@ -235,8 +246,18 @@ public partial class EngLangParser
         => new BlockStatement(statements.Select(s => s.Value).ToImmutableList());
 
     //[Rule($"labeled_statement : 'to' (Identifier+ {IdentifierReference}?)+ ':' block_statement")]
-    [Rule($"labeled_statement : 'to' Identifier+ (Identifier* {IdentifierReference})* ':' block_statement")]
-    [Rule($"labeled_statement : 'To' Identifier+ (Identifier* {IdentifierReference})* ':' block_statement")]
+    [Rule($"labeled_statement_simple : 'to' Identifier+ (Identifier* {IdentifierReference})* ':' block_statement")]
+    [Rule($"labeled_statement_simple : 'To' Identifier+ (Identifier* {IdentifierReference})* ':' block_statement")]
+    private static LabeledStatement MakeSimpleLabeledStatement(
+        IToken<EngLangTokenType> toToken,
+        IReadOnlyList<IToken<EngLangTokenType>> firstToken,
+        IReadOnlyList<(IReadOnlyList<IToken<EngLangTokenType>>, IdentifierReference)> identifierTokens,
+        IToken<EngLangTokenType> colonToken,
+        Statement statement)
+        => MakeLabeledStatement(toToken, firstToken, identifierTokens, colonToken, statement);
+
+    [Rule($"labeled_statement : 'to' Identifier+ (Identifier* {IdentifierReference})* ':' paragraph")]
+    [Rule($"labeled_statement : 'To' Identifier+ (Identifier* {IdentifierReference})* ':' paragraph")]
     private static LabeledStatement MakeLabeledStatement(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
@@ -244,7 +265,6 @@ public partial class EngLangParser
         IToken<EngLangTokenType> colonToken,
         Statement statement)
         => new LabeledStatement(string.Join(" ", firstToken.Union(identifierTokens.SelectMany(_ => _.Item1)).Select(i => i.Text)), identifierTokens.Where(_ => _.Item2 != null).Select(_ => _.Item2!).ToArray(), statement);
-
     [Rule($"invocation_statement : Identifier+ (Identifier* {IdentifierReference})* ('into' {IdentifierReference})?")]
     private static Statement MakeInvocationStatement(
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
