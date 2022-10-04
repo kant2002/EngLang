@@ -29,19 +29,16 @@ value += 42;
 value -= 42;
 value *= 42;
 value /= 42;
-
 ".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedIfEqualsStatementCode() => @"if (number == 0) {
     value += 42;
 }
-
 ".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedIfLessThanStatementCode() => @"if (number < 0) {
     value += 42;
 }
-
 ".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedResultStatementCode() => @"return 42;
@@ -50,21 +47,18 @@ value /= 42;
     protected override string GetExpectedResultInsideIfStatementCode() => @"if (number < 0) {
     return 42;
 }
-
 ".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedLabeledStatementCode() => @"void do_something()
 {
     return 1;
 }
-
 ".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedLabeledStatementParametersCode() => @"void calculate_area_from(width_and, height)
 {
     return 1;
 }
-
 ".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedInvocationStatementParametersCode() => @"previous_factorial = calculate_factorial_of(previous_number);
