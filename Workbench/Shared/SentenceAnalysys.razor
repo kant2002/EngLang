@@ -1,0 +1,60 @@
+@using Catalyst
+@using Mosaik.Core
+@if (AnalysisError != null)
+{
+    <div class="alert alert-danger">
+        @AnalysisError
+    </div>
+}
+@if (doc != null)
+{
+    <pre>
+        @foreach (var sentence in doc.TokensData)
+        {
+            <text>========== Sentence =============
+                @foreach (var word in sentence)
+                {
+                    <text>@($"{word.Tag}({Word(word)}) ")</text>
+                }
+            </text>
+        }
+    </pre>
+}
+@code {
+
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Parameter]
+    public string? Language { get; set; }
+    private string? AnalysisError { get; set; }
+    private Document? doc { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            AnalysisError = null;
+            if (Text == null)
+            {
+                doc = null;
+                return;
+            }
+
+            var lang = Language == null ? Mosaik.Core.Language.English : Mosaik.Core.Languages.CodeToEnum(this.Language);
+            var nlp = await Pipeline.ForAsync(lang);
+
+            doc = new Document(Text, lang);
+            nlp.ProcessSingle(doc);
+        }
+        catch (Exception ex)
+        {
+            AnalysisError = ex.ToString();
+        }
+    }
+
+    ReadOnlySpan<char> Word(TokenData tokenData)
+    {
+        return doc.Value.AsSpan().Slice(tokenData.LowerBound, 1 + tokenData.UpperBound - tokenData.LowerBound);
+    }
+}

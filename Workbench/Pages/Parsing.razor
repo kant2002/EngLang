@@ -1,0 +1,27 @@
+@page "/parsing"
+
+<PageTitle>Sentence parsing</PageTitle>
+
+<div class="d-flex flex-sm-column flex-xl-row">
+    <div class="w-100 pe-3">
+        <label for="source-code" class="form-label">Text:</label>
+        <textarea name="source-code" @bind="Text" class="form-control"></textarea>
+        <WellKnownSamples OnTryCallback="@Try" />
+    </div>
+    <div class="w-100">
+        <select @bind="Language" class="form-control">
+            <option value="eng">English</option>
+        </select>
+        <SentenceAnalysys Text="@Text" Language="@Language" />
+    </div>
+</div>
+
+@code {
+    private string? Text { get; set; }
+    private string? Language { get; set; } = "eng";
+
+    private void Try(SampleEventArgs args)
+    {
+        this.Text = args.SampleCode;
+    }
+}
