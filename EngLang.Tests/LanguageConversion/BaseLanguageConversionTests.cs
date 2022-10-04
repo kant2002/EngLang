@@ -231,4 +231,19 @@ public abstract class BaseLanguageConversionTests
     }
 
     protected abstract string GetExpectedLabeledStatementParametersCode();
+
+    [Fact]
+    public void ConvertInvocationStatementWithParameters()
+    {
+        var sentence = "calculate factorial of a previous number into a previous factorial.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedInvocationStatementParametersCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedInvocationStatementParametersCode();
 }

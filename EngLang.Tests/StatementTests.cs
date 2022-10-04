@@ -121,4 +121,22 @@ public class StatementTests
         var resultStatement = Assert.IsType<ResultStatement>(Assert.Single(innerBlockStatement.Statements));
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
     }
+
+    [Theory]
+    [InlineData("calculate factorial of a previous number into a previous factorial.", "calculate factorial of")]
+    public void LabeledStatementInvocation(string sentence, string marker)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+        var statement = Assert.Single(blockStatement.Statements);
+
+        var invocationStatement = Assert.IsType<InvocationStatement>(statement);
+        Assert.Equal(marker, invocationStatement.Marker);
+
+        var parameter = Assert.Single(invocationStatement.Parameters);
+        Assert.Equal("previous number", parameter.Name);
+
+        Assert.Equal("previous factorial", invocationStatement.ResultIdentifier.Name);
+    }
 }

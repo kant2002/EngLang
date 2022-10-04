@@ -154,6 +154,7 @@ public partial class EngLangParser
     [Rule("statement : simple_statement '.'")]
     [Rule("statement : block_statement '.'")]
     [Rule("statement : labeled_statement '.'")]
+    [Rule("statement : invocation_statement '.'")]
     private static Statement MakeStatement(
         Statement statement,
         IToken<EngLangTokenType> dotToken)
@@ -243,6 +244,14 @@ public partial class EngLangParser
         IToken<EngLangTokenType> colonToken,
         Statement statement)
         => new LabeledStatement(string.Join(" ", firstToken.Union(identifierTokens.SelectMany(_ => _.Item1)).Select(i => i.Text)), identifierTokens.Where(_ => _.Item2 != null).Select(_ => _.Item2!).ToArray(), statement);
+
+    [Rule($"invocation_statement : Identifier+ (Identifier* {IdentifierReference})* ('into' {IdentifierReference})?")]
+    private static Statement MakeInvocationStatement(
+        IReadOnlyList<IToken<EngLangTokenType>> firstToken,
+        IReadOnlyList<(IReadOnlyList<IToken<EngLangTokenType>>, IdentifierReference)> identifierTokens,
+        (IToken<EngLangTokenType> intoToken,
+        IdentifierReference outputIdentifier)? saveResultsGroup)
+        => new InvocationStatement(string.Join(" ", firstToken.Union(identifierTokens.SelectMany(_ => _.Item1)).Select(i => i.Text)), identifierTokens.Where(_ => _.Item2 != null).Select(_ => _.Item2!).ToArray(), saveResultsGroup?.outputIdentifier);
 
     public static SyntaxNode Parse(string sourceCode)
     {

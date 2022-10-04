@@ -66,4 +66,7 @@ value /= 42;
 }
 
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedInvocationStatementParametersCode() => @"previous_factorial = calculate_factorial_of(previous_number);
+".ReplaceLineEndings(NewLine);
 }
