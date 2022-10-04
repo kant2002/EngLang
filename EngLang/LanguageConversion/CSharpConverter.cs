@@ -16,6 +16,8 @@ public class CSharpConverter : ILanguageConverter
                 return ConvertExpression(expression);
             case VariableDeclaration variableDeclaration:
                 return ConvertVariableDeclaration(variableDeclaration);
+            case IdentifierReference identifierReference:
+                return ConvertToIdentifier(identifierReference.Name);
             default:
                 throw new NotImplementedException();
         }
@@ -119,6 +121,15 @@ public class CSharpConverter : ILanguageConverter
                     + "{" + Environment.NewLine
                     + "    " + Convert(labeledStatement.Statement)
                     + "}" + Environment.NewLine;
+            case InvocationStatement invocationStatement:
+                var invocationParameterString = string.Join(", ", invocationStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
+                var invocationStatementText = $"{invocationStatement.Marker.Replace(" ", "_")}({invocationParameterString});";
+                if (invocationStatement.ResultIdentifier != null)
+                {
+                    return $"{Convert(invocationStatement.ResultIdentifier)} = {invocationStatementText}";
+                }
+
+                return invocationStatementText;
             default:
                 throw new NotImplementedException();
         }
