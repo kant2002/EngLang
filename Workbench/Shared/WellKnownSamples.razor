@@ -1,0 +1,24 @@
+<h1>Samples:</h1>
+<Sample Title="Variable declarations" Code="@VariableDeclarationSample" OnTryCallback="OnTryCallback" />
+<Sample Title="Factorial" Code="@FactorialSample" OnTryCallback="OnTryCallback" />
+<Sample Title="Answer To All Questions" Code="@AnswerToAllQuestionsSample" OnTryCallback="OnTryCallback" />
+<Sample Title="Area function" Code="@AreaFunctionSample" OnTryCallback="OnTryCallback" />
+
+@code {
+    [Parameter]
+    public EventCallback<SampleEventArgs> OnTryCallback { get; set; }
+
+    private string VariableDeclarationSample = @"let a value equals 10.
+add 20 to a value.
+multiply a value by 42.";
+
+    private string FactorialSample = @"Calculate factorial of a number: if a number is 0 then result is 1.
+if a number is 1 then result is 1.
+let a previous number is a number minus 1.
+calculate factorial of a previous number into a previous factorial.
+result is a previous factorial multiply a number.";
+
+    private string AnswerToAllQuestionsSample = @"To get answer to all questions: result is 42.";
+
+    private string AreaFunctionSample = @"To calculate area from a width and a height: multiply a width by a height.";
+}
