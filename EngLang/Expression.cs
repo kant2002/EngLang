@@ -1,3 +1,3 @@
-﻿namespace EngLang;
+namespace EngLang;
 
-public record Expression : SyntaxNode;
+public abstract record Expression : SyntaxNode;

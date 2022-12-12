@@ -1,3 +1,10 @@
-﻿namespace EngLang;
+using System;
+using System.Collections.Generic;
 
-public record IntLiteralExpression(int Value) : Expression;
+namespace EngLang;
+
+public record IntLiteralExpression(int Value) : Expression
+{
+    public override IEnumerable<SyntaxNode> Children => Array.Empty<SyntaxNode>();
+}
+
