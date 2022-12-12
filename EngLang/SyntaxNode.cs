@@ -1,3 +1,8 @@
-﻿namespace EngLang;
+using System.Collections.Generic;
 
-public abstract record SyntaxNode();
+namespace EngLang;
+
+public abstract record SyntaxNode()
+{
+    public abstract IEnumerable<SyntaxNode> Children { get; }
+}

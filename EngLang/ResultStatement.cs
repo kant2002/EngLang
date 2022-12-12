@@ -1,3 +1,8 @@
-﻿namespace EngLang;
+using System.Collections.Generic;
 
-public record ResultStatement(Expression Value) : Statement;
+namespace EngLang;
+
+public record ResultStatement(Expression Value) : Statement
+{
+    public override IEnumerable<SyntaxNode> Children => new SyntaxNode[] { Value };
+}

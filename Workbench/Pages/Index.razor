@@ -10,11 +10,14 @@
         <WellKnownSamples OnTryCallback="@Try" />
     </div>
     <div class="w-100">
+        <h2>Programming language conversion</h2>
         <select @bind="Language" class="form-control">
             <option value="csharp">C#</option>
             <option value="js">JS</option>
         </select>
         <Compiler SourceCode="@SourceCode" Language="@Language" />
+        <h2>AST</h2>
+        <SyntaxTree SourceCode="@SourceCode" Language="@Language" />
     </div>
 </div>
 

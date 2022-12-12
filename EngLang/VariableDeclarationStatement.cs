@@ -1,3 +1,8 @@
-﻿namespace EngLang;
+using System.Collections.Generic;
 
-public record VariableDeclarationStatement(VariableDeclaration Declaration) : Statement;
+namespace EngLang;
+
+public record VariableDeclarationStatement(VariableDeclaration Declaration) : Statement
+{
+    public override IEnumerable<SyntaxNode> Children => new SyntaxNode[] { Declaration };
+}
