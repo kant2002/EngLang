@@ -181,9 +181,57 @@ public partial class EngLangParser
         => statement;
 
     [Rule("statement : labeled_statement")]
+    [Rule("statement : invalid_statement")]
     private static Statement MakeStatement(
         Statement statement)
         => statement;
+    [Rule("statementxx : (Identifier|EqualKeyword)* '.'")]
+    private static Statement MakeStatement111(
+        IEnumerable<IToken<EngLangTokenType>> tokens,
+        IToken<EngLangTokenType> dotToken)
+        => new BlockStatement(ImmutableList<Statement>.Empty);
+
+    [CustomParser("invalid_statement")]
+    private ParseResult<EngLang.BlockStatement> parseInvalidStatement(int offset)
+    {
+        ParseResult<EngLang.BlockStatement> a349;
+        ParseResult<System.Collections.Generic.IReadOnlyList<EngLang.Statement>> a350;
+        var a351 = new List<EngLang.Statement>();
+        var currentOffset = offset;
+        ParseError? a353 = null;
+        while (true)
+        {
+            ParseResult<EngLang.Statement> parseStatementResult;
+            parseStatementResult = parseStatement(currentOffset);
+            if (parseStatementResult.IsError && (!this.TokenStream.TryLookAhead(currentOffset, out var a355) || ReferenceEquals(a355, parseStatementResult.Error.Got)))
+            {
+                parseStatementResult = ParseResult.Error("token", parseStatementResult.Error.Got, parseStatementResult.Error.Position, "statement_list");
+            }
+
+            if (parseStatementResult.IsError)
+            {
+                a353 = a353 | parseStatementResult.Error;
+                break;
+            }
+
+            currentOffset = parseStatementResult.Ok.Offset;
+            a351.Add(parseStatementResult.Ok.Value);
+            a353 = a353 | parseStatementResult.Ok.FurthestError;
+        }
+
+        a350 = ParseResult.Ok((IReadOnlyList<EngLang.Statement>)a351, currentOffset, a353);
+        if (a350.IsOk)
+        {
+            var a356 = a350.Ok.Value;
+            a349 = ParseResult.Ok(MakeStatementList(a356), a350.Ok.Offset, a350.Ok.FurthestError);
+        }
+        else
+        {
+            a349 = a350.Error;
+        }
+
+        return a349;
+    }
 
     [Rule("paragraph : statement_list Multiline+")]
     private static BlockStatement MakeParagraph(
