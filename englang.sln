@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngLang.Parser", "EngLang.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Workbench", "Workbench\Workbench.csproj", "{969C03EF-5095-4348-B7F6-D54A9FF4083C}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "EngLang.Analysis", "EngLang.Analysis\EngLang.Analysis.pyproj", "{81590E6D-321E-41AC-BB7C-B53204922039}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,12 @@ Global
 		{969C03EF-5095-4348-B7F6-D54A9FF4083C}.Release|x64.Build.0 = Release|Any CPU
 		{969C03EF-5095-4348-B7F6-D54A9FF4083C}.Release|x86.ActiveCfg = Release|Any CPU
 		{969C03EF-5095-4348-B7F6-D54A9FF4083C}.Release|x86.Build.0 = Release|Any CPU
+		{81590E6D-321E-41AC-BB7C-B53204922039}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81590E6D-321E-41AC-BB7C-B53204922039}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{81590E6D-321E-41AC-BB7C-B53204922039}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{81590E6D-321E-41AC-BB7C-B53204922039}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81590E6D-321E-41AC-BB7C-B53204922039}.Release|x64.ActiveCfg = Release|Any CPU
+		{81590E6D-321E-41AC-BB7C-B53204922039}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
