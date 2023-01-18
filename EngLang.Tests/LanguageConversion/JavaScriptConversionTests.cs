@@ -54,7 +54,7 @@ value /= 42;
 }
 ".ReplaceLineEndings(NewLine);
 
-    protected override string GetExpectedLabeledStatementParametersCode() => @"function calculate_area_from(width_and, height) {
+    protected override string GetExpectedLabeledStatementParametersCode() => @"function calculate_area_from(width, height) {
     return 1;
 }
 ".ReplaceLineEndings(NewLine);

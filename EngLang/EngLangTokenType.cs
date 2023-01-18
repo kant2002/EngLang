@@ -28,7 +28,9 @@ public enum EngLangTokenType
     [Regex("(equal|equals)")] EqualKeyword,
     [Token("into")] IntoKeyword,
     [Token("by")] ByKeyword,
+    [Token("and")] AndKeyword,
 
+    //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
     [Regex(Regexes.Identifier)] Identifier,
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex(Regexes.StringLiteral)] StringLiteral,
