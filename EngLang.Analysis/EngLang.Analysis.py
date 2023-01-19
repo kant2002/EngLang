@@ -8,18 +8,21 @@ nltk.download('averaged_perceptron_tagger')
 
 def analyse_sentence(sentence):
     # tokene into words
-    tokens = nltk.word_tokenize(sentence)
+    tokens = [nltk.word_tokenize(t) for t in nltk.sent_tokenize(sentence)]
 
     # parts of speech tagging
-    tagged = nltk.pos_tag(tokens)
+    tagged = nltk.pos_tag_sents(tokens)
 
     # print tagged tokens
-    print(tagged)
+    print('[')
+    for l in tagged:
+        print('   ', l)
+    print(']')
 
 # input text
-sentence1 = """To Calculate factorial of a number: if a number is 0 then result is 1 .
-if a number is 1 then result is 1 .
-let a previous number is a number minus 1 .
+sentence1 = """To Calculate factorial of a number: if a number is 0 then result is 1.
+if a number is 1 then result is 1.
+let a previous number is a number minus 1.
 calculate factorial of a previous number into a previous factorial.
 result is a previous factorial multiply a number."""
 analyse_sentence(sentence1)
@@ -42,24 +45,29 @@ sentence4 = """To calculate area from a width and a height: multiply a width by 
 analyse_sentence(sentence4)
 
 """
-[('To', 'TO'), ('Calculate', 'NNP'), ('factorial', 'NN'), ('of', 'IN'), ('a', 'DT'), ('number', 'NN'),
-    (':', ':'),
-    ('if', 'IN'), ('a', 'DT'), ('number', 'NN'), ('is', 'VBZ'), ('0', 'CD'), ('then', 'RB'), ('result', 'NN'), ('is', 'VBZ'), ('1', 'CD'), ('.', '.'),
-    ('if', 'IN'), ('a', 'DT'), ('number', 'NN'), ('is', 'VBZ'), ('1', 'CD'), ('then', 'RB'), ('result', 'NN'), ('is', 'VBZ'), ('1', 'CD'), ('.', '.'),
-    ('let', 'VB'), ('a', 'DT'), ('previous', 'JJ'), ('number', 'NN'), ('is', 'VBZ'), ('a', 'DT'), ('number', 'NN'), ('minus', 'NN'), ('1', 'CD'), ('.', '.'),
-    ('calculate', 'VB'), ('factorial', 'NN'), ('of', 'IN'), ('a', 'DT'), ('previous', 'JJ'), ('number', 'NN'), ('into', 'IN'), ('a', 'DT'), ('previous', 'JJ'), ('factorial', 'NN'), ('.', '.'),
-    ('result', 'NN'), ('is', 'VBZ'), ('a', 'DT'), ('previous', 'JJ'), ('factorial', 'JJ'), ('multiply', 'NN'), ('a', 'DT'), ('number', 'NN'), ('.', '.')]
-
-[('let', 'VB'), ('a', 'DT'), ('value', 'NN'), ('equals', 'VBZ'), ('10', 'CD'), ('.', '.'),
-    ('add', 'VB'), ('20', 'CD'), ('to', 'TO'), ('a', 'DT'), ('value', 'NN'), ('.', '.'),
-    ('multiply', 'VB'), ('a', 'DT'), ('value', 'NN'), ('by', 'IN'), ('42', 'CD'), ('.', '.')]
-[('add', 'RB'), ('20', 'CD'), ('to', 'TO'), ('a', 'DT'), ('value', 'NN'), ('.', '.')]
-
-[('To', 'TO'), ('get', 'VB'), ('answer', 'JJR'), ('to', 'TO'), ('all', 'DT'), ('questions', 'NNS'), (':', ':'),
-    ('result', 'NN'), ('is', 'VBZ'), ('42', 'CD'), ('.', '.')]
-
-[('To', 'TO'), ('calculate', 'VB'), ('area', 'NN'), ('from', 'IN'), ('a', 'DT'), ('width', 'NN'), ('and', 'CC'), ('a', 'DT'), ('height', 'NN'), (':', ':'),
-    ('multiply', 'VB'), ('a', 'DT'), ('width', 'NN'), ('by', 'IN'), ('a', 'DT'), ('height', 'NN'), ('.', '.')]
+[
+    [('To', 'TO'), ('Calculate', 'NNP'), ('factorial', 'NN'), ('of', 'IN'), ('a', 'DT'), ('number', 'NN'),
+        (':', ':'),
+        ('if', 'IN'), ('a', 'DT'), ('number', 'NN'), ('is', 'VBZ'), ('0', 'CD'), ('then', 'RB'), ('result', 'NN'), ('is', 'VBZ'), ('1.', 'CD'), ('if', 'IN'), ('a', 'DT'), ('number', 'NN'), ('is', 'VBZ'), ('1', 'CD'), ('then', 'RB'), ('result', 'NN'), ('is', 'VBZ'), ('1.', 'CD'), ('let', 'NN'), ('a', 'DT'), ('previous', 'JJ'), ('number', 'NN'), ('is', 'VBZ'), ('a', 'DT'), ('number', 'NN'), ('minus', 'CC'), ('1.', 'CD'), ('calculate', 'JJ'), ('factorial', 'NN'), ('of', 'IN'), ('a', 'DT'), ('previous', 'JJ'), ('number', 'NN'), ('into', 'IN'), ('a', 'DT'), ('previous', 'JJ'), ('factorial', 'NN'), ('.', '.')]
+    [('result', 'NN'), ('is', 'VBZ'), ('a', 'DT'), ('previous', 'JJ'), ('factorial', 'JJ'), ('multiply', 'NN'), ('a', 'DT'), ('number', 'NN'), ('.', '.')]
+]
+[
+    [('let', 'VB'), ('a', 'DT'), ('value', 'NN'), ('equals', 'VBZ'), ('10', 'CD'), ('.', '.')]
+    [('add', 'RB'), ('20', 'CD'), ('to', 'TO'), ('a', 'DT'), ('value', 'NN'), ('.', '.')]
+    [('multiply', 'VB'), ('a', 'DT'), ('value', 'NN'), ('by', 'IN'), ('42', 'CD'), ('.', '.')]
+]
+[
+    [('add', 'RB'), ('20', 'CD'), ('to', 'TO'), ('a', 'DT'), ('value', 'NN'), ('.', '.')]
+]
+[
+    [('multiply', 'VB'), ('a', 'DT'), ('value', 'NN'), ('by', 'IN'), ('42', 'CD'), ('.', '.')]
+]
+[
+    [('To', 'TO'), ('get', 'VB'), ('answer', 'JJR'), ('to', 'TO'), ('all', 'DT'), ('questions', 'NNS'), (':', ':'), ('result', 'NN'), ('is', 'VBZ'), ('42', 'CD'), ('.', '.')]
+]
+[
+    [('To', 'TO'), ('calculate', 'VB'), ('area', 'NN'), ('from', 'IN'), ('a', 'DT'), ('width', 'NN'), ('and', 'CC'), ('a', 'DT'), ('height', 'NN'), (':', ':'), ('multiply', 'VB'), ('a', 'DT'), ('width', 'NN'), ('by', 'IN'), ('a', 'DT'), ('height', 'NN'), ('.', '.')]
+]
 """
 
 """
