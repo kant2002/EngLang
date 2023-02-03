@@ -50,28 +50,19 @@ def analyse_sentence_spacy(sentence):
     doc = nlp(sentence)
     #print ([(token.text, token.pos_) for token in doc])
     assert doc.has_annotation("SENT_START")
-    sentence_tokens = []
+    tagged_tokens = []
     for sent in doc.sents:
         print(sent.text)
         print(nltk_spacy_tree(sent))
-        sentence_tokens.append([(token.text, token.tag_) for token in sent])
+        tagged_tokens.append([(token.text, token.tag_) for token in sent])
 
-    #doc.print_tree(light=True)
     # print tagged tokens
     print('[')
-    for l in sentence_tokens:
+    for l in tagged_tokens:
         print('   ', l)
     print(']')
 
-    dump_tokens_nltk(sentence_tokens)
-
-    #pos_tags = [(token.text, token.tag_) for token in doc]
-    #print(pos_tags)
-    #pos_tags = sum(pos_tags,[])
-    #print(list(set(sum(pos_tags,[]) )))
-
-    #for l in pos_tags:
-    #    print(grammar_parser.parse(l))
+    dump_tokens_nltk(tagged_tokens)
 
 def normalize_token(token, pos):
     if (pos == '_SP'):
@@ -88,15 +79,15 @@ def analyse_sentence_nltk(sentence):
     tokens = [tokenize_sentence(t) for t in nltk.sent_tokenize(sentence)]
 
     # parts of speech tagging
-    tagged = nltk.pos_tag_sents(tokens)
+    tagged_tokens = nltk.pos_tag_sents(tokens)
 
     # print tagged tokens
     print('[')
-    for l in tagged:
+    for l in tagged_tokens:
         print('   ', l)
     print(']')
 
-    dump_tokens_nltk(tagged)
+    dump_tokens_nltk(tagged_tokens)
 
 def analyse_sentence(sentence):
     analyse_sentence_nltk(sentence)
