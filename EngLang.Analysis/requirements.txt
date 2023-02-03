@@ -1,3 +1,5 @@
-pip==10.0.1
-setuptools==39.0.1
-nltk
+pip==22.3.1
+setuptools==66.1.1
+wheel==0.38.4
+nltk==3.8.1
+spacy==3.5.0
