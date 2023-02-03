@@ -1,5 +1,9 @@
 import sys
 import nltk
+import spacy
+from nltk.tree import Tree
+
+nlp = spacy.load("en_core_web_trf")
 
 # download required nltk packages
 # required for tokenization
@@ -7,9 +11,81 @@ nltk.download('punkt')
 # required for parts of speech tagging
 nltk.download('averaged_perceptron_tagger')
 
-def analyse_sentence(sentence):
-    # tokene into words
-    tokens = [nltk.word_tokenize(t) for t in nltk.sent_tokenize(sentence)]
+simple_grammar = nltk.CFG.fromstring("""
+      S -> NP VP '.'
+      PP -> P NP
+      NP -> Det N | Det N PP
+      VP -> V NP | VP PP
+      Det -> 'DT'
+      N -> 'NN'
+      V -> 'VB'
+      P -> 'PP'
+      """)
+grammar_parser = nltk.ChartParser(simple_grammar)
+"""
+Visualize the SpaCy dependency tree with nltk.tree
+"""
+def token_format(token):
+    return "_".join([token.orth_, token.tag_, token.dep_])
+
+def to_nltk_tree(node):
+    if node.n_lefts + node.n_rights > 0:
+        return Tree(token_format(node),
+                    [to_nltk_tree(child) 
+                    for child in node.children]
+                )
+    else:
+        return token_format(node)
+
+def nltk_spacy_tree(sent):
+    #tree = [to_nltk_tree(sent.root) for sent in doc.sents]
+    # The first item in the list is the full tree
+    to_nltk_tree(sent.root).draw()
+
+def tokenize_sentence(sentence):
+    return nltk.word_tokenize(sentence)
+
+def analyse_sentence_spacy(sentence):
+    print('spacy')
+    doc = nlp(sentence)
+    #print ([(token.text, token.pos_) for token in doc])
+    assert doc.has_annotation("SENT_START")
+    sentence_tokens = []
+    for sent in doc.sents:
+        print(sent.text)
+        print(nltk_spacy_tree(sent))
+        sentence_tokens.append([(token.text, token.tag_) for token in sent])
+
+    #doc.print_tree(light=True)
+    # print tagged tokens
+    print('[')
+    for l in sentence_tokens:
+        print('   ', l)
+    print(']')
+
+    dump_tokens_nltk(sentence_tokens)
+
+    #pos_tags = [(token.text, token.tag_) for token in doc]
+    #print(pos_tags)
+    #pos_tags = sum(pos_tags,[])
+    #print(list(set(sum(pos_tags,[]) )))
+
+    #for l in pos_tags:
+    #    print(grammar_parser.parse(l))
+
+def normalize_token(token, pos):
+    if (pos == '_SP'):
+        return pos
+    return pos[:2]
+
+def dump_tokens_nltk(tagged_tokens: list[list[tuple[any,str]]]):
+    pos_tags = [[normalize_token(token, pos) for (token,pos) in sent] for sent in tagged_tokens]
+    #pos_tags = sum(pos_tags,[])
+    print(list(set(sum(pos_tags,[]) )))
+
+def analyse_sentence_nltk(sentence):
+    print('nltk')
+    tokens = [tokenize_sentence(t) for t in nltk.sent_tokenize(sentence)]
 
     # parts of speech tagging
     tagged = nltk.pos_tag_sents(tokens)
@@ -19,6 +95,12 @@ def analyse_sentence(sentence):
     for l in tagged:
         print('   ', l)
     print(']')
+
+    dump_tokens_nltk(tagged)
+
+def analyse_sentence(sentence):
+    analyse_sentence_nltk(sentence)
+    analyse_sentence_spacy(sentence)
 
 def sample():
     # input text
@@ -119,10 +201,36 @@ WP$  possessive wh-pronoun. Example: whose
 WRB  wh-abverb. Example: where, when
 """
 
+"""
+Types of Parts or speech which is used.
+['#', "''", '(', ')', ',', '.', ':', '``', 
+	'CC', 
+	'CD', 
+	'DT', 
+	'EX', 
+	'IN', 
+	'JJ', 'JJR', 'JJS', 
+	'MD', 
+	'NN', 'NNP', 'NNS', 
+	'POS', 
+	'PRP', 
+	'RB', 'RBR', 
+	'RP', 
+	'SYM', ?? what is this
+	'TO', 
+	'UH', ?? where it occurs
+	'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 
+	'WDT', 'WP', 'WRB']
+"""
+
+def analyze_file(filename):
+    with open(filename, "r+", encoding="utf-8") as program_file:
+        # Reading from a file
+        program_content = program_file.read()
+        analyse_sentence(program_content)
+
 if len(sys.argv) <= 1:
     sample()
 else:
-    with open(sys.argv[1], "r+", encoding="utf-8") as file1:
-        # Reading from a file
-        analyse_sentence(file1.read())
-
+    filename = sys.argv[1]
+    analyze_file(filename)
