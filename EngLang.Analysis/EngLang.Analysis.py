@@ -1,9 +1,22 @@
 import sys
+import argparse
 import nltk
 import spacy
+from spacy.language import Language
 from nltk.tree import Tree
 
 nlp = spacy.load("en_core_web_trf")
+
+@Language.component("custom_sentence_boundaries")
+def set_custom_boundaries(doc):
+    for token in doc[:-1]:
+        if token.text == ":" or token.text == "):" or token.text == "***" or token.text == ";":
+            doc[token.i+1].is_sent_start = True
+        #elif token.text == "Rs." or token.text == ")":
+        #    doc[token.i+1].is_sent_start = False
+    return doc
+
+nlp.add_pipe("custom_sentence_boundaries", name="custom_sentence_boundaries", before="parser")
 
 # download required nltk packages
 # required for tokenization
@@ -40,7 +53,7 @@ def to_nltk_tree(node):
 def nltk_spacy_tree(sent):
     #tree = [to_nltk_tree(sent.root) for sent in doc.sents]
     # The first item in the list is the full tree
-    to_nltk_tree(sent.root).draw()
+    to_nltk_tree(sent.root)#.draw()
 
 def tokenize_sentence(sentence):
     return nltk.word_tokenize(sentence)
@@ -220,8 +233,50 @@ def analyze_file(filename):
         program_content = program_file.read()
         analyse_sentence(program_content)
 
-if len(sys.argv) <= 1:
-    sample()
-else:
-    filename = sys.argv[1]
-    analyze_file(filename)
+def split_sentence_spacy(filename, output_file):
+    print("split_sentence_spacy " + filename)
+    with open(filename, "r+", encoding="utf-8", errors = 'ignore') as program_file:
+        # Reading from a file
+        program_content = program_file.read()
+        content = program_content.splitlines()
+
+        i = 0
+        for line in iter(content):
+          if line.find('\\') >= 0:
+            content[i] = line[:line.find('\\')]
+          else:
+            content[i] = line
+          i += 1
+
+        program_content = '\n'.join(content)
+
+        doc = nlp(program_content)
+        #print ([(token.text, token.pos_) for token in doc])
+        assert doc.has_annotation("SENT_START")
+        for sent in doc.sents:
+            print(sent.text.strip())
+            print('========================')
+                
+arg_parser = argparse.ArgumentParser(
+    prog = 'ProgramName',
+    description = 'What the program does',
+    epilog = 'Text at the bottom of help')
+arg_parser.add_argument('command', nargs='?', default = 'sample')
+arg_parser.add_argument('-f', '--filename')
+arg_parser.add_argument('-o', '--output', required = False)
+arg_parser.add_argument('-v', '--verbose',
+                    action='store_true')  # on/off flag
+
+args = arg_parser.parse_args()
+print(args.command, args.filename)
+
+match args.command:
+    case "sample":
+        sample()
+    case "analyze":
+        filename = args.filename
+        analyze_file(filename)
+    case "sentencize":
+        filename = args.filename
+        output_file = args.output if args.output else args.filename +'.sentence'
+        split_sentence_spacy(filename, output_file)
