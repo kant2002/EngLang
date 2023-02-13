@@ -72,6 +72,52 @@ divide a value by 42.
     }
 
     [Fact]
+    public void ParagraphCanEndWithFileEnd()
+    {
+        var sentence = @"To test: add 42 to a value.
+subtract 42 from a value.
+multiply a value by 42.
+divide a value by 42.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var wrappedStatement = Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements);
+        var labeledStatement = Assert.IsType<LabeledStatement>(wrappedStatement);
+        var blockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        Assert.Equal(4, blockStatement.Statements.Count);
+        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
+        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
+        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[2]).Expression);
+        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[3]).Expression);
+    }
+
+    [Fact]
+    public void ParagraphsSeparatedByEmptyLine()
+    {
+        var sentence = @"To test: add 42 to a value.
+subtract 42 from a value.
+multiply a value by 42.
+
+divide a value by 42.
+
+";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var statements = Assert.IsType<BlockStatement>(parseResult).Statements;
+        Assert.Equal(2, statements.Count);
+        var wrappedStatement = statements[0];
+        var labeledStatement = Assert.IsType<LabeledStatement>(wrappedStatement);
+        var blockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        Assert.Equal(3, blockStatement.Statements.Count);
+        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
+        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
+        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[2]).Expression);
+
+        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(statements[1]).Expression);
+    }
+
+    [Fact]
     public void IfStatement()
     {
         var sentence = "if a number is 0 then add 42 to a value.";

@@ -166,11 +166,28 @@ public partial class EngLangParser
         Statement statement)
         => statement;
 
-    [Rule("paragraph : statement_list Multiline")]
-    private static Statement MakeParagraph(
+    [Rule("paragraph : statement_list Multiline+")]
+    private static BlockStatement MakeParagraph(
         BlockStatement statement,
-        IToken<EngLangTokenType> paragraphToken)
+        IReadOnlyList<IToken<EngLangTokenType>> paragraphToken)
         => statement;
+
+    [Rule("paragraph_list : paragraph+")]
+    private static BlockStatement MakeParagraphList(
+        IReadOnlyList<Statement> statements)
+    {
+        if (statements.Count == 1 && statements[0] is BlockStatement blockStatement)
+        {
+            return blockStatement;
+        }
+
+        return new BlockStatement(statements.ToImmutableList());
+    }
+
+    [Rule("paragraph_list : statement_list")]
+    private static BlockStatement MakeParagraphList(
+        BlockStatement statements)
+        => statements;
 
     [Rule("statement_list : statement*")]
     private static BlockStatement MakeStatementList(
@@ -276,13 +293,13 @@ public partial class EngLangParser
         return new LabeledStatement(labelName, identifierTokens.IdentifierReferences.ToArray(), statement);
     }
 
-    [Rule($"invocation_statement : {Identifier}+ ({Identifier}* {IdentifierReference})* ('into' {IdentifierReference})?")]
+    [Rule($"invocation_statement : {Identifier}+ identifier_references_list ('into' {IdentifierReference})?")]
     private static Statement MakeInvocationStatement(
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
-        IReadOnlyList<(IReadOnlyList<IToken<EngLangTokenType>>, IdentifierReference)> identifierTokens,
+        IdentifierReferencesList identifierTokens,
         (IToken<EngLangTokenType> intoToken,
         IdentifierReference outputIdentifier)? saveResultsGroup)
-        => new InvocationStatement(string.Join(" ", firstToken.Union(identifierTokens.SelectMany(_ => _.Item1)).Select(i => i.Text)), identifierTokens.Where(_ => _.Item2 != null).Select(_ => _.Item2!).ToArray(), saveResultsGroup?.outputIdentifier);
+        => new InvocationStatement(string.Join(" ", firstToken.Select(i => i.Text)), identifierTokens.IdentifierReferences.ToArray(), saveResultsGroup?.outputIdentifier);
 
     public static SyntaxNode Parse(string sourceCode)
     {
@@ -298,8 +315,8 @@ public partial class EngLangParser
 
     private static BlockStatement ParseBlockStatement(string sourceCode)
     {
-        var parser = new EngLangParser(new EngLangLexer(sourceCode));
-        var blockStatementResult = parser.ParseStatementList();
+        var parser = new EngLangParser(new EngLangLexer(sourceCode + "\n\n"));
+        var blockStatementResult = parser.ParseParagraphList();
         if (blockStatementResult.IsOk)
         {
             var variableReference = blockStatementResult.Ok.Value;
