@@ -5,7 +5,7 @@ import spacy
 from spacy.language import Language
 from nltk.tree import Tree
 
-nlp = spacy.load("en_core_web_trf")
+nlp: Language = spacy.load("en_core_web_trf")
 
 @Language.component("custom_sentence_boundaries")
 def set_custom_boundaries(doc):
@@ -44,16 +44,16 @@ def token_format(token):
 def to_nltk_tree(node):
     if node.n_lefts + node.n_rights > 0:
         return Tree(token_format(node),
-                    [to_nltk_tree(child) 
+                    [to_nltk_tree(child)
                     for child in node.children]
                 )
     else:
-        return token_format(node)
+        return Tree(token_format(node), [])
 
 def nltk_spacy_tree(sent):
     #tree = [to_nltk_tree(sent.root) for sent in doc.sents]
     # The first item in the list is the full tree
-    to_nltk_tree(sent.root)#.draw()
+    return to_nltk_tree(sent.root)#.draw()
 
 def tokenize_sentence(sentence):
     return nltk.word_tokenize(sentence)
@@ -66,7 +66,7 @@ def analyse_sentence_spacy(sentence):
     tagged_tokens = []
     for sent in doc.sents:
         print(sent.text)
-        print(nltk_spacy_tree(sent))
+        nltk_spacy_tree(sent).pretty_print()
         tagged_tokens.append([(token.text, token.tag_) for token in sent])
 
     # print tagged tokens
@@ -127,7 +127,7 @@ def sample():
     sentence3 = """To get answer to all questions: result is 42."""
     analyse_sentence(sentence3)
 
-    sentence4 = """To calculate area from a width and a height: multiply a width by a height."""
+    sentence4 = """To calculate rectangle's area from a width and a height: multiply a width by a height."""
     analyse_sentence(sentence4)
 
 """
@@ -207,23 +207,23 @@ WRB  wh-abverb. Example: where, when
 
 """
 Types of Parts or speech which is used.
-['#', "''", '(', ')', ',', '.', ':', '``', 
-	'CC', 
-	'CD', 
-	'DT', 
-	'EX', 
-	'IN', 
-	'JJ', 'JJR', 'JJS', 
-	'MD', 
-	'NN', 'NNP', 'NNS', 
-	'POS', 
-	'PRP', 
-	'RB', 'RBR', 
-	'RP', 
+['#', "''", '(', ')', ',', '.', ':', '``',
+	'CC',
+	'CD',
+	'DT',
+	'EX',
+	'IN',
+	'JJ', 'JJR', 'JJS',
+	'MD',
+	'NN', 'NNP', 'NNS',
+	'POS',
+	'PRP',
+	'RB', 'RBR',
+	'RP',
 	'SYM', ?? what is this
-	'TO', 
+	'TO',
 	'UH', ?? where it occurs
-	'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 
+	'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ',
 	'WDT', 'WP', 'WRB']
 """
 
@@ -256,7 +256,7 @@ def split_sentence_spacy(filename, output_file):
         for sent in doc.sents:
             print(sent.text.strip())
             print('========================')
-                
+
 arg_parser = argparse.ArgumentParser(
     prog = 'ProgramName',
     description = 'What the program does',
