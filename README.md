@@ -163,3 +163,5 @@ This is not best way to write mathematical expression, but best way to validate 
 - [6] https://hyperscript.org/reference/
 - [7] http://attempto.ifi.uzh.ch/site/
 - [8] https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
+- [9] https://web.archive.org/web/20060315150220/http://frontier.userland.com/manual/objectDatabase
+- [10] https://github.com/hhas/iris-script/wiki
