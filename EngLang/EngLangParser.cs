@@ -214,6 +214,7 @@ public partial class EngLangParser
     [Rule("expression_statement : inplace_subtract_expression")]
     [Rule("expression_statement : inplace_multiply_expression")]
     [Rule("expression_statement : inplace_divide_expression")]
+    [Rule("expression_statement : logical_expression")]
     private static ExpressionStatement MakeExpressionStatement(
         Expression expression)
         => new ExpressionStatement(expression);
@@ -225,13 +226,33 @@ public partial class EngLangParser
         Expression literalExpression)
         => new LogicalExpression(LogicalOperator.Equals, new VariableExpression(identifierReference), literalExpression);
 
+    [Rule($"logical_expression : {IdentifierReference} 'is' 'not' literal_expression")]
+    private static LogicalExpression MakeNegativeLogicalExpression(
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> isToken,
+        IToken<EngLangTokenType> notToken,
+        Expression literalExpression)
+        => new LogicalExpression(LogicalOperator.NotEquals, new VariableExpression(identifierReference), literalExpression);
+
     [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' literal_expression")]
     private static LogicalExpression MakeLogicalExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> operatorToken,
         IToken<EngLangTokenType> thanToken,
         Expression literalExpression)
-        => new LogicalExpression(LogicalOperator.Less, new VariableExpression(identifierReference), literalExpression);
+        => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
+
+    private static LogicalOperator GetLogicalOperator(IToken<EngLangTokenType> operatorToken)
+    {
+        return operatorToken.Text switch
+        {
+            "less" => LogicalOperator.Less,
+            "smaller" => LogicalOperator.Less,
+            "greater" => LogicalOperator.Greater,
+            "bigger" => LogicalOperator.Greater,
+            _ => throw new InvalidOperationException($"Unknown logical operator {operatorToken.Text}"),
+        };
+    }
 
     [Rule($"if_statement : 'if' logical_expression ThenKeyword expression_or_return_statement")]
     private static IfStatement MakeIfEqualsStatement(
