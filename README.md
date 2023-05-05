@@ -87,7 +87,7 @@ the width is a number.
 the height is a number.
 
 To calculate area from a width and a height ->
-  result is multiply width to height.
+  result is a width multiplied by a height.
 ```
 
 Do language support concept of an expression in itself? How we decide that specific construct is expression, and what is statement.

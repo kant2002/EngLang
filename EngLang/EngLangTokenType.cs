@@ -15,6 +15,7 @@ public enum EngLangTokenType
 
     [Token(";")] SemicolonKeyword,
     [Token(".")] DotKeyword,
+    [Regex("(->|as)")] FunctionBodyKeyword,
 
     [Regex("(add|subtract|multiply|multiplied|divide|divided|plus|minus)")] MathOperationKeyword,
 

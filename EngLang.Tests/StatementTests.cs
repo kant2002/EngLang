@@ -132,7 +132,9 @@ divide a value by 42.
 
     [Theory]
     [InlineData("to do something: result is 1.")]
+    [InlineData("to do something-> result is 1.")]
     [InlineData("To do something: result is 1.")]
+    [InlineData("To do something -> result is 1.")]
     public void LabeledStatement(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
@@ -148,7 +150,12 @@ divide a value by 42.
 
     [Theory]
     [InlineData("to do something a parameter identi: result is 1.", "do something")]
+    [InlineData("to do something a parameter identi-> result is 1.", "do something")]
     [InlineData("To calculate area from a width and a height: result is 1.", "calculate area from")]
+    [InlineData("To calculate area from a width and a height-> result is 1.", "calculate area from")]
+    [InlineData("calculate area from a width and a height-> result is 1.", "calculate area from")]
+    [InlineData("define calculate area from a width and a height as result is 1.", "calculate area from")]
+    [InlineData("define the factorial of a number as result is 1.", "factorial of")]
     public void LabeledWithParameterStatement(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);
