@@ -167,6 +167,7 @@ public partial class EngLangParser
     [Rule("simple_statement : expression_or_return_statement")]
     [Rule("simple_statement : variable_declaration_statement")]
     [Rule("simple_statement : if_statement")]
+    //[Rule("simple_statement : statementxx")]
     private static Statement MakeSimpleStatement(
         Statement statement)
         => statement;
@@ -181,18 +182,19 @@ public partial class EngLangParser
         => statement;
 
     [Rule("statement : labeled_statement")]
-    [Rule("statement : invalid_statement")]
+    //[Rule("statement : invalid_statement")]
+    [Rule("statement : statementxx")]
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword)* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|IntLiteral|StringLiteral|NullLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
-        => new BlockStatement(ImmutableList<Statement>.Empty);
+        => new InvalidStatement(tokens.ToImmutableArray());
 
     [CustomParser("invalid_statement")]
-    private ParseResult<EngLang.BlockStatement> parseInvalidStatement(int offset)
+    private ParseResult<EngLang.BlockStatement> parseInvalidStatement1(int offset)
     {
         ParseResult<EngLang.BlockStatement> a349;
         ParseResult<System.Collections.Generic.IReadOnlyList<EngLang.Statement>> a350;

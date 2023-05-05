@@ -186,4 +186,19 @@ divide a value by 42.
 
         Assert.Equal("previous factorial", invocationStatement.ResultIdentifier.Name);
     }
+
+    [Theory]
+    [InlineData("if.")]
+    [InlineData("if number.")]
+    [InlineData("if number is 0 then result is 1.")]
+    [InlineData("result is a number times factorial of a number minus one.")]
+    public void InvalidStatement(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
+        var statement = Assert.Single(blockStatement.Statements);
+
+        var invocationStatement = Assert.IsType<InvalidStatement>(statement);
+    }
 }
