@@ -139,6 +139,10 @@ public class JavaScriptConverter : ILanguageConverter
 
                 builder.AppendLine(invocationStatementText);
                 break;
+            case InvalidStatement invalidStatement:
+                var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));
+                builder.AppendLine("#error " + invalidStatementString);
+                break;
             default:
                 throw new NotImplementedException();
         }
