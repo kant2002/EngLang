@@ -1,0 +1,66 @@
+@page "/arithmetics"
+<PageTitle>Arithmetics</PageTitle>
+
+<h1>Arithmetics</h1>
+<h2>Programming language conversion</h2>
+<select @bind="Language" class="form-control">
+    <option value="csharp">C#</option>
+    <option value="js">JS</option>
+</select>
+
+<p>Variables defined using `let` keyword. Variable reference is noun.</p>
+<pre>
+    @VariableDeclarationSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@VariableDeclarationSample" Language="@Language" />
+
+<p>Arithmetics is rather plain without any functions support. You can inplace add value, similarly to how += operator in many languages works</p>
+<pre>
+    @AdditionVariant1Sample
+</pre>
+<p>produces</p>
+<Compiler SourceCode="@AdditionVariant1Sample" Language="@Language" />
+<p>or produce explicit addition expression</p>
+<pre>
+    @AdditionVariant2Sample
+</pre>
+<p>produces</p>
+<Compiler SourceCode="@AdditionVariant2Sample" Language="@Language" />
+<p>Similar for multiplication, you can have both variants.</p>
+<pre>
+    @MultiplicationSample
+</pre>
+<p>produces</p>
+<Compiler SourceCode="@MultiplicationSample" Language="@Language" />
+<p>Substraction too can have inplace variant and using expression.</p>
+<pre>
+    @SubstractionSample
+</pre>
+<p>produces</p>
+<Compiler SourceCode="@SubstractionSample" Language="@Language" />
+<p>And lastly division.</p>
+<pre>
+    @DivisionSample
+</pre>
+<p>produces</p>
+<Compiler SourceCode="@DivisionSample" Language="@Language" />
+
+@code {
+    private string? Language { get; set; } = "js";
+
+    private string VariableDeclarationSample = @"let a value equals 10.";
+
+    private string AdditionVariant1Sample = @"add 20 to a value.";
+
+    private string AdditionVariant2Sample = @"a value plus 20.";
+
+    private string MultiplicationSample = @"multiply a value by 42.
+let a product equals to a value multiply by 42.";
+
+    private string SubstractionSample = @"subtract 42 from a value.
+let a difference equals to a value minus 42.";
+
+    private string DivisionSample = @"divide a value by 42.
+let a ratio equals to a value divided by 42.";
+}

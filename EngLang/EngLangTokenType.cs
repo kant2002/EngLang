@@ -16,7 +16,7 @@ public enum EngLangTokenType
     [Token(";")] SemicolonKeyword,
     [Token(".")] DotKeyword,
 
-    [Regex("(add|subtract|multiply|divide|plus|minus)")] MathOperationKeyword,
+    [Regex("(add|subtract|multiply|multiplied|divide|divided|plus|minus)")] MathOperationKeyword,
 
     [Regex("(smaller|bigger|less|greater)")] LogicalOperationKeyword,
 
@@ -35,4 +35,5 @@ public enum EngLangTokenType
     [Regex(Regexes.Identifier)] Identifier,
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex(Regexes.StringLiteral)] StringLiteral,
+    [Token("null")] NullLiteral,
 }

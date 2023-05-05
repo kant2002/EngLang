@@ -18,22 +18,6 @@ public class ExpressionTests
     }
 
     [Fact]
-    public void MathAddition()
-    {
-        var sentence = "a value plus 42.";
-
-        var parseResult = EngLangParser.Parse(sentence);
-
-        var expression = Assert.IsType<ExpressionStatement>(Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements));
-        var additionExpression = Assert.IsType<MathExpression>(expression.Expression);
-        Assert.Equal(MathOperator.Plus, additionExpression.Operator);
-        var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
-        Assert.Equal(42, addend.Value);
-        var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);
-        Assert.Equal("value", variable.Name);
-    }
-
-    [Fact]
     public void SubtractValueFromVariable()
     {
         var sentence = "subtract 42 from a value";
@@ -44,22 +28,6 @@ public class ExpressionTests
         var subtrahend = Assert.IsType<IntLiteralExpression>(subtractExpression.Subtrahend);
         Assert.Equal(42, subtrahend.Value);
         Assert.Equal("value", subtractExpression.TargetVariable.Name);
-    }
-
-    [Fact]
-    public void MathSubtract()
-    {
-        var sentence = "a value minus 42.";
-
-        var parseResult = EngLangParser.Parse(sentence);
-
-        var expression = Assert.IsType<ExpressionStatement>(Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements));
-        var additionExpression = Assert.IsType<MathExpression>(expression.Expression);
-        Assert.Equal(MathOperator.Minus, additionExpression.Operator);
-        var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
-        Assert.Equal(42, addend.Value);
-        var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);
-        Assert.Equal("value", variable.Name);
     }
 
     [Fact]
@@ -76,22 +44,6 @@ public class ExpressionTests
     }
 
     [Fact]
-    public void MathMultiplication()
-    {
-        var sentence = "a value multiply by 42.";
-
-        var parseResult = EngLangParser.Parse(sentence);
-
-        var expression = Assert.IsType<ExpressionStatement>(Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements));
-        var additionExpression = Assert.IsType<MathExpression>(expression.Expression);
-        Assert.Equal(MathOperator.Multiply, additionExpression.Operator);
-        var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
-        Assert.Equal(42, addend.Value);
-        var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);
-        Assert.Equal("value", variable.Name);
-    }
-
-    [Fact]
     public void DivideVariableByValue()
     {
         var sentence = "divide a value by 42";
@@ -104,16 +56,22 @@ public class ExpressionTests
         Assert.Equal("value", divisionExpression.TargetVariable.Name);
     }
 
-    [Fact]
-    public void MathDivision()
+    [Theory]
+    [InlineData("a value divide by 42.", MathOperator.Divide)]
+    [InlineData("a value divided by 42.", MathOperator.Divide)]
+    [InlineData("a value multiply by 42.", MathOperator.Multiply)]
+    [InlineData("a value multiply 42.", MathOperator.Multiply)]
+    [InlineData("a value multiplied by 42.", MathOperator.Multiply)]
+    [InlineData("a value minus 42.", MathOperator.Minus)]
+    [InlineData("a value plus 42.", MathOperator.Plus)]
+    public void MathExpressions(string sentence, MathOperator mathOperator)
     {
-        var sentence = "a value divide by 42.";
 
         var parseResult = EngLangParser.Parse(sentence);
 
         var expression = Assert.IsType<ExpressionStatement>(Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements));
         var additionExpression = Assert.IsType<MathExpression>(expression.Expression);
-        Assert.Equal(MathOperator.Divide, additionExpression.Operator);
+        Assert.Equal(mathOperator, additionExpression.Operator);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
         Assert.Equal(42, addend.Value);
         var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);

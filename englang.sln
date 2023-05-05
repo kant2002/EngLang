@@ -15,9 +15,9 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "EngLang.Analysis", "EngLang
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A8639DF9-2F64-439B-9B3C-3DCED8133421}"
 	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
 		Grammar.md = Grammar.md
 		ideas.md = ideas.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global

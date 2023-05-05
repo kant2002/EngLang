@@ -50,14 +50,18 @@ public partial class EngLangParser
     [Rule($"addition_expression : primitive_expression 'plus' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'minus' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'multiply' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'multiplied' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'divide' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'divided' primitive_expression")]
     private static MathExpression MakeAdditionExpression(
         Expression firstExpression,
         IToken<EngLangTokenType> mathToken,
         Expression secondExpression) => new(ToMathOperator(mathToken), firstExpression, secondExpression);
 
     [Rule($"addition_expression : primitive_expression 'multiply' 'by' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'multiplied' 'by' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'divide' 'by' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'divided' 'by' primitive_expression")]
     private static MathExpression MakeAdditionExpression(
         Expression firstExpression,
         IToken<EngLangTokenType> mathToken,
@@ -69,7 +73,9 @@ public partial class EngLangParser
         "plus" => MathOperator.Plus,
         "minus" => MathOperator.Minus,
         "multiply" => MathOperator.Multiply,
+        "multiplied" => MathOperator.Multiply,
         "divide" => MathOperator.Divide,
+        "divided" => MathOperator.Divide,
         _ => throw new InvalidOperationException($"Unexpected token {token} for math expression"),
     };
 
@@ -103,12 +109,14 @@ public partial class EngLangParser
 
     [Rule("literal_expression : StringLiteral")]
     [Rule("literal_expression : IntLiteral")]
+    [Rule("literal_expression : NullLiteral")]
     private static Expression MakeIdentifierReference(
         IToken<EngLangTokenType> token)
         => token.Kind switch
         {
             EngLangTokenType.StringLiteral => new StringLiteralExpression(token.Text.Trim('"')),
             EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text)),
+            EngLangTokenType.NullLiteral => new NullLiteralExpression(),
             _ => throw new InvalidOperationException()
         };
 
@@ -137,6 +145,15 @@ public partial class EngLangParser
         IToken<EngLangTokenType> letToken,
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
+        Expression expression)
+        => new AssignmentExpression(identifierReference, expression);
+
+    [Rule($"assignment_expression: 'let' {IdentifierReference} EqualKeyword 'to' math_expression ")]
+    private static AssignmentExpression MakeAlternateAssignment2Expression(
+        IToken<EngLangTokenType> letToken,
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> equalsToken,
+        IToken<EngLangTokenType> toToken,
         Expression expression)
         => new AssignmentExpression(identifierReference, expression);
 
