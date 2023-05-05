@@ -135,6 +135,18 @@ Conditional statement supports only constructs which can be considered `if..then
 if XXXX is YYYY, operations_list.
 ```
 
+Classical `if..then` is also an option.
+
+```
+if XXXX is YYYY then operations_list.
+```
+
+Maybe `then` can be used for chaining operations
+
+```
+add 20 to a value then multiply a value by 42.
+```
+
 ### Arithmetics
 
 It seems to be that math operations carried in usual language is quite interesting.
@@ -153,6 +165,21 @@ value *= 42;
 ```
 
 This is not best way to write mathematical expression, but best way to validate calculations by humans without special training.
+
+Assignment of variable can happens using `set`/`put`.
+```
+set a value to 10.
+```
+or
+```
+put 10 into a value.
+```
+
+### String operations
+
+```
+append "value" to an error message
+```
 
 # Links
 - [1] https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
