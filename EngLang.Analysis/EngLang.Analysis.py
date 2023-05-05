@@ -12,6 +12,9 @@ def set_custom_boundaries(doc):
     for token in doc[:-1]:
         if token.text == ":" or token.text == "):" or token.text == "***" or token.text == ";":
             doc[token.i+1].is_sent_start = True
+        if token.text == "." and (doc[token.i+1].text == ''):
+            token.is_sent_end = True
+            token.tag_ = '.'
         #elif token.text == "Rs." or token.text == ")":
         #    doc[token.i+1].is_sent_start = False
     return doc
@@ -25,16 +28,20 @@ nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
 simple_grammar = nltk.CFG.fromstring("""
-      S -> NP VP '.'
-      PP -> P NP
-      NP -> Det N | Det N PP
-      VP -> V NP | VP PP
+      S -> NP VP SentenceEnd | TO VP SentenceEnd
+      PP -> PP NP
+      NP -> Det NN | Det NN PP | NN | NP PP | 'CD' | NP VP
+      VP -> Verb NP | VP PP
       Det -> 'DT'
-      N -> 'NN'
-      V -> 'VB'
-      P -> 'PP'
+      NN -> 'NN'
+      Verb -> 'VB'
+      PP -> 'PP' | IN NP
+      IN -> 'IN'
+      TO -> 'TO'
+      SentenceEnd -> '.' | ':'
       """)
 grammar_parser = nltk.ChartParser(simple_grammar)
+
 """
 Visualize the SpaCy dependency tree with nltk.tree
 """
@@ -55,15 +62,15 @@ def nltk_spacy_tree(sent):
     # The first item in the list is the full tree
     return to_nltk_tree(sent.root)#.draw()
 
-def tokenize_sentence(sentence):
+def tokenize_sentence(sentence: str):
     return nltk.word_tokenize(sentence)
 
-def analyse_sentence_spacy(sentence):
+def analyse_sentence_spacy(sentence: str):
     print('spacy')
     doc = nlp(sentence)
     #print ([(token.text, token.pos_) for token in doc])
     assert doc.has_annotation("SENT_START")
-    tagged_tokens = []
+    tagged_tokens: list[tuple[str, str]] = []
     for sent in doc.sents:
         print(sent.text)
         nltk_spacy_tree(sent).pretty_print()
@@ -73,16 +80,24 @@ def analyse_sentence_spacy(sentence):
     print('[')
     for l in tagged_tokens:
         print('   ', l)
+        pos_tags = [normalize_token(token, pos) for (token,pos) in l]
+        detected_sentences = 0
+        for sentence_structure in grammar_parser.parse( filter(lambda x: x != '_SP', pos_tags) ):
+            print(sentence_structure)
+            detected_sentences += 1
+
+        if (detected_sentences == 0):
+            print("Cannot detect sentence", pos_tags)
     print(']')
 
     dump_tokens_nltk(tagged_tokens)
 
-def normalize_token(token, pos):
+def normalize_token(token: str, pos: str):
     if (pos == '_SP'):
         return pos
     return pos[:2]
 
-def dump_tokens_nltk(tagged_tokens: list[list[tuple[any,str]]]):
+def dump_tokens_nltk(tagged_tokens: list[list[tuple[str,str]]]):
     pos_tags = [[normalize_token(token, pos) for (token,pos) in sent] for sent in tagged_tokens]
     #pos_tags = sum(pos_tags,[])
     print(list(set(sum(pos_tags,[]) )))
@@ -113,7 +128,7 @@ def sample():
     Let a previous number is a number minus 1.
     Calculate factorial of a previous number into a previous factorial.
     Result is a previous factorial multiply a number."""
-    analyse_sentence(sentence1)
+    #analyse_sentence(sentence1)
 
     sentence2 = """let a value equals 10. Add 20 to a value. multiply a value by 42."""
     analyse_sentence(sentence2)
@@ -128,7 +143,7 @@ def sample():
     analyse_sentence(sentence3)
 
     sentence4 = """To calculate rectangle's area from a width and a height: multiply a width by a height."""
-    analyse_sentence(sentence4)
+    #analyse_sentence(sentence4)
 
 """
 [
