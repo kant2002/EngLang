@@ -44,6 +44,7 @@ public partial class EngLangParser
     [Rule("expression : inplace_subtract_expression")]
     [Rule("expression : inplace_multiply_expression")]
     [Rule("expression : inplace_divide_expression")]
+    [Rule("expression : logical_expression")]
     private static Expression MakeExpression(Expression e) => e;
 
     [Rule($"addition_expression : primitive_expression 'plus' primitive_expression")]
@@ -141,6 +142,7 @@ public partial class EngLangParser
 
     [Rule("expression_or_return_statement : expression_statement")]
     [Rule("expression_or_return_statement : result_statement")]
+    [Rule("expression_or_return_statement : invocation_statement")]
     private static Statement MakeExpressionOrReturnStatement(
         Statement statement)
         => statement;
@@ -216,26 +218,28 @@ public partial class EngLangParser
         Expression expression)
         => new ExpressionStatement(expression);
 
-    [Rule($"if_statement : 'if' {IdentifierReference} 'is' literal_expression 'then' expression_or_return_statement")]
-    private static IfStatement MakeIfEqualsStatement(
-        IToken<EngLangTokenType> ifToken,
+    [Rule($"logical_expression : {IdentifierReference} 'is' literal_expression")]
+    private static LogicalExpression MakeLogicalExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
-        Expression literalExpression,
-        IToken<EngLangTokenType> thenToken,
-        Statement statement)
-        => new IfStatement(new LogicalExpression(LogicalOperator.Equals, new VariableExpression(identifierReference), literalExpression), statement);
+        Expression literalExpression)
+        => new LogicalExpression(LogicalOperator.Equals, new VariableExpression(identifierReference), literalExpression);
 
-    [Rule($"if_statement : 'if' {IdentifierReference} LogicalOperationKeyword 'than' literal_expression 'then' expression_or_return_statement")]
-    private static IfStatement MakeIfLessStatement(
-        IToken<EngLangTokenType> ifToken,
+    [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' literal_expression")]
+    private static LogicalExpression MakeLogicalExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> operatorToken,
         IToken<EngLangTokenType> thanToken,
-        Expression literalExpression,
+        Expression literalExpression)
+        => new LogicalExpression(LogicalOperator.Less, new VariableExpression(identifierReference), literalExpression);
+
+    [Rule($"if_statement : 'if' logical_expression ThenKeyword expression_or_return_statement")]
+    private static IfStatement MakeIfEqualsStatement(
+        IToken<EngLangTokenType> ifToken,
+        LogicalExpression testExpression,
         IToken<EngLangTokenType> thenToken,
         Statement statement)
-        => new IfStatement(new LogicalExpression(LogicalOperator.Less, new VariableExpression(identifierReference), literalExpression), statement);
+        => new IfStatement(testExpression, statement);
 
     [Rule("result_statement : 'result' 'is' math_expression")]
     private static ResultStatement MakeResultStatement(
