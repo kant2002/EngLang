@@ -7,13 +7,7 @@
         @CompilerError
     </div>
 }
-<TreeView Nodes="SyntaxNodes"
-          GetChildNodes="GetChildNodes"
-          HasChildNodes="HasChildNodes"
-          @bind-SelectedNode="selectedNode"
-          @bind-ExpandedNodes="ExpandedNodes">
-    <NodeContent>@GetNodeText(context)</NodeContent>
-</TreeView>
+<AstView SyntaxNodes="SyntaxNodes"></AstView>
 
 @code {
 
@@ -27,35 +21,6 @@
     private IEnumerable<SyntaxNode> SyntaxNodes => SyntaxNode is null ? Array.Empty<SyntaxNode>() : new[] { SyntaxNode };
 
     private string? CompilerError { get; set; }
-
-    private IList<SyntaxNode> ExpandedNodes = new List<SyntaxNode>();
-    private SyntaxNode selectedNode;
-
-    private static IEnumerable<SyntaxNode> GetChildNodes(SyntaxNode node)
-    {
-        return node.Children;
-    }
-
-    private static bool HasChildNodes(SyntaxNode node)
-    {
-        return GetChildNodes(node).Any();
-    }
-
-    private static string GetNodeText(SyntaxNode node)
-    {
-        var typeName = node.GetType().Name;
-        return node switch
-        {
-            IdentifierReference ir => typeName + "(" + ir.Name + ")",
-            IntLiteralExpression ile => typeName + "(" + ile.Value + ")",
-            LabeledStatement ls => typeName + "(" + ls.Marker + ")",
-            LogicalExpression le => typeName + "(" + le.Operator + ")",
-            MathExpression me => typeName + "(" + me.Operator + ")",
-            StringLiteralExpression sle => typeName + "(" + sle.Value + ")",
-            VariableDeclaration vd => typeName + "(" + vd.Name + ")",
-            _ => typeName,
-        };
-    }
 
     protected override void OnParametersSet()
     {

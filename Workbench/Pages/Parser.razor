@@ -1,0 +1,81 @@
+@page "/parser"
+@using EngLang
+@using Yoakke.SynKit.Parser
+
+<PageTitle>Parser</PageTitle>
+
+<div class="d-flex flex-sm-column flex-xl-row">
+    <div class="w-100 pe-3">
+        <label for="source-code" class="form-label">Source code:</label>
+        <textarea name="source-code" @bind="SourceCode" class="form-control"></textarea>
+    </div>
+    <div class="w-100">
+        <h2>Programming language conversion</h2>
+        <p>Paragraph List</p>
+        @if (ParagraphList.IsOk)
+        {
+            <AstView SyntaxNodes="GetNodes(ParagraphList.Ok.Value)"></AstView>
+        }
+        <p>Paragraph</p>
+        @if (Paragraph.IsOk)
+        {
+            <AstView SyntaxNodes="GetNodes(Paragraph.Ok.Value)"></AstView>
+        }
+        <p>BlockStatement</p>
+        @if (BlockStatement.IsOk)
+        {
+            <AstView SyntaxNodes="GetNodes(BlockStatement.Ok.Value)"></AstView>
+        }
+        <p>StatementList</p>
+        @if (StatementList.IsOk)
+        {
+            <AstView SyntaxNodes="GetNodes(StatementList.Ok.Value)"></AstView>
+        }
+        <p>LabeledStatement</p>
+        @if (LabeledStatement.IsOk)
+        {
+            <AstView SyntaxNodes="GetNodes(LabeledStatement.Ok.Value)"></AstView>
+        }
+        <p>LabeledStatementSimple</p>
+        @if (LabeledStatementSimple.IsOk)
+        {
+            <AstView SyntaxNodes="GetNodes(LabeledStatementSimple.Ok.Value)"></AstView>
+        }
+    </div>
+</div>
+
+@code {
+    private string? sourceCode = "";
+    private string? SourceCode
+    {
+        get => sourceCode;
+        set
+        {
+            sourceCode = value;
+            OnParametersSet();
+            StateHasChanged();
+        }
+    }
+    private List<SyntaxNode> SyntaxNodes = new();
+
+    private ParseResult<BlockStatement> ParagraphList;
+    private ParseResult<BlockStatement> Paragraph;
+    private ParseResult<BlockStatement> BlockStatement;
+    private ParseResult<BlockStatement> StatementList;
+    private ParseResult<LabeledStatement> LabeledStatement;
+    private ParseResult<LabeledStatement> LabeledStatementSimple;
+
+    protected override void OnParametersSet()
+    {
+        ParagraphList = CreateParser().ParseParagraphList();
+        Paragraph = CreateParser().ParseParagraph();
+        BlockStatement = CreateParser().ParseBlockStatement();
+        StatementList = CreateParser().ParseStatementList();
+        LabeledStatement = CreateParser().ParseLabeledStatement();
+        LabeledStatementSimple = CreateParser().ParseLabeledStatementSimple();
+    }
+
+    private EngLangParser CreateParser() => new EngLangParser(new EngLangLexer(SourceCode));
+
+    private IEnumerable<SyntaxNode> GetNodes(SyntaxNode? node) => node is null ? Array.Empty<SyntaxNode>() : new[] { node };
+}
