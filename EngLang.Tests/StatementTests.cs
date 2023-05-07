@@ -117,6 +117,63 @@ divide a value by 42.
         Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(statements[1]).Expression);
     }
 
+    [Fact(Skip = "Need to make explicit AST classes for paragraphs, paragraph lists and compound statements instead of relying BlockStatement.")]
+    public void MultipleParagraphs()
+    {
+        var sentence = @"the width is a number.
+the height is a number.
+
+To calculate area from a width and a height ->
+  result is a width multiplied by a height.
+
+";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var statements = Assert.IsType<BlockStatement>(parseResult).Statements;
+        Assert.Equal(3, statements.Count);
+        var widthDeclarationStatement = Assert.IsType<VariableDeclarationStatement>(statements[0]);
+        Assert.Equal("width", widthDeclarationStatement.Declaration.Name);
+        Assert.Equal("number", widthDeclarationStatement.Declaration.TypeName.Name);
+
+        var heightDeclarationStatement = Assert.IsType<VariableDeclarationStatement>(statements[1]);
+        Assert.Equal("height", heightDeclarationStatement.Declaration.Name);
+        Assert.Equal("number", heightDeclarationStatement.Declaration.TypeName.Name);
+
+        var labeledStatement = Assert.IsType<LabeledStatement>(statements[2]);
+        var blockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        Assert.Single(blockStatement.Statements);
+        Assert.IsType<MathExpression>(Assert.IsType<ResultStatement>(blockStatement.Statements[0]).Value);
+    }
+
+    [Fact]
+    public void LastLabeledSentenceMissed()
+    {
+        var sentence = @"the width is a number.
+the height is a number.
+To calculate area from a width and a height ->
+  result is a width multiplied by a height.
+
+";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var statements = Assert.IsType<BlockStatement>(parseResult).Statements;
+        Assert.Equal(3, statements.Count);
+        var widthDeclarationStatement = Assert.IsType<VariableDeclarationStatement>(statements[0]);
+        Assert.Equal("width", widthDeclarationStatement.Declaration.Name);
+        Assert.Equal("number", widthDeclarationStatement.Declaration.TypeName.Name);
+
+        var heightDeclarationStatement = Assert.IsType<VariableDeclarationStatement>(statements[1]);
+        Assert.Equal("height", heightDeclarationStatement.Declaration.Name);
+        Assert.Equal("number", heightDeclarationStatement.Declaration.TypeName.Name);
+
+        var labeledStatement = Assert.IsType<LabeledStatement>(statements[2]);
+        var blockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        Assert.Single(blockStatement.Statements);
+        Assert.IsType<MathExpression>(Assert.IsType<ResultStatement>(blockStatement.Statements[0]).Value);
+    }
+
     [Theory]
     [InlineData("result is 1.")]
     [InlineData("return 1.")]

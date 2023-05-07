@@ -167,7 +167,7 @@ public partial class EngLangParser
     [Rule("simple_statement : expression_or_return_statement")]
     [Rule("simple_statement : variable_declaration_statement")]
     [Rule("simple_statement : if_statement")]
-    //[Rule("simple_statement : statementxx")]
+    //[Rule("simple_statement : statementyy")]
     private static Statement MakeSimpleStatement(
         Statement statement)
         => statement;
@@ -191,6 +191,10 @@ public partial class EngLangParser
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
+        => new InvalidStatement(tokens.ToImmutableArray());
+    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|IntLiteral|StringLiteral|NullLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
+    private static Statement MakeStatement222(
+        IEnumerable<IToken<EngLangTokenType>> tokens)
         => new InvalidStatement(tokens.ToImmutableArray());
 
     [CustomParser("invalid_statement")]
@@ -439,8 +443,8 @@ public partial class EngLangParser
         var blockStatementResult = parser.ParseParagraphList();
         if (blockStatementResult.IsOk)
         {
-            var variableReference = blockStatementResult.Ok.Value;
-            return variableReference;
+            var blockStatement = blockStatementResult.Ok.Value;
+            return blockStatement;
         }
 
         throw new Exception($"Parser error. Got {blockStatementResult.Error.Got} at position {blockStatementResult.Error.Position}");
