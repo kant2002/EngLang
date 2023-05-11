@@ -181,7 +181,7 @@ public partial class EngLangParser
         IToken<EngLangTokenType> dotToken)
         => statement;
 
-    [Rule("statement : labeled_statement")]
+    //[Rule("statement : labeled_statement")]
     //[Rule("statement : invalid_statement")]
     [Rule("statement : statementxx")]
     private static Statement MakeStatement(
@@ -239,25 +239,48 @@ public partial class EngLangParser
         return a349;
     }
 
-    [Rule("paragraph : statement_list Multiline+")]
+    [Rule("paragraph : statement_list")]
     private static Paragraph MakeParagraph(
-        BlockStatement statement,
-        IReadOnlyList<IToken<EngLangTokenType>> paragraphToken)
-        => new Paragraph(statement.Statements);
+        BlockStatement statement)
+        => new Paragraph(statement.Statements, null);
 
-    [Rule("paragraph_list : paragraph+")]
+    [Rule("paragraph_separator : Multiline+")]
+    private static (bool, InvokableLabel?) MakeParagraphSeparator(
+        IReadOnlyList<IToken<EngLangTokenType>> paragraphToken)
+        => (true, null);
+
+    [Rule("paragraph_separator : invokable_label")]
+    private static (bool, InvokableLabel?) MakeParagraphSeparator(
+        InvokableLabel invokableLabel)
+        => (false, invokableLabel);
+
+    [Rule("paragraph_separator : Multiline+ invokable_label")]
+    private static (bool, InvokableLabel?) MakeParagraphSeparator(
+        IReadOnlyList<IToken<EngLangTokenType>> paragraphToken,
+        InvokableLabel invokableLabel)
+        => (true, invokableLabel);
+
+    // invokable_label
+    [Rule("paragraph_list : invokable_label? (paragraph (paragraph_separator paragraph)*)")]
     private static ParagraphList MakeParagraphList(
-        IReadOnlyList<Paragraph> statements)
+        InvokableLabel? firstInvokableLabel,
+        Punctuated<Paragraph, (bool, InvokableLabel?)> statements)
     {
-        return new ParagraphList(statements.ToImmutableList());
+        InvokableLabel? currentLabel = firstInvokableLabel;
+        var paragraphs = new List<Paragraph>();
+        for (int i = 0; i < statements.Count; i++)
+        {
+            var paragraph = currentLabel is null
+                ? statements[i].Value
+                : statements[i].Value with { Label = currentLabel };
+            currentLabel = statements[i].Punctuation.Item2;
+            paragraphs.Add(paragraph);
+        }
+
+        return new ParagraphList(paragraphs.ToImmutableList());
     }
 
-    [Rule("paragraph_list : statement_list")]
-    private static ParagraphList MakeParagraphList(
-        BlockStatement statements)
-        => new ParagraphList(ImmutableList.Create<Paragraph>(new Paragraph(statements.Statements)));
-
-    [Rule("statement_list : statement*")]
+    [Rule("statement_list : statement+")]
     private static BlockStatement MakeStatementList(
         IReadOnlyList<Statement> statements)
     {
@@ -354,7 +377,6 @@ public partial class EngLangParser
         Punctuated<Statement, IToken<EngLangTokenType>> statements)
         => new BlockStatement(statements.Select(s => s.Value).ToImmutableList());
 
-    //[Rule($"labeled_statement : 'to' ({Identifier}+ {IdentifierReference}?)+ ':' block_statement")]
     [Rule($"identifier_references_list : ({IdentifierReference} 'and'?)*")]
     private static IdentifierReferencesList MakeIdentifierReferencesList(
         IReadOnlyList<(IdentifierReference, IToken<EngLangTokenType>?)> identifierReferences)

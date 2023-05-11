@@ -100,9 +100,22 @@ public class CSharpConverter : ILanguageConverter
 
     private void ConvertParagraph(IndentedStringBuilder builder, Paragraph paragraph)
     {
+        var label = paragraph.Label;
+        if (label is not null)
+        {
+            var parameterString = string.Join(", ", label.Parameters.Select(_ => _.Name.Replace(" ", "_")));
+            builder.AppendLine($"void {label.Marker.Replace(" ", "_")}({parameterString})");
+            builder.OpenBraces();
+        }
+
         foreach (var statement in paragraph.Statements)
         {
             ConvertStatement(builder, statement);
+        }
+
+        if (label is not null)
+        {
+            builder.CloseBraces();
         }
     }
 
