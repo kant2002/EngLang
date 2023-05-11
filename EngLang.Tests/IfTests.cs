@@ -12,8 +12,8 @@ public class IfTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
@@ -26,8 +26,8 @@ public class IfTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
@@ -40,8 +40,8 @@ public class IfTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
         Assert.Equal("exit", Assert.IsType<InvocationStatement>(ifStatement.Then).Marker);
@@ -55,8 +55,8 @@ public class IfTests
     {
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
         Assert.Equal("exit", Assert.IsType<InvocationStatement>(ifStatement.Then).Marker);

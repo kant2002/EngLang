@@ -11,8 +11,8 @@ public class StatementTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var additionStatement = Assert.IsType<ExpressionStatement>(Assert.Single(blockStatement.Statements));
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var additionStatement = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
         var additionExpression = Assert.IsType<InPlaceAdditionExpression>(additionStatement.Expression);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.Addend);
         Assert.Equal(42, addend.Value);
@@ -26,12 +26,12 @@ public class StatementTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        Assert.Equal(4, blockStatement.Statements.Count);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
-        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
-        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[2]).Expression);
-        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[3]).Expression);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        Assert.Equal(4, paragraph.Statements.Count);
+        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression);
+        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression);
+        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression);
+        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression);
     }
 
     [Fact]
@@ -41,12 +41,12 @@ public class StatementTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        Assert.Equal(4, blockStatement.Statements.Count);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
-        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
-        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[2]).Expression);
-        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[3]).Expression);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        Assert.Equal(4, paragraph.Statements.Count);
+        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression);
+        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression);
+        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression);
+        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression);
     }
 
     [Fact]
@@ -61,9 +61,10 @@ divide a value by 42.
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var wrappedStatement = Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var wrappedStatement = Assert.Single(paragraph.Statements);
         var labeledStatement = Assert.IsType<LabeledStatement>(wrappedStatement);
-        var blockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        var blockStatement = Assert.IsType<Paragraph>(labeledStatement.Statement);
         Assert.Equal(4, blockStatement.Statements.Count);
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
         Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
@@ -81,9 +82,10 @@ divide a value by 42.";
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var wrappedStatement = Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var wrappedStatement = Assert.Single(paragraph.Statements);
         var labeledStatement = Assert.IsType<LabeledStatement>(wrappedStatement);
-        var blockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        var blockStatement = Assert.IsType<Paragraph>(labeledStatement.Statement);
         Assert.Equal(4, blockStatement.Statements.Count);
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
         Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
@@ -104,11 +106,12 @@ divide a value by 42.
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var statements = Assert.IsType<BlockStatement>(parseResult).Statements;
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statements = paragraph.Statements;
         Assert.Equal(2, statements.Count);
         var wrappedStatement = statements[0];
         var labeledStatement = Assert.IsType<LabeledStatement>(wrappedStatement);
-        var blockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        var blockStatement = Assert.IsType<Paragraph>(labeledStatement.Statement);
         Assert.Equal(3, blockStatement.Statements.Count);
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
         Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
@@ -158,7 +161,8 @@ To calculate area from a width and a height ->
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var statements = Assert.IsType<BlockStatement>(parseResult).Statements;
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statements = paragraph.Statements;
         Assert.Equal(3, statements.Count);
         var widthDeclarationStatement = Assert.IsType<VariableDeclarationStatement>(statements[0]);
         Assert.Equal("width", widthDeclarationStatement.Declaration.Name);
@@ -169,7 +173,7 @@ To calculate area from a width and a height ->
         Assert.Equal("number", heightDeclarationStatement.Declaration.TypeName.Name);
 
         var labeledStatement = Assert.IsType<LabeledStatement>(statements[2]);
-        var blockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        var blockStatement = Assert.IsType<Paragraph>(labeledStatement.Statement);
         Assert.Single(blockStatement.Statements);
         Assert.IsType<MathExpression>(Assert.IsType<ResultStatement>(blockStatement.Statements[0]).Value);
     }
@@ -181,8 +185,8 @@ To calculate area from a width and a height ->
     {
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         var resultStatement = Assert.IsType<ResultStatement>(statement);
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
     }
@@ -196,11 +200,11 @@ To calculate area from a width and a height ->
     {
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         var labeledStatement = Assert.IsType<LabeledStatement>(statement);
         Assert.Equal("do something", labeledStatement.Marker);
-        var innerBlockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        var innerBlockStatement = Assert.IsType<Paragraph>(labeledStatement.Statement);
         var resultStatement = Assert.IsType<ResultStatement>(Assert.Single(innerBlockStatement.Statements));
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
     }
@@ -217,11 +221,11 @@ To calculate area from a width and a height ->
     {
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         var labeledStatement = Assert.IsType<LabeledStatement>(statement);
         Assert.Equal(marker, labeledStatement.Marker);
-        var innerBlockStatement = Assert.IsType<BlockStatement>(labeledStatement.Statement);
+        var innerBlockStatement = Assert.IsType<Paragraph>(labeledStatement.Statement);
         var resultStatement = Assert.IsType<ResultStatement>(Assert.Single(innerBlockStatement.Statements));
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
     }
@@ -232,8 +236,8 @@ To calculate area from a width and a height ->
     {
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
 
         var invocationStatement = Assert.IsType<InvocationStatement>(statement);
         Assert.Equal(marker, invocationStatement.Marker);
@@ -253,8 +257,8 @@ To calculate area from a width and a height ->
     {
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
 
         var invocationStatement = Assert.IsType<InvalidStatement>(statement);
     }

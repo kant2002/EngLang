@@ -69,7 +69,8 @@ public class ExpressionTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var expression = Assert.IsType<ExpressionStatement>(Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements));
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var expression = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
         var additionExpression = Assert.IsType<MathExpression>(expression.Expression);
         Assert.Equal(mathOperator, additionExpression.Operator);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
@@ -89,7 +90,8 @@ public class ExpressionTests
     {
         var parseResult = EngLangParser.Parse(sentence);
 
-        var expression = Assert.IsType<ExpressionStatement>(Assert.Single(Assert.IsType<BlockStatement>(parseResult).Statements));
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var expression = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
         var additionExpression = Assert.IsType<LogicalExpression>(expression.Expression);
         Assert.Equal(logicalOperator, additionExpression.Operator);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);

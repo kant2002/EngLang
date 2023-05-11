@@ -11,6 +11,12 @@ public class CSharpConverter : ILanguageConverter
         IndentedStringBuilder builder = new(string.Empty);
         switch (node)
         {
+            case ParagraphList paragraphList:
+                ConvertParagraphList(builder, paragraphList);
+                return builder.ToString();
+            case Paragraph paragraph:
+                ConvertParagraph(builder, paragraph);
+                return builder.ToString();
             case Statement statement:
                 ConvertStatement(builder, statement);
                 return builder.ToString();
@@ -21,7 +27,7 @@ public class CSharpConverter : ILanguageConverter
             case IdentifierReference identifierReference:
                 return ConvertToIdentifier(identifierReference.Name);
             default:
-                throw new NotImplementedException();
+                throw new NotImplementedException($"Syntax node {node} is not supported");
         }
     }
 
@@ -92,6 +98,22 @@ public class CSharpConverter : ILanguageConverter
         };
     }
 
+    private void ConvertParagraph(IndentedStringBuilder builder, Paragraph paragraph)
+    {
+        foreach (var statement in paragraph.Statements)
+        {
+            ConvertStatement(builder, statement);
+        }
+    }
+
+    private void ConvertParagraphList(IndentedStringBuilder builder, ParagraphList paragraphList)
+    {
+        foreach (var paragraph in paragraphList.Paragraphs)
+        {
+            ConvertParagraph(builder, paragraph);
+        }
+    }
+
     private void ConvertStatement(IndentedStringBuilder builder, Statement statement)
     {
         switch (statement)
@@ -143,6 +165,9 @@ public class CSharpConverter : ILanguageConverter
             case InvalidStatement invalidStatement:
                 var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));
                 builder.AppendLine("#error " + invalidStatementString);
+                break;
+            case Paragraph paragraph:
+                ConvertParagraph(builder, paragraph);
                 break;
             default:
                 throw new NotImplementedException();

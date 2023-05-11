@@ -11,6 +11,12 @@ public class JavaScriptConverter : ILanguageConverter
         IndentedStringBuilder builder = new(string.Empty);
         switch (node)
         {
+            case ParagraphList paragraphList:
+                ConvertParagraphList(builder, paragraphList);
+                return builder.ToString();
+            case Paragraph paragraph:
+                ConvertParagraph(builder, paragraph);
+                return builder.ToString();
             case Statement statement:
                 ConvertStatement(builder, statement);
                 return builder.ToString();
@@ -91,6 +97,22 @@ public class JavaScriptConverter : ILanguageConverter
         };
     }
 
+    private void ConvertParagraph(IndentedStringBuilder builder, Paragraph paragraph)
+    {
+        foreach (var statement in paragraph.Statements)
+        {
+            ConvertStatement(builder, statement);
+        }
+    }
+
+    private void ConvertParagraphList(IndentedStringBuilder builder, ParagraphList paragraphList)
+    {
+        foreach (var paragraph in paragraphList.Paragraphs)
+        {
+            ConvertParagraph(builder, paragraph);
+        }
+    }
+
     private void ConvertStatement(IndentedStringBuilder builder, Statement statement)
     {
         switch (statement)
@@ -142,6 +164,9 @@ public class JavaScriptConverter : ILanguageConverter
             case InvalidStatement invalidStatement:
                 var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));
                 builder.AppendLine("#error " + invalidStatementString);
+                break;
+            case Paragraph paragraph:
+                ConvertParagraph(builder, paragraph);
                 break;
             default:
                 throw new NotImplementedException();

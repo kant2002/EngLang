@@ -101,10 +101,8 @@ public class VariableNameTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        Assert.Single(blockStatement.Statements);
-
-        var variableStatement = Assert.IsType<VariableDeclarationStatement>(blockStatement.Statements[0]);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var variableStatement = Assert.IsType<VariableDeclarationStatement>(Assert.Single(paragraph.Statements));
         Assert.Equal("name", variableStatement.Declaration.Name);
         Assert.Equal("apple", variableStatement.Declaration.TypeName.Name);
         Assert.Null(variableStatement.Declaration.Expression);
@@ -117,10 +115,9 @@ public class VariableNameTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
 
-        var assignmentStatement = Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]);
+        var assignmentStatement = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
         Assert.Equal("value", assignmentExpression.Variable.Name);
         var expression = Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression);

@@ -11,8 +11,8 @@ public class AssignmentStatementTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
         Assert.Equal("value", assignmentExpression.Variable.Name);
@@ -25,8 +25,8 @@ public class AssignmentStatementTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
         Assert.Equal("value", assignmentExpression.Variable.Name);
@@ -40,8 +40,8 @@ public class AssignmentStatementTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
         Assert.Equal("value", assignmentExpression.Variable.Name);
@@ -55,8 +55,8 @@ public class AssignmentStatementTests
 
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
         Assert.Equal("value", assignmentExpression.Variable.Name);
@@ -72,8 +72,8 @@ public class AssignmentStatementTests
     {
         var parseResult = EngLangParser.Parse(sentence);
 
-        var blockStatement = Assert.IsType<BlockStatement>(parseResult);
-        var statement = Assert.Single(blockStatement.Statements);
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
         Assert.Equal("value", assignmentExpression.Variable.Name);
