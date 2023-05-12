@@ -123,3 +123,9 @@ so let's say variable declaration is
 ```
 DET(the) DET? ADJ+ NOUN+ VERB(is) DET(a|an) DET? ADJ+ NOUN+ PUNCT(.)
 ```
+
+# Proximity
+
+Maybe that would be not fruitful, but let's map stack and heap on concepts of proximity which humans operate on. 
+Stack is objects which we are currently working on and sitting on your table with hands reach. 
+You can easily manipulate them. Heap is on the other side some remote storage.

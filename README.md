@@ -105,13 +105,13 @@ The statements is sentence.
 
 ### Simple sentences
 
-Statement is a sentnce which ends with `.`. Long sentences can be split by `;`, each part of this sentence will become their own sentence.
+Statement is a sentence which ends with `.`. Long sentences can be split by `;`, each part of this sentence will become their own sentence.
 
 ```
 statement_1 ; statement_2 ; .... ; statement_N.
 ```
 
-Preferably operate using linguistic properties, and do not use `;` if possible.
+Preferably operate using linguistic properties, and do not use `;` if possible since people nowadays don't use it very much.
 
 ### Labeled sentences
 
@@ -147,7 +147,7 @@ Maybe `then` can be used for chaining operations
 add 20 to a value then multiply a value by 42.
 ```
 
-### Arithmetics
+### Arithmetic
 
 It seems to be that math operations carried in usual language is quite interesting.
 
@@ -179,6 +179,45 @@ put 10 into a value.
 
 ```
 append "value" to an error message
+```
+
+### Accessing properties
+
+When speaking about object properties we usually use `of`
+```
+the size of the box.
+the constraints of the parent container.
+width of the content.
+the color of the textual.
+```
+
+or  `'s`
+
+```
+paragraph's text.
+the element's color.
+an element's text.
+```
+
+so in a sense that allow us to view objects as bag of properties. Let's make this as hypothesis.
+
+### Classes
+
+Classes is definition for objects.
+
+```
+apple is an fruit
+```
+
+or classical shapes
+
+```
+circle is a shape with
+    a radius.
+
+rectangle is a shape with
+    a width
+    and a height.
 ```
 
 # Links
