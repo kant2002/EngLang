@@ -455,10 +455,16 @@ public partial class EngLangParser
 
     private static ParagraphList ParseParagraphList(string sourceCode)
     {
-        var parser = new EngLangParser(new EngLangLexer(sourceCode + "\n\n"));
+        var lexer = new EngLangLexer(sourceCode);
+        var parser = new EngLangParser(lexer);
         var blockStatementResult = parser.ParseParagraphList();
         if (blockStatementResult.IsOk)
         {
+            if (!lexer.IsEnd)
+            {
+                throw new Exception($"Parser error. Do not reach end of file. Currently at position {lexer.Position}");
+            }
+
             var blockStatement = blockStatementResult.Ok.Value;
             return blockStatement;
         }
