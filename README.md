@@ -231,3 +231,6 @@ rectangle is a shape with
 - [8] https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
 - [9] https://web.archive.org/web/20060315150220/http://frontier.userland.com/manual/objectDatabase
 - [10] https://github.com/hhas/iris-script/wiki
+- [11] https://wwwcdn.imo.org/localresources/en/OurWork/Safety/Documents/A.918(22).pdf
+- [12] https://simple.wikipedia.org/wiki/Basic_English
+- [13] https://ntrs.nasa.gov/api/citations/20140004055/downloads/20140004055.pdf
