@@ -69,7 +69,7 @@ Human readable description in pseudo code.
 ```
 To Inspect Car Before Barrier:
     Recognise License Plate.
-    if recognition Result Successful then Do nothing.
+    if recognition Result is not Successful then Do nothing.
 
     license Plate is license plate from recognition Result.
     license Plate Known if it is Is License Plate Registered in journal.
@@ -91,7 +91,7 @@ I want to distinguish between these process-like classes and regular classes/obj
 Based on reading code from AppleScript and EnglishScript I came to conclusion that 
 embedding simple mathy expressions is noble goal, and make language more practical. 
 Reading formulas is already better for anybody who is somewhat technical. Reading 
-same formulas in pure text is most likely inconvinience for everybody.
+same formulas in pure text is most likely inconvenience for everybody.
 
 # Events
 

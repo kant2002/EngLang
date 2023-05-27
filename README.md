@@ -9,7 +9,7 @@ Programs should be able to integrate with existing software development ecosyste
 Would be good to have this language compile not only to executables, but to dlls too. Which in itself can be used from other programming languages.
 
 I will target initially .NET runtime, since I know it relatively well.
-Other goal is to be able translate existing languages to this language. This is to support explanability of codebase to non-programmer.
+Other goal is to be able translate existing languages to this language. This is to support ability to explain of codebase to non-programmer.
 
 I would choose English as example, since it has nice properties like articles. This allow disambiguate types from variables. I do not know what reasonable language trick [allow that](https://ru.wikipedia.org/wiki/%D0%90%D1%80%D1%82%D0%B8%D0%BA%D0%BB%D1%8C#%D0%A2%D0%B8%D0%BF%D1%8B_%D0%B0%D1%80%D1%82%D0%B8%D0%BA%D0%BB%D0%B5%D0%B9) in Russian/Ukrainian for example. If somebody know that I may pursue that language too.
 
@@ -185,10 +185,10 @@ append "value" to an error message
 
 When speaking about object properties we usually use `of`
 ```
-the size of the box.
-the constraints of the parent container.
-width of the content.
-the color of the textual.
+the size of the box
+the constraints of the parent container
+width of the content
+the color of the textual
 ```
 
 or  `'s`
@@ -206,16 +206,16 @@ so in a sense that allow us to view objects as bag of properties. Let's make thi
 Classes is definition for objects.
 
 ```
-apple is an fruit
+an apple is an fruit
 ```
 
 or classical shapes
 
 ```
-circle is a shape with
+a circle is a shape with
     a radius.
 
-rectangle is a shape with
+a rectangle is a shape with
     a width
     and a height.
 ```
