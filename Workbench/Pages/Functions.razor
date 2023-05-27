@@ -1,0 +1,65 @@
+@page "/functions"
+<PageTitle>Functions</PageTitle>
+
+<h1>Functions</h1>
+<h2>Programming language conversion</h2>
+<select @bind="Language" class="form-control">
+    <option value="csharp">C#</option>
+    <option value="js">JS</option>
+</select>
+
+<p>Functions define calculation process.</p>
+<pre>
+    @FunctionDefinitionSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@FunctionDefinitionSample" Language="@Language" />
+<p>Note that formatting is a bit arbitrary to simplify reading.</p>
+<p>
+    You can use `define` for the same thing.
+</p>
+<pre>
+    @FunctionDefinitionDefineSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@FunctionDefinitionDefineSample" Language="@Language" />
+<p>
+    Function definition starts with function label which define name of operation and paramerers.
+    Each parameter is idefinite artcile + noun phrase, parameters separated by <b>and</b>. For example,
+    <i>To Calculate factorial of a number:</i> has `to` as function label marker, `Calculate factorial of`
+    as label marker and variable `a number` as parameter slot. Colon (:) indicates start of function body.
+    After that any sentences would be part of function until compiler read empty line which signify
+    end of function body.
+</p>
+<pre>
+    @FunctionsSeparatorSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@FunctionsSeparatorSample" Language="@Language" />
+
+@code {
+    private string? Language { get; set; } = "js";
+
+    private string FunctionDefinitionSample = @"To Calculate factorial of a number:
+    if a number is 0 then result is 1.
+    if a number is 1 then result is 1.
+    let a previous number is a number minus 1.
+    calculate factorial of a previous number into a previous factorial.
+    result is a previous factorial multiply a number.";
+
+    private string FunctionDefinitionDefineSample = @"Define calculate factorial of a number as
+    if a number is 0 then result is 1.
+    if a number is 1 then result is 1.
+    let a previous number is a number minus 1.
+    calculate factorial of a previous number into a previous factorial.
+    result is a previous factorial multiply a number.";
+
+    private string FunctionsSeparatorSample = @"Define add and multiply of an A and a B and a C as
+    let a sum is a A plus a B.
+    let a product is a sum multiply a C.
+    result is a product.
+
+Define summation of an A and a B as
+    let a sum is a A plus a B.
+    result is a sum.";
+}

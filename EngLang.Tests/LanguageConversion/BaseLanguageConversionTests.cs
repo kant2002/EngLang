@@ -173,6 +173,21 @@ public abstract class BaseLanguageConversionTests
     protected abstract string GetExpectedIfLessThanStatementCode();
 
     [Fact]
+    public void ConvertIfMultipleThenStatement()
+    {
+        var sentence = "if a number is 0 then add 42 to a value; exit.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedIfMultipleThenStatementCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedIfMultipleThenStatementCode();
+
+    [Fact]
     public void ConvertResultStatement()
     {
         var sentence = "result is 42.";

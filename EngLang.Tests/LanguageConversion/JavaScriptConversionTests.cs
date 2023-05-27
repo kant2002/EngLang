@@ -49,6 +49,12 @@ value /= 42;
 }
 ".ReplaceLineEndings(NewLine);
 
+    protected override string GetExpectedIfMultipleThenStatementCode() => @"if (number == 0) {
+    value += 42;
+    exit();
+}
+".ReplaceLineEndings(NewLine);
+
     protected override string GetExpectedLabeledStatementCode() => @"function do_something() {
     return 1;
 }

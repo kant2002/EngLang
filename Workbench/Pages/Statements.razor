@@ -1,0 +1,56 @@
+@page "/statements"
+<PageTitle>Statemetns</PageTitle>
+
+<h1>Statemetns</h1>
+<h2>Programming language conversion</h2>
+<select @bind="Language" class="form-control">
+    <option value="csharp">C#</option>
+    <option value="js">JS</option>
+</select>
+
+<p>Statements used to perform calculation. There different kind of statements which express some formula, conditional statements</p>
+<pre>
+    @StatementSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@StatementSample" Language="@Language" />
+
+<p>
+    Statements separated by dot (.).
+</p>
+<p>which you would write as following:</p>
+<pre>
+    @MultipleStatementSample
+</pre>
+<Compiler SourceCode="@MultipleStatementSample" Language="@Language" />
+<p>
+    Same multiple statements can be expressed usign semicolon (;) as separator. You still need to end last sentence with dot (.).
+</p>
+<pre>
+    @MultipleStatementUsingSemicolonsSample
+</pre>
+<Compiler SourceCode="@MultipleStatementUsingSemicolonsSample" Language="@Language" />
+<p>
+    Now to conditional statements. There only <b>if/then</b> variant supported. Right now you cannot express <b>else</b>.
+</p>
+<Compiler SourceCode="@IfStatementSample" Language="@Language" />
+<p>
+    For if statements, ability to separate statements using semicolon comes in handy.
+</p>
+<pre>
+    @IfStatementMultipleThenSample
+</pre>
+<Compiler SourceCode="@IfStatementMultipleThenSample" Language="@Language" />
+@code {
+    private string? Language { get; set; } = "js";
+
+    private string StatementSample = @"add 42 to a value.";
+
+    private string MultipleStatementSample = @"add 1 to a value. multiply a value by 3.";
+
+    private string MultipleStatementUsingSemicolonsSample = @"add 1 to a value; multiply a value by 3.";
+
+    private string IfStatementSample = @"if a number smaller than 0 then add 42 to a value.";
+
+    private string IfStatementMultipleThenSample = @"if a number smaller than 0 then add 42 to a value; exit.";
+}

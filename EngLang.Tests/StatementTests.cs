@@ -213,8 +213,10 @@ To calculate area from a width and a height ->
     [InlineData("To calculate area from a width and a height-> result is 1.", "calculate area from")]
     [InlineData("calculate area from a width and a height-> result is 1.", "calculate area from")]
     [InlineData("define calculate area from a width and a height as result is 1.", "calculate area from")]
+    [InlineData("Define calculate area from a width and a height as result is 1.", "calculate area from")]
     [InlineData("define the factorial of a number as result is 1.", "the factorial of")]
     [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
+    [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of")]
     public void LabeledWithParameterStatement(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);

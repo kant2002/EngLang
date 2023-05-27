@@ -34,6 +34,22 @@ public class IfTests
     }
 
     [Fact]
+    public void IfStatementMultipleThen()
+    {
+        var sentence = "if a number smaller than 0 then add 42 to a value; exit.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
+        Assert.IsType<LogicalExpression>(ifStatement.Condition);
+        var thenBlock = Assert.IsType<BlockStatement>(ifStatement.Then);
+        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(thenBlock.Statements[0]).Expression);
+        Assert.IsType<InvocationStatement>(thenBlock.Statements[1]);
+    }
+
+    [Fact]
     public void IfStatementCanExpressInvocationStatement()
     {
         var sentence = "if a number is 0 then exit.";

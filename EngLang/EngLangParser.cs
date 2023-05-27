@@ -171,6 +171,7 @@ public partial class EngLangParser
     [Rule("expression_or_return_statement : expression_statement")]
     [Rule("expression_or_return_statement : result_statement")]
     [Rule("expression_or_return_statement : invocation_statement")]
+    //[Rule("expression_or_return_statement : block_statement")]
     private static Statement MakeExpressionOrReturnStatement(
         Statement statement)
         => statement;
@@ -187,7 +188,7 @@ public partial class EngLangParser
     [Rule("statement : simple_statement '.'")]
     //[Rule("statement : labeled_statement_simple '.'")]
     [Rule("statement : block_statement '.'")]
-    [Rule("statement : invocation_statement '.'")]
+    //[Rule("statement : invocation_statement '.'")]
     private static Statement MakeStatement(
         Statement statement,
         IToken<EngLangTokenType> dotToken)
@@ -361,6 +362,7 @@ public partial class EngLangParser
     }
 
     [Rule($"if_statement : 'if' logical_expression ThenKeyword expression_or_return_statement")]
+    [Rule($"if_statement : 'if' logical_expression ThenKeyword block_statement")]
     private static IfStatement MakeIfEqualsStatement(
         IToken<EngLangTokenType> ifToken,
         LogicalExpression testExpression,
@@ -402,6 +404,9 @@ public partial class EngLangParser
     [Rule($"label_word : {Identifier}")]
     [Rule($"label_word : OfKeyword")]
     [Rule($"label_word : DefiniteArticleKeyword")]
+    [Rule($"label_word : AndKeyword")]
+    [Rule($"label_word : MathOperationKeyword")]
+    [Rule($"label_word : LogicalOperationKeyword")]
     private static IToken<EngLangTokenType> MakeLabelWord(IToken<EngLangTokenType> marker)
         => marker;
 
@@ -410,6 +415,7 @@ public partial class EngLangParser
     [Rule($"invokable_label : 'To' label_word+ identifier_references_list ':'")]
     [Rule($"invokable_label : 'To' label_word+ identifier_references_list '->'")]
     [Rule($"invokable_label : 'define' label_word+ identifier_references_list 'as'")]
+    [Rule($"invokable_label : 'Define' label_word+ identifier_references_list 'as'")]
     private static InvokableLabel MakeInvokableLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
