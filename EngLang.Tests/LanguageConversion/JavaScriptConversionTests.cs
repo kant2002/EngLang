@@ -61,4 +61,14 @@ value /= 42;
 
     protected override string GetExpectedInvocationStatementParametersCode() => @"previous_factorial = calculate_factorial_of(previous_number);
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedShapeDeclarationStatementCode() => @"class apple extends fruit {
+}
+".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedShapeDeclarationStatementWithSlotsCode() => @"class rectangle extends shape {
+    width;
+    height;
+}
+".ReplaceLineEndings(NewLine);
 }

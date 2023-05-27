@@ -131,6 +131,15 @@ public partial class EngLangParser
         Expression literalExpression)? x)
         => new VariableDeclaration(identifier, identifierReference, x?.literalExpression);
 
+    [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('with' ({IdentifierReference} ('and' {IdentifierReference})*))?")]
+    private static ShapeDeclaration MakeShapeDeclaration(
+        IToken<EngLangTokenType> indefiniteArticle,
+        string identifier,
+        IToken<EngLangTokenType> isToken,
+        IdentifierReference identifierReference,
+        (IToken<EngLangTokenType> withToken, Punctuated<IdentifierReference, IToken<EngLangTokenType>> slots)? slotsList)
+        => new ShapeDeclaration(identifier, identifierReference, slotsList?.slots.Values.ToImmutableArray());
+
     [Rule($"assignment_expression: PutKeyword literal_expression 'into' {IdentifierReference}")]
     private static AssignmentExpression MakeAssignmentExpression(
         IToken<EngLangTokenType> putToken,
@@ -167,6 +176,7 @@ public partial class EngLangParser
     [Rule("simple_statement : expression_or_return_statement")]
     [Rule("simple_statement : variable_declaration_statement")]
     [Rule("simple_statement : if_statement")]
+    [Rule("simple_statement : shape_declaration_statement")]
     //[Rule("simple_statement : statementyy")]
     private static Statement MakeSimpleStatement(
         Statement statement)
@@ -296,6 +306,11 @@ public partial class EngLangParser
     private static VariableDeclarationStatement MakeVariableDeclarationStatement(
         VariableDeclaration declaration)
         => new VariableDeclarationStatement(declaration);
+
+    [Rule("shape_declaration_statement : shape_declaration")]
+    private static ShapeDeclarationStatement MakeShapeDeclarationStatement(
+        ShapeDeclaration declaration)
+        => new ShapeDeclarationStatement(declaration);
 
     [Rule("expression_statement : assignment_expression")]
     [Rule("expression_statement : math_expression")]

@@ -246,4 +246,38 @@ public abstract class BaseLanguageConversionTests
     }
 
     protected abstract string GetExpectedInvocationStatementParametersCode();
+
+    [Fact]
+    public void ConvertShapeDeclarationStatement()
+    {
+        var sentence = "an apple is an fruit.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedShapeDeclarationStatementCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedShapeDeclarationStatementCode();
+
+    [Fact]
+    public void ConvertShapeDeclarationWithSlotsStatement()
+    {
+        var sentence = """
+            a rectangle is a shape with
+                a width
+                and a height.
+            """;
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedShapeDeclarationStatementWithSlotsCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedShapeDeclarationStatementWithSlotsCode();
 }

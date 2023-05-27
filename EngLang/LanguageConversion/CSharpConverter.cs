@@ -24,6 +24,8 @@ public class CSharpConverter : ILanguageConverter
                 return ConvertExpression(expression);
             case VariableDeclaration variableDeclaration:
                 return ConvertVariableDeclaration(variableDeclaration);
+            case ShapeDeclaration shapeDeclaration:
+                return ConvertShapeDeclaration(shapeDeclaration);
             case IdentifierReference identifierReference:
                 return ConvertToIdentifier(identifierReference.Name);
             default:
@@ -42,6 +44,28 @@ public class CSharpConverter : ILanguageConverter
             result.Append(" = ");
             result.Append(Convert(variableDeclaration.Expression));
         }
+
+        return result.ToString();
+    }
+
+    private string ConvertShapeDeclaration(ShapeDeclaration variableDeclaration)
+    {
+        var result = new StringBuilder();
+        result.Append("public class ");
+        result.Append(ConvertToIdentifier(variableDeclaration.Name));
+        result.Append(" : ");
+        result.Append(ConvertToIdentifier(variableDeclaration.BaseShapeName.Name));
+        result.AppendLine();
+        result.AppendLine("{");
+        if (variableDeclaration.WellKnownSlots != null)
+        {
+            foreach (var slot in variableDeclaration.WellKnownSlots)
+            {
+                result.AppendLine($"    public object {slot.Name};");
+            }
+        }
+
+        result.Append("}");
 
         return result.ToString();
     }
@@ -139,8 +163,12 @@ public class CSharpConverter : ILanguageConverter
 
                 break;
             case VariableDeclarationStatement variableDeclarationStatement:
-                var declaration = variableDeclarationStatement.Declaration;
-                builder.AppendLine($"{Convert(declaration)};");
+                var variableDeclaration = variableDeclarationStatement.Declaration;
+                builder.AppendLine($"{Convert(variableDeclaration)};");
+                break;
+            case ShapeDeclarationStatement shapeDeclarationStatement:
+                var shapeDeclaration = shapeDeclarationStatement.Declaration;
+                builder.AppendLine($"{Convert(shapeDeclaration)}");
                 break;
             case ExpressionStatement expressionStatement:
                 var additionExpression = expressionStatement.Expression;
