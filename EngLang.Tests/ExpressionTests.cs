@@ -56,6 +56,24 @@ public class ExpressionTests
         Assert.Equal("value", divisionExpression.TargetVariable.Name);
     }
 
+    [Fact]
+    public void UseNestedPropertiesInExpression()
+    {
+        var sentence = "multiply a width of a rectangle by a height of a rectangle";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var divisionExpression = Assert.IsType<InPlaceMultiplyExpression>(parseResult);
+        var factor = Assert.IsType<VariableExpression>(divisionExpression.Factor).Identifier;
+        var target = divisionExpression.TargetVariable;
+        Assert.Equal("width", target.Name);
+        Assert.NotNull(target.Owner);
+        Assert.Equal("rectangle", target.Owner.Name);
+        Assert.Equal("height", factor.Name);
+        Assert.NotNull(factor.Owner);
+        Assert.Equal("rectangle", factor.Owner.Name);
+    }
+
     [Theory]
     [InlineData("a value divide by 42.", MathOperator.Divide)]
     [InlineData("a value divided by 42.", MathOperator.Divide)]

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 
@@ -27,16 +28,29 @@ public class CSharpConverter : ILanguageConverter
             case ShapeDeclaration shapeDeclaration:
                 return ConvertShapeDeclaration(shapeDeclaration);
             case IdentifierReference identifierReference:
-                return ConvertToIdentifier(identifierReference.Name);
+                return ConvertIdentifierReference(identifierReference);
             default:
                 throw new NotImplementedException($"Syntax node {node} is not supported");
+        }
+    }
+
+    private string ConvertIdentifierReference(IdentifierReference identifierReference)
+    {
+        var identifier = ConvertToIdentifier(identifierReference.Name);
+        if (identifierReference.Owner is not null)
+        {
+            return $"{ConvertIdentifierReference(identifierReference.Owner)}.{identifier}";
+        }
+        else
+        {
+            return identifier;
         }
     }
 
     private string ConvertVariableDeclaration(VariableDeclaration variableDeclaration)
     {
         var result = new StringBuilder();
-        result.Append(ConvertToIdentifier(variableDeclaration.TypeName.Name));
+        result.Append(ConvertIdentifierReference(variableDeclaration.TypeName));
         result.Append(' ');
         result.Append(ConvertToIdentifier(variableDeclaration.Name));
         if (variableDeclaration.Expression != null)
@@ -79,17 +93,17 @@ public class CSharpConverter : ILanguageConverter
             case StringLiteralExpression stringLiteralExpression:
                 return $"\"{stringLiteralExpression.Value}\"";
             case VariableExpression variableExpression:
-                return $"{ConvertToIdentifier(variableExpression.Identifier.Name)}";
+                return $"{ConvertIdentifierReference(variableExpression.Identifier)}";
             case InPlaceAdditionExpression additionExpression:
-                return $"{ConvertToIdentifier(additionExpression.TargetVariable.Name)} += {ConvertExpression(additionExpression.Addend)}";
+                return $"{ConvertIdentifierReference(additionExpression.TargetVariable)} += {ConvertExpression(additionExpression.Addend)}";
             case InPlaceSubtractExpression substractExpression:
-                return $"{ConvertToIdentifier(substractExpression.TargetVariable.Name)} -= {ConvertExpression(substractExpression.Subtrahend)}";
+                return $"{ConvertIdentifierReference(substractExpression.TargetVariable)} -= {ConvertExpression(substractExpression.Subtrahend)}";
             case InPlaceMultiplyExpression multiplyExpression:
-                return $"{ConvertToIdentifier(multiplyExpression.TargetVariable.Name)} *= {ConvertExpression(multiplyExpression.Factor)}";
+                return $"{ConvertIdentifierReference(multiplyExpression.TargetVariable)} *= {ConvertExpression(multiplyExpression.Factor)}";
             case InPlaceDivisionExpression divisionExpression:
-                return $"{ConvertToIdentifier(divisionExpression.TargetVariable.Name)} /= {ConvertExpression(divisionExpression.Denominator)}";
+                return $"{ConvertIdentifierReference(divisionExpression.TargetVariable)} /= {ConvertExpression(divisionExpression.Denominator)}";
             case AssignmentExpression assignmentExpression:
-                return $"{ConvertToIdentifier(assignmentExpression.Variable.Name)} = {ConvertExpression(assignmentExpression.Expression)}";
+                return $"{ConvertIdentifierReference(assignmentExpression.Variable)} = {ConvertExpression(assignmentExpression.Expression)}";
             case LogicalExpression equalityExpression:
                 return $"{ConvertExpression(equalityExpression.FirstOperand)} {Convert(equalityExpression.Operator)} {ConvertExpression(equalityExpression.SecondOperand)}";
             case MathExpression mathExpression:

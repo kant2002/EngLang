@@ -21,11 +21,13 @@ public partial class EngLangParser
         return string.Join(' ', identifierParts.Select(_ => _.Text));
     }
 
-    [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier}")]
+    [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     private static IdentifierReference MakeIdentifierReference(
         IToken<EngLangTokenType> indefiniteArticleKeyword,
-        string identifier)
-        => new IdentifierReference(identifier);
+        string identifier,
+        (IToken<EngLangTokenType> ofToken,
+        IdentifierReference parentReference)? parent)
+        => new IdentifierReference(identifier, parent?.parentReference);
 
     [Rule($"variable_expression : {IdentifierReference}")]
     private static VariableExpression MakeVariableExpression(IdentifierReference e) => new (e);
@@ -197,12 +199,12 @@ public partial class EngLangParser
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|IntLiteral|StringLiteral|NullLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
         => new InvalidStatement(tokens.ToImmutableArray());
-    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|IntLiteral|StringLiteral|NullLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
+    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
     private static Statement MakeStatement222(
         IEnumerable<IToken<EngLangTokenType>> tokens)
         => new InvalidStatement(tokens.ToImmutableArray());
@@ -397,11 +399,17 @@ public partial class EngLangParser
         IReadOnlyList<(IdentifierReference, IToken<EngLangTokenType>?)> identifierReferences)
         => new IdentifierReferencesList(identifierReferences.Select(_ => _.Item1).ToImmutableList());
 
-    [Rule($"invokable_label : 'to' {Identifier}+ identifier_references_list ':'")]
-    [Rule($"invokable_label : 'to' {Identifier}+ identifier_references_list '->'")]
-    [Rule($"invokable_label : 'To' {Identifier}+ identifier_references_list ':'")]
-    [Rule($"invokable_label : 'To' {Identifier}+ identifier_references_list '->'")]
-    [Rule($"invokable_label : 'define' {Identifier}+ identifier_references_list 'as'")]
+    [Rule($"label_word : {Identifier}")]
+    [Rule($"label_word : OfKeyword")]
+    [Rule($"label_word : DefiniteArticleKeyword")]
+    private static IToken<EngLangTokenType> MakeLabelWord(IToken<EngLangTokenType> marker)
+        => marker;
+
+    [Rule($"invokable_label : 'to' label_word+ identifier_references_list ':'")]
+    [Rule($"invokable_label : 'to' label_word+ identifier_references_list '->'")]
+    [Rule($"invokable_label : 'To' label_word+ identifier_references_list ':'")]
+    [Rule($"invokable_label : 'To' label_word+ identifier_references_list '->'")]
+    [Rule($"invokable_label : 'define' label_word+ identifier_references_list 'as'")]
     private static InvokableLabel MakeInvokableLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
@@ -412,19 +420,7 @@ public partial class EngLangParser
         return new InvokableLabel(labelName, identifierTokens.IdentifierReferences.ToArray());
     }
 
-    [Rule($"invokable_label : 'define' 'the' {Identifier}+ identifier_references_list 'as'")]
-    private static InvokableLabel MakeInvokableLabel(
-        IToken<EngLangTokenType> defineToken,
-        IToken<EngLangTokenType> theToken,
-        IReadOnlyList<IToken<EngLangTokenType>> firstToken,
-        IdentifierReferencesList identifierTokens,
-        IToken<EngLangTokenType> asToken)
-    {
-        string labelName = string.Join(" ", firstToken.Select(i => i.Text));
-        return new InvokableLabel(labelName, identifierTokens.IdentifierReferences.ToArray());
-    }
-
-    [Rule($"invokable_label : {Identifier}+ identifier_references_list '->'")]
+    [Rule($"invokable_label : label_word+ identifier_references_list '->'")]
     private static InvokableLabel MakeInvokableLabel(
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
         IdentifierReferencesList identifierTokens,
@@ -448,7 +444,7 @@ public partial class EngLangParser
         return new LabeledStatement(invokableLabel.Marker, invokableLabel.Parameters, statement);
     }
 
-    [Rule($"invocation_statement : {Identifier}+ identifier_references_list ('into' {IdentifierReference})?")]
+    [Rule($"invocation_statement : label_word+ identifier_references_list ('into' {IdentifierReference})?")]
     private static Statement MakeInvocationStatement(
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
         IdentifierReferencesList identifierTokens,

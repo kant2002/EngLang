@@ -280,4 +280,19 @@ public abstract class BaseLanguageConversionTests
     }
 
     protected abstract string GetExpectedShapeDeclarationStatementWithSlotsCode();
+
+    [Fact]
+    public void ConvertObjectPropertiesAccess()
+    {
+        var sentence = "multiply a width of a rectangle by a height of a rectangle.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedObjectPropertiesAccess();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedObjectPropertiesAccess();
 }

@@ -31,6 +31,7 @@ public enum EngLangTokenType
     [Token("by")] ByKeyword,
     [Token("and")] AndKeyword,
     [Token("with")] WithKeyword,
+    [Token("of")] OfKeyword,
     [Regex("(then|,)")] ThenKeyword,
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
