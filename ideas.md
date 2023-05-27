@@ -129,3 +129,13 @@ DET(the) DET? ADJ+ NOUN+ VERB(is) DET(a|an) DET? ADJ+ NOUN+ PUNCT(.)
 Maybe that would be not fruitful, but let's map stack and heap on concepts of proximity which humans operate on. 
 Stack is objects which we are currently working on and sitting on your table with hands reach. 
 You can easily manipulate them. Heap is on the other side some remote storage.
+
+# In-place operations
+
+I choose in-place arithmetic operations as part of calculations and that's starts biting. Where `divide a value by 42` 
+is perfectly in-place operations, `multiply a width of a rectangle by a height of a rectangle` cannot be thought
+like that. It's more regular operation. I thinking about that, like what I thought as in-place operation is actually
+operation on hidden register with context dependent flushing. So we start operation, perform them, store result in the
+memory cell, then can continue operation and so on. Now depending on the context, like if this regular statement we dump
+result in original location, or in case if this sentence is last sentence in function we return value from that temporary
+register.
