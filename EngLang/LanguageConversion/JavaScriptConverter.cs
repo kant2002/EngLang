@@ -228,6 +228,6 @@ public class JavaScriptConverter : ILanguageConverter
 
     private string ConvertToIdentifier(string name)
     {
-        return name.Replace(' ', '_');
+        return name.Replace(' ', '_').Replace('-', '_');
     }
 }

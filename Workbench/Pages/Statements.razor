@@ -1,14 +1,21 @@
 @page "/statements"
-<PageTitle>Statemetns</PageTitle>
+<PageTitle>Statements</PageTitle>
 
-<h1>Statemetns</h1>
+<h1>Statements</h1>
 <h2>Programming language conversion</h2>
 <select @bind="Language" class="form-control">
     <option value="csharp">C#</option>
     <option value="js">JS</option>
 </select>
 
-<p>Statements used to perform calculation. There different kind of statements which express some formula, conditional statements</p>
+<p>Statements used to perform calculation. There different kind of statements which express some formula, assignment statements and conditional statements</p>
+<pre>
+    @AssignmentStatementSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@AssignmentStatementSample" Language="@Language" />
+
+<p>expression statements which can express math concepts </p>
 <pre>
     @StatementSample
 </pre>
@@ -43,6 +50,8 @@
 <Compiler SourceCode="@IfStatementMultipleThenSample" Language="@Language" />
 @code {
     private string? Language { get; set; } = "js";
+
+    private string AssignmentStatementSample = @"let a value equals 10.";
 
     private string StatementSample = @"add 42 to a value.";
 

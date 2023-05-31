@@ -35,7 +35,9 @@ public enum EngLangTokenType
     [Regex("(then|,)")] ThenKeyword,
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
-    [Regex(Regexes.Identifier)] Identifier,
+    //[Regex(Regexes.Identifier)]
+    [Regex("[A-Za-z_]([A-Za-z0-9_\\-]*[A-Za-z_]|[A-Za-z_]?)")]
+    Identifier,
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex(Regexes.StringLiteral)] StringLiteral,
     [Token("null")] NullLiteral,

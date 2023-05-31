@@ -41,6 +41,18 @@ public class VariableNameTests
     }
 
     [Fact]
+    public void VariableNameCanHaveDash()
+    {
+        var sentence = "a zero-indexed";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var expectedVariableName = "zero-indexed";
+        var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
+        Assert.Equal(expectedVariableName, variableDeclaration.Name);
+    }
+
+    [Fact]
     public void DeclareVariableWithType()
     {
         var sentence = "the name is a string";

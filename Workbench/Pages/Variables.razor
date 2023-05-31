@@ -1,0 +1,49 @@
+@page "/variables"
+<PageTitle>Variables</PageTitle>
+
+<h1>Variables</h1>
+<h2>Programming language conversion</h2>
+<select @bind="Language" class="form-control">
+    <option value="csharp">C#</option>
+    <option value="js">JS</option>
+</select>
+
+<p>You can refer to variables using indefinite article a.</p>
+<pre>
+    @VariableSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@VariableSample" Language="@Language" />
+<p>or an.</p>
+<pre>
+    @VariableAnSample
+</pre>
+<Compiler SourceCode="@VariableAnSample" Language="@Language" />
+
+<p>Compiler ignore spaces in variable names and wait for next control word.</p>
+<pre>
+    @VariableWithSpaceSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@VariableWithSpaceSample" Language="@Language" />
+<p>You can also use dash (-) in variable names.</p>
+<pre>
+    @VariableWithDashSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@VariableWithDashSample" Language="@Language" />
+<p>Global variables use the article.</p>
+<pre>
+    @GlobalVariableSample
+</pre>
+<p>which would be rougly translated to following code:</p>
+<Compiler SourceCode="@GlobalVariableSample" Language="@Language" />
+@code {
+    private string? Language { get; set; } = "js";
+
+    private string VariableSample = @"a value";
+    private string VariableAnSample = @"an apple";
+    private string VariableWithSpaceSample = @"a index value";
+    private string VariableWithDashSample = @"a zero-index value";
+    private string GlobalVariableSample = @"the name is an apple.";
+}

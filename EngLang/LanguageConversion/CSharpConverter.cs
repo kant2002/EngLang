@@ -231,6 +231,6 @@ public class CSharpConverter : ILanguageConverter
 
     private static string ConvertToIdentifier(string name)
     {
-        return name.Replace(' ', '_');
+        return name.Replace(' ', '_').Replace('-', '_');
     }
 }
