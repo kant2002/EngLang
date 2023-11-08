@@ -20,13 +20,21 @@ public class DeclarationStatementTests
         Assert.Null(shapeDeclaration.WellKnownSlots);
     }
 
-    [Fact]
-    public void ShapeDeclarationWithSlots()
-    {
-        var sentence = """
+    [Theory]
+    [InlineData("""
 a rectangle is a shape with a width and a height.
-""";
-
+""")]
+    [InlineData("""
+A rectangle is a shape with a width and a height.
+""")]
+    [InlineData("""
+an rectangle is a shape with a width and a height.
+""")]
+    [InlineData("""
+An rectangle is a shape with a width and a height.
+""")]
+    public void ShapeDeclarationWithSlots(string sentence)
+    {
         var parseResult = EngLangParser.Parse(sentence);
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);

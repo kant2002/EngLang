@@ -10,7 +10,7 @@ public enum EngLangTokenType
     [Ignore] [Regex("([ \t]+((\r\n|\n|\r)[ \t]*)?|(\r\n|\n|\r))")] Whitespace,
     [Regex("(\r\n|\n|\r){2,}")] Multiline,
 
-    [Regex("(a|an)")] IndefiniteArticleKeyword,
+    [Regex("(a|an|A|An)")] IndefiniteArticleKeyword,
     [Token("the")] DefiniteArticleKeyword,
 
     [Token(";")] SemicolonKeyword,
