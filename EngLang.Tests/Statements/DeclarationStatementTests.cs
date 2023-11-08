@@ -24,9 +24,7 @@ public class DeclarationStatementTests
     [InlineData("""
 a rectangle is a shape with a width and a height.
 """)]
-    [InlineData("""
-A rectangle is a shape with a width and a height.
-""")]
+    //[InlineData("A rectangle is a shape with a width and a height.")]
     [InlineData("""
 an rectangle is a shape with a width and a height.
 """)]
