@@ -234,3 +234,4 @@ a rectangle is a shape with
 - [11] https://wwwcdn.imo.org/localresources/en/OurWork/Safety/Documents/A.918(22).pdf
 - [12] https://simple.wikipedia.org/wiki/Basic_English
 - [13] https://ntrs.nasa.gov/api/citations/20140004055/downloads/20140004055.pdf
+- [14] https://osmosianplainenglishprogramming.blog/
