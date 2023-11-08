@@ -142,7 +142,7 @@ public partial class EngLangParser
         (IToken<EngLangTokenType> withToken, Punctuated<IdentifierReference, IToken<EngLangTokenType>> slots)? slotsList)
         => new ShapeDeclaration(identifier, identifierReference, slotsList?.slots.Values.ToImmutableArray());
 
-    [Rule($"assignment_expression: PutKeyword literal_expression 'into' {IdentifierReference}")]
+    [Rule($"assignment_expression: PutKeyword primitive_expression IntoKeyword {IdentifierReference}")]
     private static AssignmentExpression MakeAssignmentExpression(
         IToken<EngLangTokenType> putToken,
         Expression expression,

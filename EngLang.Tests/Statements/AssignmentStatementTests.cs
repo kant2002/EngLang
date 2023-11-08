@@ -4,11 +4,25 @@ namespace EngLang.Tests.Statements;
 
 public class AssignmentStatementTests
 {
-    [Fact]
-    public void AssignmentStatement()
+    [Theory]
+    [InlineData("put 40 into a value.")]
+    [InlineData("put 40 in a value.")]
+    public void AssignmentStatement(string sentence)
     {
-        var sentence = "put 40 into a value.";
+        var parseResult = EngLangParser.Parse(sentence);
 
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
+        var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
+        Assert.Equal("value", assignmentExpression.Variable.Name);
+    }
+
+    [Theory]
+    [InlineData("put a data into a value.")]
+    [InlineData("put a data in a value.")]
+    public void AssignmentVariableStatement(string sentence)
+    {
         var parseResult = EngLangParser.Parse(sentence);
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
