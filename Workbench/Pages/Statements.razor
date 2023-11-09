@@ -14,7 +14,24 @@
 </pre>
 <p>which would be rougly translated to following code:</p>
 <Compiler SourceCode="@AssignmentStatementSample" Language="@Language" />
+<p>
+    Same can be writen as:
+</p>
+<pre>put 10 into a value.</pre>
+<p>You can assign variables to other variables.</p>
+<pre>
+    @AssignmentVariablesStatementSample
+</pre>
+<p>which as you may guess is this:</p>
+<Compiler SourceCode="@AssignmentVariablesStatementSample" Language="@Language" />
+<p>I have plans to support English script too</p>
+<pre>
+    @AssignmentStatementEnglishScriptSample
+</pre>
+<p>Right now it is:</p>
+<Compiler SourceCode="@AssignmentStatementEnglishScriptSample" Language="@Language" />
 
+<h2></h2>
 <p>expression statements which can express math concepts </p>
 <pre>
     @StatementSample
@@ -52,6 +69,10 @@
     private string? Language { get; set; } = "js";
 
     private string AssignmentStatementSample = @"let a value equals 10.";
+
+    private string AssignmentVariablesStatementSample = @"put a value in a box.";
+
+    private string AssignmentStatementEnglishScriptSample = @"let the initial value of a number be x.";
 
     private string StatementSample = @"add 42 to a value.";
 
