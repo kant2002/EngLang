@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 using Yoakke.SynKit.Lexer;
 using Yoakke.SynKit.Parser;
 using Yoakke.SynKit.Parser.Attributes;
@@ -16,18 +17,49 @@ public partial class EngLangParser
     private const string Identifier = "Identifier";
 
     [Rule($"{LongIdentifier} : {Identifier}+")]
-    private static string MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
+    private static IReadOnlyList<string> MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
     {
-        return string.Join(' ', identifierParts.Select(_ => _.Text));
+        return identifierParts.Select(_ => _.Text).ToList();
     }
 
     [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     private static IdentifierReference MakeIdentifierReference(
         IToken<EngLangTokenType> indefiniteArticleKeyword,
-        string identifier,
+        IReadOnlyList<string> identifiersList,
         (IToken<EngLangTokenType> ofToken,
         IdentifierReference parentReference)? parent)
-        => new IdentifierReference(identifier, parent?.parentReference);
+    {
+        StringBuilder currentIdentifier = new();
+        IdentifierReference? parentReference = parent?.parentReference;
+        bool nonFirst = false;
+        foreach (var identifierPart in identifiersList)
+        {
+            if (!identifierPart.EndsWith("'s"))
+            {
+                if (nonFirst)
+                {
+                    currentIdentifier.Append(" ");
+                }
+
+                currentIdentifier.Append(identifierPart);
+                nonFirst = true;
+            }
+            else
+            {
+                if (nonFirst)
+                {
+                    currentIdentifier.Append(" ");
+                }
+
+                currentIdentifier.Append(identifierPart[..(identifierPart.Length - 2)]);
+                parentReference = new IdentifierReference(currentIdentifier.ToString(), parentReference);
+                currentIdentifier = new();
+            }
+        }
+
+        var identifier = currentIdentifier.ToString();
+        return new IdentifierReference(identifier, parentReference);
+    }
 
     [Rule($"variable_expression : {IdentifierReference}")]
     private static VariableExpression MakeVariableExpression(IdentifierReference e) => new (e);
@@ -125,22 +157,22 @@ public partial class EngLangParser
     [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} (EqualKeyword 'to' literal_expression)?")]
     private static VariableDeclaration MakeVariableDeclaration(
         IToken<EngLangTokenType> definiteArticle,
-        string identifier,
+        IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> isToken,
         IdentifierReference identifierReference,
         (IToken<EngLangTokenType> equalToken,
         IToken<EngLangTokenType> toToken,
         Expression literalExpression)? x)
-        => new VariableDeclaration(identifier, identifierReference, x?.literalExpression);
+        => new VariableDeclaration(string.Join(' ', identifier), identifierReference, x?.literalExpression);
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('with' ({IdentifierReference} ('and' {IdentifierReference})*))?")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
-        string identifier,
+        IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> isToken,
         IdentifierReference identifierReference,
         (IToken<EngLangTokenType> withToken, Punctuated<IdentifierReference, IToken<EngLangTokenType>> slots)? slotsList)
-        => new ShapeDeclaration(identifier, identifierReference, slotsList?.slots.Values.ToImmutableArray());
+        => new ShapeDeclaration(string.Join(' ', identifier), identifierReference, slotsList?.slots.Values.ToImmutableArray());
 
     [Rule($"assignment_expression: PutKeyword primitive_expression IntoKeyword {IdentifierReference}")]
     private static AssignmentExpression MakeAssignmentExpression(
