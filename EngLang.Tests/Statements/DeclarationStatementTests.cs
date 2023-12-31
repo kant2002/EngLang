@@ -47,9 +47,8 @@ An rectangle is a shape with a width and a height.
     }
 
     [Theory]
-    [InlineData("""
-a rectangle of a sprite.
-""")]
+    [InlineData("a rectangle of a sprite.")]
+    [InlineData("a sprite's rectangle.")]
     public void PosessionDeclaration(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);

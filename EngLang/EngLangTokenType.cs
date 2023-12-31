@@ -36,7 +36,7 @@ public enum EngLangTokenType
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
     //[Regex(Regexes.Identifier)]
-    [Regex("[A-Za-z_]([A-Za-z0-9_\\-]*[A-Za-z_]|[A-Za-z_]?)")]
+    [Regex("[A-Za-z_]([A-Za-z0-9_\\-]*[A-Za-z_]|[A-Za-z_]?)('s)?")]
     Identifier,
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex(Regexes.StringLiteral)] StringLiteral,
