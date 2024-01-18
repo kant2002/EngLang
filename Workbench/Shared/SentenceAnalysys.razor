@@ -11,12 +11,12 @@
     <pre>
         @foreach (var sentence in doc.TokensData)
         {
-            <text>========== Sentence =============
-                @foreach (var word in sentence)
-                {
-                    <text>@($"{word.Tag}({Word(word)}) ")</text>
-                }
-            </text>
+            <text>========== Sentence =============<br /></text>
+            @foreach (var word in sentence)
+            {
+                <text>@($"{word.Tag}({Word(word)}) ")</text>
+            }
+            <br />    
         }
     </pre>
 }
@@ -30,6 +30,8 @@
     private string? AnalysisError { get; set; }
     private Document? doc { get; set; }
 
+    private static Pipeline? nlp;
+
     protected override async Task OnParametersSetAsync()
     {
         try
@@ -42,7 +44,7 @@
             }
 
             var lang = Language == null ? Mosaik.Core.Language.English : Mosaik.Core.Languages.CodeToEnum(this.Language);
-            var nlp = await Pipeline.ForAsync(lang);
+            nlp ??= await Pipeline.ForAsync(lang);
 
             doc = new Document(Text, lang);
             nlp.ProcessSingle(doc);
