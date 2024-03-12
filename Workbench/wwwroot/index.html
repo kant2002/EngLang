@@ -30,6 +30,19 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="libs/boostrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        window.ScrollToId = function (id) {
+            const element = document.querySelector("a[name='" + decodeURIComponent(id)  + "']");
+            if (element instanceof HTMLElement) {
+                element.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                    inline: "nearest"
+                });
+            }
+
+        }
+    </script>
 </body>
 
 </html>

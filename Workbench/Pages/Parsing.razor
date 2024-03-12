@@ -1,27 +1,162 @@
 @page "/parsing"
+@inject NavigationManager navigationManager
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <PageTitle>Sentence parsing</PageTitle>
 
-<div class="d-flex flex-sm-column flex-xl-row">
-    <div class="w-100 pe-3">
-        <label for="source-code" class="form-label">Text:</label>
-        <textarea name="source-code" @bind="Text" class="form-control"></textarea>
-        <WellKnownSamples OnTryCallback="@Try" />
+<InputFile OnChange="@SingleUpload" />
+<div class="row">
+    <div class="col">
+        @((MarkupString)Content)
     </div>
-    <div class="w-100">
-        <select @bind="Language" class="form-control">
-            <option value="eng">English</option>
-        </select>
-        <SentenceAnalysys Text="@Text" Language="@Language" />
+    <div class="col">
+        <h1>Variables</h1>
+        <ul>
+            @foreach (var v in variables.Values)
+            {
+                if (v.Type is null)
+                {
+                    <li>@v.Name</li>
+                }
+                else
+                {
+                    <li>@v.Name - @v.Type</li>
+                }
+            }
+        </ul>
+        <h1>Functions</h1>
+        <ul>
+            @{
+                var baseUrl = new Uri(navigationManager.Uri, UriKind.Absolute)
+                    .GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+            }
+            @foreach (var v in functions.Values)
+            {
+                <li>
+                    <a href="@baseUrl#@v.Template" @onclick=@(() =>ScrollToId(v.Template))>
+                        @v.Template
+                        @if (v.Parameters.Length != 0)
+                        {
+                            <text>(@(string.Join(", ", v.Parameters)))</text>
+                        }
+                    </a>
+                </li>
+            }
+        </ul>
     </div>
 </div>
 
 @code {
-    private string? Text { get; set; }
-    private string? Language { get; set; } = "en";
 
-    private void Try(SampleEventArgs args)
+    string Content = "";
+    Dictionary<string, VariableInformation> variables = new();
+    Dictionary<string, FunctionInformation> functions = new();
+
+    protected override void OnInitialized()
     {
-        this.Text = args.SampleCode;
+        navigationManager.LocationChanged += OnLocationChanged;
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await ScrollToFragment();
+    }
+
+    public void Dispose()
+    {
+        navigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await ScrollToFragment();
+    }
+
+    private async Task ScrollToFragment()
+    {
+        var uri = new Uri(navigationManager.Uri, UriKind.Absolute);
+        var fragment = uri.Fragment;
+        if (fragment.StartsWith('#'))
+        {
+            // Handle text fragment (https://example.org/#test:~:text=foo)
+            // https://github.com/WICG/scroll-to-text-fragment/
+            var elementId = fragment.Substring(1);
+            var index = elementId.IndexOf(":~:", StringComparison.Ordinal);
+            if (index > 0)
+            {
+                elementId = elementId.Substring(0, index);
+            }
+
+            if (!string.IsNullOrEmpty(elementId))
+            {
+                await ScrollToId(elementId);
+            }
+        }
+    }
+
+    private async Task ScrollToId(string elementId)
+    {
+        await JSRuntime.InvokeVoidAsync("ScrollToId", elementId);
+    }
+
+    private async Task SingleUpload(InputFileChangeEventArgs e)
+    {
+        MemoryStream ms = new MemoryStream();
+        await e.File.OpenReadStream().CopyToAsync(ms);
+        var bytes = ms.ToArray();
+        variables.Clear();
+        functions.Clear();
+        Content = ParseText(System.Text.Encoding.UTF8.GetString(bytes));
+        //do something with bytes
+    }
+
+    private string ParseText(string text)
+    {
+        var paragraphs = text.Split("\r\n\r\n");
+        return string.Join("", paragraphs.Select(ParseParagraph));
+    }
+
+    private string ParseParagraph(string text)
+    {
+        var lines = text.Split("\r\n");
+        if (text.StartsWith("the ") || text.StartsWith("an ") || text.StartsWith("a "))
+        {
+            variables.Add(text, new(text, null));
+        }
+
+        return $"<pre>{string.Join("\r\n", lines.Select(MarkFunctionHeader).Select(MarkComments))}</pre>";
+
+        string MarkFunctionHeader(string text)
+        {
+            var toStartPosition = text.IndexOf("to", StringComparison.InvariantCultureIgnoreCase);
+            if (toStartPosition != 0) return text;
+            var lineEndPosition = text.IndexOf("\r\n", StringComparison.InvariantCultureIgnoreCase);
+            string name;
+            string leftover;
+            if (lineEndPosition == -1)
+            {
+                name = text;
+                leftover = "";
+            }
+            else
+            {
+                name = text[0..lineEndPosition];
+                leftover = text[lineEndPosition..];
+            }
+
+            functions.Add(name, new FunctionInformation(name, Array.Empty<string>()));
+            return $"<a name='{name}'></a><span class='englang-function-declaration'>{name}</span>{leftover}";
+        }
+
+        string MarkComments(string text)
+        {
+            var commentStartPosition = text.IndexOf("\\");
+            if (commentStartPosition == -1) return text;
+            return $"{text[0..commentStartPosition]}<span class='englang-comments'>{text[commentStartPosition..]}</span>";
+        }
+    }
+
+    record VariableInformation(string Name, string? Type);
+    record FunctionInformation(string Template, string[] Parameters);
 }

@@ -66,3 +66,11 @@ a, .btn-link {
 textarea[name=source-code] {
     min-height: 45vh;
 }
+
+.englang-comments {
+    color: green;
+}
+
+.englang-function-declaration {
+    font-weight: bold;
+}
