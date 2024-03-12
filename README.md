@@ -235,3 +235,6 @@ a rectangle is a shape with
 - [12] https://simple.wikipedia.org/wiki/Basic_English
 - [13] https://ntrs.nasa.gov/api/citations/20140004055/downloads/20140004055.pdf
 - [14] https://osmosianplainenglishprogramming.blog/
+- [15] https://web.media.mit.edu/%7Elieber/Publications/Programmatic-Semantics.pdf
+- [15] https://web.media.mit.edu/%7Elieber/Publications/Feasibility-Nat-Lang-Prog.pdf
+- [16] https://www.cs.cmu.edu/~NatProg/papers/Myers2004NaturalProgramming.pdf
