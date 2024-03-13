@@ -10,7 +10,7 @@ using Yoakke.SynKit.Parser;
 using Yoakke.SynKit.Parser.Attributes;
 
 [Parser(typeof(EngLangTokenType))]
-public partial class EngLangParser
+public partial class EngLangParser : IEngLangParser
 {
     private const string IdentifierReference = "identifier_reference";
     private const string LongIdentifier = "long_identifier";

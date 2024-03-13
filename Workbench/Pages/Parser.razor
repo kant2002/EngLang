@@ -75,7 +75,7 @@
         LabeledStatementSimple = CreateParser().ParseLabeledStatementSimple();
     }
 
-    private EngLangParser CreateParser() => new EngLangParser(new EngLangLexer(SourceCode));
+    private IEngLangParser CreateParser() => new EngLangParser(new EngLangLexer(SourceCode));
 
     private IEnumerable<SyntaxNode> GetNodes(SyntaxNode? node) => node is null ? Array.Empty<SyntaxNode>() : new[] { node };
 }
