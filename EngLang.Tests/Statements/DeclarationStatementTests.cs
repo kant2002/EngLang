@@ -47,6 +47,25 @@ An rectangle is a shape with a width and a height.
     }
 
     [Theory]
+    [InlineData("""
+An rectangle has a width and a height.
+""")]
+    public void ShapeDeclarationWithSlotsWithoutBase(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
+        var shapeDeclaration = shapeStatement.Declaration;
+        Assert.Equal("rectangle", shapeDeclaration.Name);
+        Assert.Null(shapeDeclaration.BaseShapeName);
+        Assert.NotNull(shapeDeclaration.WellKnownSlots);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Value[0].Name);
+        Assert.Equal("height", shapeDeclaration.WellKnownSlots.Value[1].Name);
+    }
+
+    [Theory]
     [InlineData("a rectangle of a sprite.")]
     [InlineData("a sprite's rectangle.")]
     public void PosessionDeclaration(string sentence)

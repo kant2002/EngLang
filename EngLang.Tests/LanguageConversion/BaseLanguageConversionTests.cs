@@ -252,6 +252,25 @@ public abstract class BaseLanguageConversionTests
     protected abstract string GetExpectedShapeDeclarationStatementWithSlotsCode();
 
     [Fact]
+    public void ConvertSimpleShapeDeclarationWithSlotsStatement()
+    {
+        var sentence = """
+            a rectangle has
+                a width
+                and a height.
+            """;
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedSimpleShapeDeclarationStatementWithSlotsCode();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedSimpleShapeDeclarationStatementWithSlotsCode();
+
+    [Fact]
     public void ConvertObjectPropertiesAccess()
     {
         var sentence = "multiply a width of a rectangle by a height of a rectangle.";

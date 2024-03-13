@@ -71,6 +71,12 @@ value /= 42;
 }
 ".ReplaceLineEndings(NewLine);
 
+    protected override string GetExpectedSimpleShapeDeclarationStatementWithSlotsCode() => @"class rectangle {
+    public object width;
+    public object height;
+}
+".ReplaceLineEndings(NewLine);
+
     protected override string GetExpectedObjectPropertiesAccess() => @"rectangle.width *= rectangle.height;
 ".ReplaceLineEndings(NewLine);
 }

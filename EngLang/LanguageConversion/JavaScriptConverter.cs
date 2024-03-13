@@ -65,8 +65,12 @@ public class JavaScriptConverter : ILanguageConverter
         var result = new StringBuilder();
         result.Append("class ");
         result.Append(ConvertToIdentifier(variableDeclaration.Name));
-        result.Append(" extends ");
-        result.Append(ConvertToIdentifier(variableDeclaration.BaseShapeName.Name));
+        if (variableDeclaration.BaseShapeName is { } baseShapeName)
+        {
+            result.Append(" extends ");
+            result.Append(ConvertToIdentifier(baseShapeName.Name));
+        }
+
         result.AppendLine(" {");
         if (variableDeclaration.WellKnownSlots != null)
         {

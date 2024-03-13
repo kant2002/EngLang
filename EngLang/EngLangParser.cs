@@ -174,6 +174,14 @@ public partial class EngLangParser : IEngLangParser
         (IToken<EngLangTokenType> withToken, Punctuated<IdentifierReference, IToken<EngLangTokenType>> slots)? slotsList)
         => new ShapeDeclaration(string.Join(' ', identifier), identifierReference, slotsList?.slots.Values.ToImmutableArray());
 
+    [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'has' ({IdentifierReference} ('and' {IdentifierReference})*)")]
+    private static ShapeDeclaration MakeShapeDeclaration(
+        IToken<EngLangTokenType> indefiniteArticle,
+        IReadOnlyList<string> identifier,
+        IToken<EngLangTokenType> hasToken,
+        Punctuated<IdentifierReference, IToken<EngLangTokenType>> slotsList)
+        => new ShapeDeclaration(string.Join(' ', identifier), null, slotsList.Values.ToImmutableArray());
+
     [Rule($"assignment_expression: PutKeyword primitive_expression IntoKeyword {IdentifierReference}")]
     private static AssignmentExpression MakeAssignmentExpression(
         IToken<EngLangTokenType> putToken,

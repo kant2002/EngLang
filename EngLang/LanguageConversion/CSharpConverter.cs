@@ -67,8 +67,12 @@ public class CSharpConverter : ILanguageConverter
         var result = new StringBuilder();
         result.Append("public class ");
         result.Append(ConvertToIdentifier(variableDeclaration.Name));
-        result.Append(" : ");
-        result.Append(ConvertToIdentifier(variableDeclaration.BaseShapeName.Name));
+        if (variableDeclaration.BaseShapeName is { } baseShapeName)
+        {
+            result.Append(" : ");
+            result.Append(ConvertToIdentifier(baseShapeName.Name));
+        }
+
         result.AppendLine();
         result.AppendLine("{");
         if (variableDeclaration.WellKnownSlots != null)
