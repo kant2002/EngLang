@@ -72,8 +72,8 @@ value /= 42;
 ".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedSimpleShapeDeclarationStatementWithSlotsCode() => @"class rectangle {
-    public object width;
-    public object height;
+    width;
+    height;
 }
 ".ReplaceLineEndings(NewLine);
 
