@@ -165,15 +165,10 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression)? x)
         => new VariableDeclaration(string.Join(' ', identifier), identifierReference, x?.literalExpression);
 
-    [Rule($"shape_sub_slot_list: ({IdentifierReference} (CommaKeyword {IdentifierReference})*)")]
-    private static ImmutableArray<IdentifierReference> MakeShapeSubSlitList(
-        Punctuated<IdentifierReference, IToken<EngLangTokenType>> slots)
-        => slots.Values.ToImmutableArray();
-
-    [Rule($"shape_slot_list: (shape_sub_slot_list ('and' shape_sub_slot_list)*)")]
-    private static ImmutableArray<IdentifierReference> MakeShapeSlotList(
-        Punctuated<ImmutableArray<IdentifierReference>, IToken<EngLangTokenType>> slots)
-        => slots.Values.SelectMany(_ => _).ToImmutableArray();
+    [Rule($"shape_slot_list: (comma_identifier_references_list ('and' comma_identifier_references_list)*)")]
+    private static IdentifierReferencesList MakeShapeSlotList(
+        Punctuated<IdentifierReferencesList, IToken<EngLangTokenType>> slots)
+        => new IdentifierReferencesList(slots.Values.SelectMany(_ => _.IdentifierReferences).ToImmutableList());
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('with' shape_slot_list)?")]
     private static ShapeDeclaration MakeShapeDeclaration(
@@ -181,7 +176,7 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> isToken,
         IdentifierReference identifierReference,
-        (IToken<EngLangTokenType> withToken, ImmutableArray<IdentifierReference> slots)? slotsList)
+        (IToken<EngLangTokenType> withToken, IdentifierReferencesList slots)? slotsList)
         => new ShapeDeclaration(string.Join(' ', identifier), identifierReference, slotsList?.slots);
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'has' shape_slot_list")]
@@ -189,7 +184,7 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> indefiniteArticle,
         IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> hasToken,
-        ImmutableArray<IdentifierReference> slotsList)
+        IdentifierReferencesList slotsList)
         => new ShapeDeclaration(string.Join(' ', identifier), null, slotsList);
 
     [Rule($"assignment_expression: PutKeyword primitive_expression IntoKeyword {IdentifierReference}")]
@@ -452,6 +447,11 @@ public partial class EngLangParser : IEngLangParser
     private static IdentifierReferencesList MakeIdentifierReferencesList(
         IReadOnlyList<(IdentifierReference, IToken<EngLangTokenType>?)> identifierReferences)
         => new IdentifierReferencesList(identifierReferences.Select(_ => _.Item1).ToImmutableList());
+
+    [Rule($"comma_identifier_references_list : ({IdentifierReference} (CommaKeyword {IdentifierReference})*)")]
+    private static IdentifierReferencesList MakeCommaDelimitedIdentifierReferencesList(
+        Punctuated<IdentifierReference, IToken<EngLangTokenType>> identifierReferences)
+        => new IdentifierReferencesList(identifierReferences.Select(_ => _.Value).ToImmutableList());
 
     [Rule($"label_word : {Identifier}")]
     [Rule($"label_word : OfKeyword")]

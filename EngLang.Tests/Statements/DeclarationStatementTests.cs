@@ -42,8 +42,8 @@ An rectangle is a shape with a width and a height.
         Assert.Equal("rectangle", shapeDeclaration.Name);
         Assert.Equal("shape", shapeDeclaration.BaseShapeName.Name);
         Assert.NotNull(shapeDeclaration.WellKnownSlots);
-        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Value[0].Name);
-        Assert.Equal("height", shapeDeclaration.WellKnownSlots.Value[1].Name);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.IdentifierReferences[0].Name);
+        Assert.Equal("height", shapeDeclaration.WellKnownSlots.IdentifierReferences[1].Name);
     }
 
     [Theory]
@@ -64,8 +64,8 @@ An rectangle has a width, a height.
         Assert.Equal("rectangle", shapeDeclaration.Name);
         Assert.Null(shapeDeclaration.BaseShapeName);
         Assert.NotNull(shapeDeclaration.WellKnownSlots);
-        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Value[0].Name);
-        Assert.Equal("height", shapeDeclaration.WellKnownSlots.Value[1].Name);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.IdentifierReferences[0].Name);
+        Assert.Equal("height", shapeDeclaration.WellKnownSlots.IdentifierReferences[1].Name);
     }
 
     [Theory]

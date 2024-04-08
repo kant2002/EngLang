@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace EngLang;
 
-public record ShapeDeclaration(string Name, IdentifierReference? BaseShapeName, ImmutableArray<IdentifierReference>? WellKnownSlots = null) : SyntaxNode
+public record ShapeDeclaration(string Name, IdentifierReference? BaseShapeName, IdentifierReferencesList? WellKnownSlots = null) : SyntaxNode
 {
     public override IEnumerable<SyntaxNode> Children
     {
@@ -16,7 +16,7 @@ public record ShapeDeclaration(string Name, IdentifierReference? BaseShapeName, 
 
             if (WellKnownSlots is not null)
             {
-                foreach (var slot in WellKnownSlots)
+                foreach (var slot in WellKnownSlots.IdentifierReferences)
                 {
                     yield return slot;
                 }
