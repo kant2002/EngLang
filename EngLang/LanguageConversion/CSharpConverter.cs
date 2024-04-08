@@ -79,7 +79,7 @@ public class CSharpConverter : ILanguageConverter
         {
             foreach (var slot in variableDeclaration.WellKnownSlots.IdentifierReferences)
             {
-                result.AppendLine($"    public object {slot.Name};");
+                result.AppendLine($"    public object {ConvertToIdentifier(slot.Name)};");
             }
         }
 

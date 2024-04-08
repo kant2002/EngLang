@@ -48,10 +48,10 @@ An rectangle is a shape with a width and a height.
 
     [Theory]
     [InlineData("""
-An rectangle has a width and a height.
+An rectangle has a width and a height, a fill colour.
 """)]
     [InlineData("""
-An rectangle has a width, a height.
+An rectangle has a width, a height and a fill colour.
 """)]
     public void ShapeDeclarationWithSlotsWithoutBase(string sentence)
     {
@@ -66,6 +66,7 @@ An rectangle has a width, a height.
         Assert.NotNull(shapeDeclaration.WellKnownSlots);
         Assert.Equal("width", shapeDeclaration.WellKnownSlots.IdentifierReferences[0].Name);
         Assert.Equal("height", shapeDeclaration.WellKnownSlots.IdentifierReferences[1].Name);
+        Assert.Equal("fill colour", shapeDeclaration.WellKnownSlots.IdentifierReferences[2].Name);
     }
 
     [Theory]

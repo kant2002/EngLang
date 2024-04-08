@@ -76,7 +76,7 @@ public class JavaScriptConverter : ILanguageConverter
         {
             foreach (var slot in variableDeclaration.WellKnownSlots.IdentifierReferences)
             {
-                result.AppendLine($"    {slot.Name};");
+                result.AppendLine($"    {ConvertToIdentifier(slot.Name)};");
             }
         }
 
