@@ -50,6 +50,9 @@ An rectangle is a shape with a width and a height.
     [InlineData("""
 An rectangle has a width and a height.
 """)]
+    [InlineData("""
+An rectangle has a width, a height.
+""")]
     public void ShapeDeclarationWithSlotsWithoutBase(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);

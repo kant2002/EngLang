@@ -33,7 +33,8 @@ public enum EngLangTokenType
     [Token("and")] AndKeyword,
     [Token("with")] WithKeyword,
     [Token("of")] OfKeyword,
-    [Regex("(then|,)")] ThenKeyword,
+    [Regex("then")] ThenKeyword,
+    [Regex(",")] CommaKeyword,
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
     //[Regex(Regexes.Identifier)]

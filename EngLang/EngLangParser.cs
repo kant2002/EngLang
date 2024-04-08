@@ -165,22 +165,32 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression)? x)
         => new VariableDeclaration(string.Join(' ', identifier), identifierReference, x?.literalExpression);
 
-    [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('with' ({IdentifierReference} ('and' {IdentifierReference})*))?")]
+    [Rule($"shape_sub_slot_list: ({IdentifierReference} (CommaKeyword {IdentifierReference})*)")]
+    private static ImmutableArray<IdentifierReference> MakeShapeSubSlitList(
+        Punctuated<IdentifierReference, IToken<EngLangTokenType>> slots)
+        => slots.Values.ToImmutableArray();
+
+    [Rule($"shape_slot_list: (shape_sub_slot_list ('and' shape_sub_slot_list)*)")]
+    private static ImmutableArray<IdentifierReference> MakeShapeSlotList(
+        Punctuated<ImmutableArray<IdentifierReference>, IToken<EngLangTokenType>> slots)
+        => slots.Values.SelectMany(_ => _).ToImmutableArray();
+
+    [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('with' shape_slot_list)?")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
         IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> isToken,
         IdentifierReference identifierReference,
-        (IToken<EngLangTokenType> withToken, Punctuated<IdentifierReference, IToken<EngLangTokenType>> slots)? slotsList)
-        => new ShapeDeclaration(string.Join(' ', identifier), identifierReference, slotsList?.slots.Values.ToImmutableArray());
+        (IToken<EngLangTokenType> withToken, ImmutableArray<IdentifierReference> slots)? slotsList)
+        => new ShapeDeclaration(string.Join(' ', identifier), identifierReference, slotsList?.slots);
 
-    [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'has' ({IdentifierReference} ('and' {IdentifierReference})*)")]
+    [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'has' shape_slot_list")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
         IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> hasToken,
-        Punctuated<IdentifierReference, IToken<EngLangTokenType>> slotsList)
-        => new ShapeDeclaration(string.Join(' ', identifier), null, slotsList.Values.ToImmutableArray());
+        ImmutableArray<IdentifierReference> slotsList)
+        => new ShapeDeclaration(string.Join(' ', identifier), null, slotsList);
 
     [Rule($"assignment_expression: PutKeyword primitive_expression IntoKeyword {IdentifierReference}")]
     private static AssignmentExpression MakeAssignmentExpression(
@@ -403,6 +413,8 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule($"if_statement : 'if' logical_expression ThenKeyword expression_or_return_statement")]
     [Rule($"if_statement : 'if' logical_expression ThenKeyword block_statement")]
+    [Rule($"if_statement : 'if' logical_expression CommaKeyword expression_or_return_statement")]
+    [Rule($"if_statement : 'if' logical_expression CommaKeyword block_statement")]
     private static IfStatement MakeIfEqualsStatement(
         IToken<EngLangTokenType> ifToken,
         LogicalExpression testExpression,
