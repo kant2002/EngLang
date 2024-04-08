@@ -16,7 +16,7 @@
     private string? CompilerError { get; set; }
 
     private IList<SyntaxNode> ExpandedNodes = new List<SyntaxNode>();
-    private SyntaxNode selectedNode;
+    private SyntaxNode selectedNode = null!;
 
     private static IEnumerable<SyntaxNode> GetChildNodes(SyntaxNode node)
     {
