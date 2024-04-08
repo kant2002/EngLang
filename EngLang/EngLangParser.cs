@@ -3,6 +3,7 @@ namespace EngLang;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Yoakke.SynKit.Lexer;
@@ -114,6 +115,7 @@ public partial class EngLangParser : IEngLangParser
     };
 
     [Rule($"inplace_addition_expression : 'add' literal_expression 'to' {IdentifierReference}")]
+    [Rule($"inplace_addition_expression : 'Add' literal_expression 'to' {IdentifierReference}")]
     private static InPlaceAdditionExpression MakeInPlaceAdditionExpression(
         IToken<EngLangTokenType> addToken,
         Expression literalExpression,
@@ -121,6 +123,7 @@ public partial class EngLangParser : IEngLangParser
         IdentifierReference identifierReference) => new(literalExpression, identifierReference);
 
     [Rule($"inplace_subtract_expression : 'subtract' literal_expression 'from' {IdentifierReference}")]
+    [Rule($"inplace_subtract_expression : 'Subtract' literal_expression 'from' {IdentifierReference}")]
     private static InPlaceSubtractExpression MakeInPlaceSubtractExpression(
         IToken<EngLangTokenType> subtractToken,
         Expression literalExpression,
@@ -128,6 +131,7 @@ public partial class EngLangParser : IEngLangParser
         IdentifierReference identifierReference) => new(literalExpression, identifierReference);
 
     [Rule($"inplace_multiply_expression : 'multiply' {IdentifierReference} 'by' primitive_expression")]
+    [Rule($"inplace_multiply_expression : 'Multiply' {IdentifierReference} 'by' primitive_expression")]
     private static InPlaceMultiplyExpression MakeInPlaceMultiplyExpression(
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
@@ -135,6 +139,7 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression) => new(literalExpression, identifierReference);
 
     [Rule($"inplace_divide_expression : 'divide' {IdentifierReference} 'by' primitive_expression")]
+    [Rule($"inplace_divide_expression : 'Divide' {IdentifierReference} 'by' primitive_expression")]
     private static InPlaceDivisionExpression MakeInPlaceDivisionExpression(
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
@@ -154,7 +159,16 @@ public partial class EngLangParser : IEngLangParser
             _ => throw new InvalidOperationException()
         };
 
-    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} (EqualKeyword 'to' literal_expression)?")]
+    [Rule("constant_expression : ('+' | '-')? literal_expression")]
+    private static Expression MakeConstantExpression(
+        IToken<EngLangTokenType>? token,
+        Expression expression)
+    {
+        Debug.Assert(token?.Text != "-", "negated expressions does not supported.");
+        return expression;
+    }
+
+    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} (EqualKeyword 'to' constant_expression)?")]
     private static VariableDeclaration MakeVariableDeclaration(
         IToken<EngLangTokenType> definiteArticle,
         IReadOnlyList<string> identifier,
@@ -169,6 +183,14 @@ public partial class EngLangParser : IEngLangParser
     private static IdentifierReferencesList MakeShapeSlotList(
         Punctuated<IdentifierReferencesList, IToken<EngLangTokenType>> slots)
         => new IdentifierReferencesList(slots.Values.SelectMany(_ => _.IdentifierReferences).ToImmutableList());
+
+    [Rule($"shape_slot_list: comma_identifier_references_list ',' 'and' comma_identifier_references_list")]
+    private static IdentifierReferencesList MakeShapeSlotList(
+        IdentifierReferencesList first,
+        IToken<EngLangTokenType> comma,
+        IToken<EngLangTokenType> and,
+        IdentifierReferencesList second)
+        => new IdentifierReferencesList(first.IdentifierReferences.Union(second.IdentifierReferences).ToImmutableList());
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('with' shape_slot_list)?")]
     private static ShapeDeclaration MakeShapeDeclaration(
@@ -455,27 +477,39 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule($"label_word : {Identifier}")]
     [Rule($"label_word : OfKeyword")]
+    //[Rule($"label_word : IsKeyword")]
+    //[Rule($"label_word : IfKeyword")]
     [Rule($"label_word : DefiniteArticleKeyword")]
     [Rule($"label_word : AndKeyword")]
     [Rule($"label_word : MathOperationKeyword")]
     [Rule($"label_word : LogicalOperationKeyword")]
     private static IToken<EngLangTokenType> MakeLabelWord(IToken<EngLangTokenType> marker)
         => marker;
+    [Rule($"comment_label : '(' ({Identifier} | '-')* ')'")]
+    private static string MakeInvokableLabel(
+        IToken<EngLangTokenType> toToken,
+        IReadOnlyList<IToken<EngLangTokenType>> names,
+        IToken<EngLangTokenType> colonToken)
+    {
+        string labelName = string.Join(" ", names.Select(token => token.Text));
+        return $"({labelName})";
+    }
 
-    [Rule($"invokable_label : 'to' label_word+ identifier_references_list ':'")]
-    [Rule($"invokable_label : 'to' label_word+ identifier_references_list '->'")]
-    [Rule($"invokable_label : 'To' label_word+ identifier_references_list ':'")]
-    [Rule($"invokable_label : 'To' label_word+ identifier_references_list '->'")]
-    [Rule($"invokable_label : 'define' label_word+ identifier_references_list 'as'")]
-    [Rule($"invokable_label : 'Define' label_word+ identifier_references_list 'as'")]
+    [Rule($"invokable_label : 'to' label_word+ identifier_references_list comment_label? ':'")]
+    [Rule($"invokable_label : 'to' label_word+ identifier_references_list comment_label? '->'")]
+    [Rule($"invokable_label : 'To' label_word+ identifier_references_list comment_label? ':'")]
+    [Rule($"invokable_label : 'To' label_word+ identifier_references_list comment_label? '->'")]
+    [Rule($"invokable_label : 'define' label_word+ identifier_references_list comment_label? 'as'")]
+    [Rule($"invokable_label : 'Define' label_word+ identifier_references_list comment_label? 'as'")]
     private static InvokableLabel MakeInvokableLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
         IdentifierReferencesList identifierTokens,
+        string? comment,
         IToken<EngLangTokenType> colonToken)
     {
         string labelName = string.Join(" ", firstToken.Select(i => i.Text));
-        return new InvokableLabel(labelName, identifierTokens.IdentifierReferences.ToArray());
+        return new InvokableLabel(labelName + (comment is null ? "" : " " + comment), identifierTokens.IdentifierReferences.ToArray());
     }
 
     [Rule($"invokable_label : label_word+ identifier_references_list '->'")]

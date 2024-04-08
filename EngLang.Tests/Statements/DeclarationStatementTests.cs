@@ -53,6 +53,9 @@ An rectangle has a width and a height, a fill colour.
     [InlineData("""
 An rectangle has a width, a height and a fill colour.
 """)]
+    [InlineData("""
+An rectangle has a width, a height, and a fill colour.
+""")]
     public void ShapeDeclarationWithSlotsWithoutBase(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
