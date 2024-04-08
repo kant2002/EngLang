@@ -7,22 +7,41 @@
 
 <InputFile OnChange="@SingleUpload" />
 <div class="row">
-    <div class="col">
+    <div class="col-6">
         @((MarkupString)Content)
     </div>
-    <div class="col">
+    <div class="col-6">
         <h1>Variables</h1>
         <ul>
             @foreach (var v in variables.Values)
             {
-                if (v.Type is null)
-                {
-                    <li>@v.Name</li>
-                }
-                else
-                {
-                    <li>@v.Name - @v.Type</li>
-                }
+                <li>
+                    @v.Name
+
+                    @if (v.Type is not null)
+                    {
+                        <text> : @v.Type</text>
+                    }
+
+                    @if (v.DefaultValue is not null)
+                    {
+                        <text> = @v.DefaultValue</text>
+                    }
+                </li>
+            }
+        </ul>
+        <h1>Types</h1>
+        <ul>
+            @foreach (var v in types.Values)
+            {
+                <li>
+                    @v.Name
+
+                    @if (v.Parameters.Length != 0)
+                    {
+                        <text>(@(string.Join(", ", v.Parameters.Select(_ => $"{_.Name}: {_.Type}")))</text>
+                    }
+                </li>
             }
         </ul>
         <h1>Functions</h1>
@@ -34,7 +53,7 @@
             @foreach (var v in functions.Values)
             {
                 <li>
-                    <a href="@baseUrl#@v.Template" @onclick=@(() =>ScrollToId(v.Template))>
+                    <a href="@baseUrl#@Uri.EscapeDataString(v.Template)" @onclick=@(() => ScrollToId(v.Template))>
                         @v.Template
                         @if (v.Parameters.Length != 0)
                         {
@@ -51,6 +70,7 @@
 
     string Content = "";
     Dictionary<string, VariableInformation> variables = new();
+    Dictionary<string, TypeInformation> types = new();
     Dictionary<string, FunctionInformation> functions = new();
 
     protected override void OnInitialized()
@@ -119,34 +139,58 @@
 
     private string ParseParagraph(string text)
     {
-        var lines = text.Split("\r\n");
-        if (text.StartsWith("the ") || text.StartsWith("an ") || text.StartsWith("a "))
+        if (text.StartsWith("the "))
         {
-            variables.Add(text, new(text, null));
+            var code = string.Join("\r\n", text.Split("\r\n").Where(_ => !_.Trim().StartsWith("\\")));
+            var variableName = code.Replace("the ", "");
+            var parts = variableName.Split(" is ", 2);
+            if (parts.Length == 1)
+            {
+                parts = variableName.Split(" are ", 2);
+            }
+
+            variableName = parts[0];
+            var typeName = parts.ElementAtOrDefault(1);
+            string? defaultValue = null;
+            if (typeName is not null)
+            {
+                parts = typeName.Replace("a ", "").Replace("an ", "").Split(" equal to ", 2);
+                typeName = parts[0];
+                defaultValue = parts.ElementAtOrDefault(1);
+            }
+
+            variables.Add(variableName, new(variableName, typeName, defaultValue));
         }
 
+        if (text.StartsWith("an ") || text.StartsWith("a "))
+        {
+            types.Add(text, new(text, Array.Empty<VariableInformation>()));
+        }
+
+        var lines = text.Split("\r\n");
         return $"<pre>{string.Join("\r\n", lines.Select(MarkFunctionHeader).Select(MarkComments))}</pre>";
 
         string MarkFunctionHeader(string text)
         {
-            var toStartPosition = text.IndexOf("to", StringComparison.InvariantCultureIgnoreCase);
-            if (toStartPosition != 0) return text;
-            var lineEndPosition = text.IndexOf("\r\n", StringComparison.InvariantCultureIgnoreCase);
+            var (code, comment) = ParseComments(text);
+            var toStartPosition = code.IndexOf("to", StringComparison.InvariantCultureIgnoreCase);
+            if (toStartPosition != 0) return code;
+            var lineEndPosition = code.IndexOf("\r\n", StringComparison.InvariantCultureIgnoreCase);
             string name;
             string leftover;
             if (lineEndPosition == -1)
             {
-                name = text;
+                name = code;
                 leftover = "";
             }
             else
             {
-                name = text[0..lineEndPosition];
-                leftover = text[lineEndPosition..];
+                name = code[0..lineEndPosition];
+                leftover = code[lineEndPosition..];
             }
 
             functions.Add(name, new FunctionInformation(name, Array.Empty<string>()));
-            return $"<a name='{name}'></a><span class='englang-function-declaration'>{name}</span>{leftover}";
+            return $"<a name='{name}'></a><span class='englang-function-declaration'>{name}</span>{comment}{leftover}";
         }
 
         string MarkComments(string text)
@@ -155,8 +199,16 @@
             if (commentStartPosition == -1) return text;
             return $"{text[0..commentStartPosition]}<span class='englang-comments'>{text[commentStartPosition..]}</span>";
         }
+
+        (string, string?) ParseComments(string text)
+        {
+            var commentStartPosition = text.IndexOf("\\");
+            if (commentStartPosition == -1) return (text, null);
+            return (text[0..commentStartPosition], text[commentStartPosition..]);
+        }
     }
 
-    record VariableInformation(string Name, string? Type);
+    record VariableInformation(string Name, string? Type, string? DefaultValue);
     record FunctionInformation(string Template, string[] Parameters);
+    record TypeInformation(string Name, VariableInformation[] Parameters);
 }
