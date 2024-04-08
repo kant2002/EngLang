@@ -139,3 +139,12 @@ operation on hidden register with context dependent flushing. So we start operat
 memory cell, then can continue operation and so on. Now depending on the context, like if this regular statement we dump
 result in original location, or in case if this sentence is last sentence in function we return value from that temporary
 register.
+
+## Variable names and types are usually the same
+
+If we speak about recent improvements in the engineering of enterprise application, I would say that we observe that software written in very mundane way
+where all dependencies/operations moved to separate types, and then passed as dependencies to other processes. This lead to funny naming conventions
+```
+ILogger logger;
+```
+So maybe we like to have 1 thing to be specific object and their own class at the same time?
