@@ -148,3 +148,10 @@ where all dependencies/operations moved to separate types, and then passed as de
 ILogger logger;
 ```
 So maybe we like to have 1 thing to be specific object and their own class at the same time?
+
+In Rust fields of structure can be shortened from Например, `MyStruct {foo: foo}` to simply `MyStruct {foo}`. Many languages utilize type inferrence for this shortening. 
+For example 
+```
+Logger logger = new();
+```
+Tuples maybe in some form works? Javascript has notion for short copying of variables to properties of the objects, like `{ foo }` which seems close somewhat.
