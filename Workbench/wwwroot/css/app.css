@@ -74,3 +74,27 @@ textarea[name=source-code] {
 .englang-function-declaration {
     font-weight: bold;
 }
+
+.nlp-tag-verb {
+    color: red;
+}
+
+.nlp-tag-noun {
+    color: dodgerblue;
+}
+
+.nlp-tag-det {
+    color: dodgerblue;
+}
+
+.nlp-tag-adj {
+    color: dodgerblue;
+}
+
+.nlp-tag-part {
+    font-weight: bold;
+}
+
+.nlp-tag-adp {
+    color: grey;
+}

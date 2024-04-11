@@ -1,0 +1,30 @@
+@page "/nlp"
+@using EngLang
+@using Yoakke.SynKit.Parser
+
+<PageTitle>NLP analysis</PageTitle>
+
+<div class="d-flex flex-sm-column flex-xl-row">
+    <div class="w-100 pe-3">
+        <label for="source-code" class="form-label">Source code:</label>
+        <textarea name="source-code" @bind="SourceCode" class="form-control"></textarea>
+    </div>
+    <div class="w-100">
+        <h2>NLP analysis</h2>
+        <SentenceAnalysys Text="@SourceCode" />
+    </div>
+</div>
+
+@code {
+    private string? sourceCode = "";
+    private string? SourceCode
+    {
+        get => sourceCode;
+        set
+        {
+            sourceCode = value;
+            OnParametersSet();
+            StateHasChanged();
+        }
+    }
+}

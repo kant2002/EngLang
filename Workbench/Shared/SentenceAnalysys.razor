@@ -14,7 +14,16 @@
             <text>========== Sentence =============<br /></text>
             @foreach (var word in sentence)
             {
-                <text>@($"{word.Tag}({Word(word)}) ")</text>
+                var wordText = Word(word);
+                <span title="H: @word.Head DT: @word.DependencyType" class="nlp-tag-@word.Tag.ToString().ToLowerInvariant()">
+                    @($"{word.Tag}({wordText}) ")
+                </span>
+                @if (wordText.Contains(",", StringComparison.InvariantCulture)
+                    //|| wordText.Contains(":", StringComparison.InvariantCulture)
+                    )
+                {
+                    <br />
+                }
             }
             <br />    
         }
