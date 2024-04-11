@@ -38,7 +38,7 @@ public class StupidEngLangParser : IEngLangParser
 
     private ParseResult<Paragraph> ParseParagraph(string text)
     {
-        if (text.StartsWith("the "))
+        if (text.StartsWith("the ") || text.StartsWith("The "))
         {
             var code = string.Join("\r\n", text.Split("\r\n").Where(_ => !_.Trim().StartsWith("\\"))).Trim().TrimEnd('.');
             var variableName = code.Replace("the ", "");
@@ -58,13 +58,14 @@ public class StupidEngLangParser : IEngLangParser
                 defaultValue = parts.ElementAtOrDefault(1);
             }
 
-            var defaultValueExpression = defaultValue is null ? null : new IntLiteralExpression(int.Parse(defaultValue));
+            var defaultValueExpression = defaultValue is null ? null
+                : defaultValue.StartsWith("\"") ? (Expression?)new StringLiteralExpression(defaultValue) : new IntLiteralExpression(int.Parse(defaultValue));
             Statement declStat = new VariableDeclarationStatement(new VariableDeclaration(variableName, new IdentifierReference(typeName, null), defaultValueExpression));
             var para = new Paragraph(new[] { declStat }.ToImmutableList(), null);
             return ParseResult.Ok(para, 0);
         }
 
-        if (text.StartsWith("an ") || text.StartsWith("a "))
+        if (text.StartsWith("an ") || text.StartsWith("An ") || text.StartsWith("a ") || text.StartsWith("A "))
         {
             var code = text.Trim().TrimEnd('.');
             var parts = code.Split(" is ", 2);

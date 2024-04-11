@@ -1,4 +1,5 @@
 @page "/parsing"
+@using EngLang
 @inject NavigationManager navigationManager
 @inject IJSRuntime JSRuntime
 @implements IDisposable
@@ -127,6 +128,7 @@
         var bytes = ms.ToArray();
         variables.Clear();
         functions.Clear();
+        types.Clear();
         Content = ParseText(System.Text.Encoding.UTF8.GetString(bytes));
         //do something with bytes
     }
@@ -139,9 +141,9 @@
 
     private string ParseParagraph(string text)
     {
-        if (text.StartsWith("the "))
+        if (text.StartsWith("the ") || text.StartsWith("The "))
         {
-            var code = string.Join("\r\n", text.Split("\r\n").Where(_ => !_.Trim().StartsWith("\\")));
+            var code = string.Join("\r\n", text.Split("\r\n").Where(_ => !_.Trim().StartsWith("\\"))).Trim().TrimEnd('.');
             var variableName = code.Replace("the ", "");
             var parts = variableName.Split(" is ", 2);
             if (parts.Length == 1)
@@ -159,11 +161,21 @@
                 defaultValue = parts.ElementAtOrDefault(1);
             }
 
+            var parser = new StupidEngLangParser(text);
+            var paragraph = parser.ParseParagraph();
+            System.Diagnostics.Debug.Assert(paragraph.IsOk);
+            var varDeclarationStatement = (VariableDeclarationStatement)paragraph.Ok.Value.Statements[0];
+            var declaration = varDeclarationStatement.Declaration;
+            System.Diagnostics.Debug.Assert(declaration.Name == variableName && declaration.TypeName.Name == typeName);
             variables.Add(variableName, new(variableName, typeName, defaultValue));
         }
 
-        if (text.StartsWith("an ") || text.StartsWith("a "))
+        if (text.StartsWith("an ") || text.StartsWith("An ") || text.StartsWith("a ") || text.StartsWith("A "))
         {
+            var parser = new StupidEngLangParser(text);
+            var paragraph = parser.ParseParagraph();
+            System.Diagnostics.Debug.Assert(paragraph.IsOk);
+            var shapeDeclarationStatement = (ShapeDeclarationStatement)paragraph.Ok.Value.Statements[0];
             types.Add(text, new(text, Array.Empty<VariableInformation>()));
         }
 
