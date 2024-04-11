@@ -1,6 +1,7 @@
 @page "/parser"
 @using EngLang
 @using Yoakke.SynKit.Parser
+@inject NavigationManager navigationManager
 
 <PageTitle>Parser</PageTitle>
 
@@ -56,6 +57,7 @@
             StateHasChanged();
         }
     }
+    public bool SimpleParser { get; set; }
     private List<SyntaxNode> SyntaxNodes = new();
 
     private ParseResult<ParagraphList> ParagraphList;
@@ -64,6 +66,12 @@
     private ParseResult<BlockStatement> StatementList;
     private ParseResult<LabeledStatement> LabeledStatement;
     private ParseResult<LabeledStatement> LabeledStatementSimple;
+
+    protected override void OnInitialized()
+    {
+        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+        this.SimpleParser = System.Web.HttpUtility.ParseQueryString(uri.Query).Get("simple") == "true";
+    }
 
     protected override void OnParametersSet()
     {
@@ -75,7 +83,10 @@
         LabeledStatementSimple = CreateParser().ParseLabeledStatementSimple();
     }
 
-    private IEngLangParser CreateParser() => new EngLangParser(new EngLangLexer(SourceCode));
+    private IEngLangParser CreateParser() =>
+        SimpleParser
+            ? new StupidEngLangParser(SourceCode)
+            : new EngLangParser(new EngLangLexer(SourceCode));
 
     private IEnumerable<SyntaxNode> GetNodes(SyntaxNode? node) => node is null ? Array.Empty<SyntaxNode>() : new[] { node };
 }
