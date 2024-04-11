@@ -220,6 +220,29 @@ a rectangle is a shape with
     and a height.
 ```
 
+## Arrays or lists
+
+I think we as humans operate on some objects. Language assume that we either have some set of ordered objects. Probably closer to dynamic lists.
+Arrays is more imporants.
+
+```
+the apples are some fruits.
+```
+
+or
+
+```
+the apples are fruits.
+```
+
+assuming that `fruit` is some shape. Pluralization is important for humans.
+
+```
+the apples are some fruit.
+```
+
+look really wierd.
+
 # Links
 - [1] https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
 - [2] https://github.com/pannous/english-script

@@ -11,6 +11,7 @@ public enum EngLangTokenType
     [Regex("(\r\n|\n|\r){2,}")] Multiline,
 
     [Regex("(a|an|An)")] IndefiniteArticleKeyword,
+    [Token("some")] SomeKeyword,
     [Token("the")] DefiniteArticleKeyword,
 
     [Token(";")] SemicolonKeyword,
@@ -26,6 +27,7 @@ public enum EngLangTokenType
 
     [Token("if")] IfKeyword,
     [Token("is")] IsKeyword,
+    [Token("are")] AreKeyword,
     [Token("has")] HasKeyword,
     [Regex("(equal|equals)")] EqualKeyword,
     [Regex("(in|into)")] IntoKeyword,

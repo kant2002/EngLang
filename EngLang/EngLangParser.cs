@@ -1,5 +1,6 @@
 namespace EngLang;
 
+using Humanizer;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,6 +15,7 @@ using Yoakke.SynKit.Parser.Attributes;
 public partial class EngLangParser : IEngLangParser
 {
     private const string IdentifierReference = "identifier_reference";
+    private const string TypeIdentifierReference = "type_reference";
     private const string LongIdentifier = "long_identifier";
     private const string Identifier = "Identifier";
 
@@ -60,6 +62,23 @@ public partial class EngLangParser : IEngLangParser
 
         var identifier = currentIdentifier.ToString();
         return new IdentifierReference(identifier, parentReference);
+    }
+
+    [Rule($"{TypeIdentifierReference} : IndefiniteArticleKeyword {LongIdentifier}")]
+    private static TypeIdentifierReference MakeTypeIdentifierReference(
+        IToken<EngLangTokenType> indefiniteArticleKeyword,
+        IReadOnlyList<string> identifiersList)
+    {
+        return new TypeIdentifierReference(string.Join(" ", identifiersList), false);
+    }
+
+    [Rule($"{TypeIdentifierReference} : 'some' {LongIdentifier}")]
+    private static TypeIdentifierReference MakeCollectionTypeIdentifierReference(
+        IToken<EngLangTokenType> indefiniteArticleKeyword,
+        IReadOnlyList<string> identifiersList)
+    {
+        var typeName = string.Join(" ", identifiersList.SkipLast(1).Append(identifiersList.Last().Singularize()));
+        return new TypeIdentifierReference(typeName, true);
     }
 
     [Rule($"variable_expression : {IdentifierReference}")]
@@ -168,16 +187,17 @@ public partial class EngLangParser : IEngLangParser
         return expression;
     }
 
-    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} (EqualKeyword 'to' constant_expression)?")]
+    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {TypeIdentifierReference} (EqualKeyword 'to' constant_expression)?")]
+    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'are' {TypeIdentifierReference} (EqualKeyword 'to' constant_expression)?")]
     private static VariableDeclaration MakeVariableDeclaration(
         IToken<EngLangTokenType> definiteArticle,
         IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> isToken,
-        IdentifierReference identifierReference,
+        TypeIdentifierReference typeReference,
         (IToken<EngLangTokenType> equalToken,
         IToken<EngLangTokenType> toToken,
         Expression literalExpression)? x)
-        => new VariableDeclaration(string.Join(' ', identifier), identifierReference, x?.literalExpression);
+        => new VariableDeclaration(string.Join(' ', identifier), typeReference, x?.literalExpression);
 
     [Rule($"shape_slot_list: (comma_identifier_references_list ('and' comma_identifier_references_list)*)")]
     private static IdentifierReferencesList MakeShapeSlotList(

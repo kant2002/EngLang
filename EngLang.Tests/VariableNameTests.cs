@@ -75,6 +75,21 @@ public class VariableNameTests
         var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
         Assert.Equal("name", variableDeclaration.Name);
         Assert.Equal("apple", variableDeclaration.TypeName.Name);
+        Assert.False(variableDeclaration.TypeName.IsCollection);
+        Assert.Null(variableDeclaration.Expression);
+    }
+
+    [Fact]
+    public void DeclareCollectionVariableWithAnType()
+    {
+        var sentence = "the apples are some fruits";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
+        Assert.Equal("apples", variableDeclaration.Name);
+        Assert.Equal("fruit", variableDeclaration.TypeName.Name);
+        Assert.True(variableDeclaration.TypeName.IsCollection);
         Assert.Null(variableDeclaration.Expression);
     }
 

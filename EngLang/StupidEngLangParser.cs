@@ -60,7 +60,7 @@ public class StupidEngLangParser : IEngLangParser
 
             var defaultValueExpression = defaultValue is null ? null
                 : defaultValue.StartsWith("\"") ? (Expression?)new StringLiteralExpression(defaultValue) : new IntLiteralExpression(int.Parse(defaultValue));
-            Statement declStat = new VariableDeclarationStatement(new VariableDeclaration(variableName, new IdentifierReference(typeName, null), defaultValueExpression));
+            Statement declStat = new VariableDeclarationStatement(new VariableDeclaration(variableName, new TypeIdentifierReference(typeName, false), defaultValueExpression));
             var para = new Paragraph(new[] { declStat }.ToImmutableList(), null);
             return ParseResult.Ok(para, 0);
         }

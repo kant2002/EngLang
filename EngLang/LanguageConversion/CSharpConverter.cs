@@ -47,10 +47,23 @@ public class CSharpConverter : ILanguageConverter
         }
     }
 
+    private string ConvertTypeIdentifierReference(TypeIdentifierReference identifierReference)
+    {
+        var identifier = ConvertToIdentifier(identifierReference.Name);
+        if (identifierReference.IsCollection)
+        {
+            return $"{identifier}[]";
+        }
+        else
+        {
+            return identifier;
+        }
+    }
+
     private string ConvertVariableDeclaration(VariableDeclaration variableDeclaration)
     {
         var result = new StringBuilder();
-        result.Append(ConvertIdentifierReference(variableDeclaration.TypeName));
+        result.Append(ConvertTypeIdentifierReference(variableDeclaration.TypeName));
         result.Append(' ');
         result.Append(ConvertToIdentifier(variableDeclaration.Name));
         if (variableDeclaration.Expression != null)
