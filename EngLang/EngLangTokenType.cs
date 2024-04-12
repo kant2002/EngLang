@@ -28,6 +28,7 @@ public enum EngLangTokenType
 
     [Regex("(if|If)")] IfKeyword,
     [Token("is")] IsKeyword,
+    [Token("at")] AtKeyword,
     [Token("are")] AreKeyword,
     [Token("has")] HasKeyword,
     [Regex("(equal|equals)")] EqualKeyword,

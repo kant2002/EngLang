@@ -90,7 +90,7 @@ public class CSharpConverter : ILanguageConverter
         result.AppendLine("{");
         if (variableDeclaration.WellKnownSlots != null)
         {
-            foreach (var slot in variableDeclaration.WellKnownSlots.IdentifierReferences)
+            foreach (var slot in variableDeclaration.WellKnownSlots.Slots)
             {
                 result.AppendLine($"    public object {ConvertToIdentifier(slot.Name)};");
             }

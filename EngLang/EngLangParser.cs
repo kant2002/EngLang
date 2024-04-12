@@ -218,17 +218,17 @@ public partial class EngLangParser : IEngLangParser
         => new VariableDeclaration(string.Join(' ', identifier), typeReference, x?.literalExpression);
 
     [Rule($"shape_slot_list: (comma_identifier_references_list ('and' comma_identifier_references_list)*)")]
-    private static IdentifierReferencesList MakeShapeSlotList(
-        Punctuated<IdentifierReferencesList, IToken<EngLangTokenType>> slots)
-        => new IdentifierReferencesList(slots.Values.SelectMany(_ => _.IdentifierReferences).ToImmutableList());
+    private static SlotDeclarationsList MakeShapeSlotList(
+        Punctuated<SlotDeclarationsList, IToken<EngLangTokenType>> slots)
+        => new SlotDeclarationsList(slots.Values.SelectMany(_ => _.Slots).ToImmutableList());
 
     [Rule($"shape_slot_list: comma_identifier_references_list ',' 'and' comma_identifier_references_list")]
-    private static IdentifierReferencesList MakeShapeSlotList(
-        IdentifierReferencesList first,
+    private static SlotDeclarationsList MakeShapeSlotList(
+        SlotDeclarationsList first,
         IToken<EngLangTokenType> comma,
         IToken<EngLangTokenType> and,
-        IdentifierReferencesList second)
-        => new IdentifierReferencesList(first.IdentifierReferences.Union(second.IdentifierReferences).ToImmutableList());
+        SlotDeclarationsList second)
+        => new SlotDeclarationsList(first.Slots.Union(second.Slots).ToImmutableList());
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
     private static ShapeDeclaration MakeShapeDeclaration(
@@ -236,7 +236,7 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> isToken,
         TypeIdentifierReference identifierReference,
-        (IToken<EngLangTokenType> withToken, IdentifierReferencesList slots)? slotsList)
+        (IToken<EngLangTokenType> withToken, SlotDeclarationsList slots)? slotsList)
         => new ShapeDeclaration(string.Join(' ', identifier), identifierReference, slotsList?.slots);
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'has' shape_slot_list")]
@@ -244,7 +244,7 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> indefiniteArticle,
         IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> hasToken,
-        IdentifierReferencesList slotsList)
+        SlotDeclarationsList slotsList)
         => new ShapeDeclaration(string.Join(' ', identifier), null, slotsList);
 
     [Rule($"assignment_expression: PutKeyword primitive_expression IntoKeyword {IdentifierReference}")]
@@ -514,10 +514,17 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<(IdentifierReference, IToken<EngLangTokenType>?)> identifierReferences)
         => new IdentifierReferencesList(identifierReferences.Select(_ => _.Item1).ToImmutableList());
 
-    [Rule($"comma_identifier_references_list : ({IdentifierReference} (CommaKeyword {IdentifierReference})*)")]
-    private static IdentifierReferencesList MakeCommaDelimitedIdentifierReferencesList(
-        Punctuated<IdentifierReference, IToken<EngLangTokenType>> identifierReferences)
-        => new IdentifierReferencesList(identifierReferences.Select(_ => _.Value).ToImmutableList());
+    [Rule($"slot_declaration : {IdentifierReference} ('is' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {IdentifierReference} ('at' {IdentifierReference})?")]
+    private static SlotDeclaration MakeSlotDeclaration(
+        IdentifierReference identifierReferences,
+        (IToken<EngLangTokenType>, IdentifierReference AliasFor)? alias)
+        => new SlotDeclaration(identifierReferences.Name, alias?.AliasFor?.Name);
+
+    [Rule($"comma_identifier_references_list : (slot_declaration (CommaKeyword slot_declaration)*)")]
+    private static SlotDeclarationsList MakeCommaDelimitedIdentifierReferencesList(
+        Punctuated<SlotDeclaration, IToken<EngLangTokenType>> identifierReferences)
+        => new SlotDeclarationsList(identifierReferences.Values.ToImmutableList());
 
     [Rule($"label_word : {Identifier}")]
     [Rule($"label_word : OfKeyword")]

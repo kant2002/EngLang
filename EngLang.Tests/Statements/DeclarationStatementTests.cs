@@ -42,8 +42,8 @@ An rectangle is a shape with a width and a height.
         Assert.Equal("rectangle", shapeDeclaration.Name);
         Assert.Equal("shape", shapeDeclaration.BaseShapeName.Name);
         Assert.NotNull(shapeDeclaration.WellKnownSlots);
-        Assert.Equal("width", shapeDeclaration.WellKnownSlots.IdentifierReferences[0].Name);
-        Assert.Equal("height", shapeDeclaration.WellKnownSlots.IdentifierReferences[1].Name);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
+        Assert.Equal("height", shapeDeclaration.WellKnownSlots.Slots[1].Name);
     }
 
     [Theory]
@@ -67,9 +67,40 @@ An rectangle has a width, a height, and a fill colour.
         Assert.Equal("rectangle", shapeDeclaration.Name);
         Assert.Null(shapeDeclaration.BaseShapeName);
         Assert.NotNull(shapeDeclaration.WellKnownSlots);
-        Assert.Equal("width", shapeDeclaration.WellKnownSlots.IdentifierReferences[0].Name);
-        Assert.Equal("height", shapeDeclaration.WellKnownSlots.IdentifierReferences[1].Name);
-        Assert.Equal("fill colour", shapeDeclaration.WellKnownSlots.IdentifierReferences[2].Name);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[0].AliasFor);
+        Assert.Equal("height", shapeDeclaration.WellKnownSlots.Slots[1].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
+        Assert.Equal("fill colour", shapeDeclaration.WellKnownSlots.Slots[2].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[2].AliasFor);
+    }
+
+    [Theory]
+    [InlineData("""
+a pen has
+    a width,
+    a size is a width.
+""")]
+    [InlineData("""
+a pen has
+    a width,
+    a size at the width.
+""")]
+    public void ShapeDeclarationWithSlotsAndAlias(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
+        var shapeDeclaration = shapeStatement.Declaration;
+        Assert.Equal("pen", shapeDeclaration.Name);
+        Assert.Null(shapeDeclaration.BaseShapeName);
+        Assert.NotNull(shapeDeclaration.WellKnownSlots);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[0].AliasFor);
+        Assert.Equal("size", shapeDeclaration.WellKnownSlots.Slots[1].Name);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
     }
 
     [Theory]

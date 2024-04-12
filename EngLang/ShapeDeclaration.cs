@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace EngLang;
 
-public record ShapeDeclaration(string Name, TypeIdentifierReference? BaseShapeName, IdentifierReferencesList? WellKnownSlots = null) : SyntaxNode
+public record ShapeDeclaration(string Name, TypeIdentifierReference? BaseShapeName, SlotDeclarationsList? WellKnownSlots = null) : SyntaxNode
 {
     public override IEnumerable<SyntaxNode> Children
     {
@@ -14,7 +14,7 @@ public record ShapeDeclaration(string Name, TypeIdentifierReference? BaseShapeNa
 
             if (WellKnownSlots is not null)
             {
-                foreach (var slot in WellKnownSlots.IdentifierReferences)
+                foreach (var slot in WellKnownSlots.Slots)
                 {
                     yield return slot;
                 }
