@@ -67,6 +67,7 @@ public class IfTests
     [InlineData("if a number is 0 , exit.")]
     [InlineData("if a number is 0, exit.")]
     [InlineData("if a number is 0,exit.")]
+    [InlineData("If a number is 0,exit.")]
     public void CommaInsteadOfThen(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);

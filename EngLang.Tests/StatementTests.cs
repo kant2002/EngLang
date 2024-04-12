@@ -252,6 +252,8 @@ To calculate area from a width and a height ->
     [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of")]
     [InlineData("To calculate the area of a rectangle (multiplication): result is 1.", "calculate the area of (multiplication)")]
     [InlineData("To calculate the area of a rectangle (multiplication - trivial): result is 1.", "calculate the area of (multiplication - trivial)")]
+    [InlineData("to apply some parameters: result is 1.", "apply")]
+    [InlineData("to do something with some parameters: result is 1.", "do something with")]
     public void LabeledWithParameterStatement(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);

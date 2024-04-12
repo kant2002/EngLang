@@ -15,6 +15,7 @@ using Yoakke.SynKit.Parser.Attributes;
 public partial class EngLangParser : IEngLangParser
 {
     private const string IdentifierReference = "identifier_reference";
+    private const string ParameterReference = "parameter_reference";
     private const string TypeIdentifierReference = "type_reference";
     private const string LongIdentifier = "long_identifier";
     private const string Identifier = "Identifier";
@@ -70,6 +71,22 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<string> identifiersList)
     {
         return new TypeIdentifierReference(string.Join(" ", identifiersList), false);
+    }
+
+    [Rule($"{ParameterReference} : IndefiniteArticleKeyword {LongIdentifier}")]
+    private static IdentifierReference MakeParameterReference(
+        IToken<EngLangTokenType> indefiniteArticleKeyword,
+        IReadOnlyList<string> identifiersList)
+    {
+        return new IdentifierReference(string.Join(" ", identifiersList), null);
+    }
+
+    [Rule($"{ParameterReference} : 'some' {LongIdentifier}")]
+    private static IdentifierReference MakeParameterArrayReference(
+        IToken<EngLangTokenType> indefiniteArticleKeyword,
+        IReadOnlyList<string> identifiersList)
+    {
+        return new IdentifierReference(string.Join(" ", identifiersList), null);
     }
 
     [Rule($"{TypeIdentifierReference} : 'some' {LongIdentifier}")]
@@ -449,10 +466,10 @@ public partial class EngLangParser : IEngLangParser
         };
     }
 
-    [Rule($"if_statement : 'if' logical_expression ThenKeyword expression_or_return_statement")]
-    [Rule($"if_statement : 'if' logical_expression ThenKeyword block_statement")]
-    [Rule($"if_statement : 'if' logical_expression CommaKeyword expression_or_return_statement")]
-    [Rule($"if_statement : 'if' logical_expression CommaKeyword block_statement")]
+    [Rule($"if_statement : IfKeyword logical_expression ThenKeyword expression_or_return_statement")]
+    [Rule($"if_statement : IfKeyword logical_expression ThenKeyword block_statement")]
+    [Rule($"if_statement : IfKeyword logical_expression CommaKeyword expression_or_return_statement")]
+    [Rule($"if_statement : IfKeyword logical_expression CommaKeyword block_statement")]
     private static IfStatement MakeIfEqualsStatement(
         IToken<EngLangTokenType> ifToken,
         LogicalExpression testExpression,
@@ -491,6 +508,11 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<(IdentifierReference, IToken<EngLangTokenType>?)> identifierReferences)
         => new IdentifierReferencesList(identifierReferences.Select(_ => _.Item1).ToImmutableList());
 
+    [Rule($"parameter_references_list : ({ParameterReference} 'and'?)*")]
+    private static IdentifierReferencesList MakeParameterReferencesList(
+        IReadOnlyList<(IdentifierReference, IToken<EngLangTokenType>?)> identifierReferences)
+        => new IdentifierReferencesList(identifierReferences.Select(_ => _.Item1).ToImmutableList());
+
     [Rule($"comma_identifier_references_list : ({IdentifierReference} (CommaKeyword {IdentifierReference})*)")]
     private static IdentifierReferencesList MakeCommaDelimitedIdentifierReferencesList(
         Punctuated<IdentifierReference, IToken<EngLangTokenType>> identifierReferences)
@@ -504,6 +526,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"label_word : AndKeyword")]
     [Rule($"label_word : MathOperationKeyword")]
     [Rule($"label_word : LogicalOperationKeyword")]
+    [Rule($"label_word : WithKeyword")]
     private static IToken<EngLangTokenType> MakeLabelWord(IToken<EngLangTokenType> marker)
         => marker;
     [Rule($"comment_label : '(' ({Identifier} | '-')* ')'")]
@@ -516,12 +539,12 @@ public partial class EngLangParser : IEngLangParser
         return $"({labelName})";
     }
 
-    [Rule($"invokable_label : 'to' label_word+ identifier_references_list comment_label? ':'")]
-    [Rule($"invokable_label : 'to' label_word+ identifier_references_list comment_label? '->'")]
-    [Rule($"invokable_label : 'To' label_word+ identifier_references_list comment_label? ':'")]
-    [Rule($"invokable_label : 'To' label_word+ identifier_references_list comment_label? '->'")]
-    [Rule($"invokable_label : 'define' label_word+ identifier_references_list comment_label? 'as'")]
-    [Rule($"invokable_label : 'Define' label_word+ identifier_references_list comment_label? 'as'")]
+    [Rule($"invokable_label : 'to' label_word+ parameter_references_list comment_label? ':'")]
+    [Rule($"invokable_label : 'to' label_word+ parameter_references_list comment_label? '->'")]
+    [Rule($"invokable_label : 'To' label_word+ parameter_references_list comment_label? ':'")]
+    [Rule($"invokable_label : 'To' label_word+ parameter_references_list comment_label? '->'")]
+    [Rule($"invokable_label : 'define' label_word+ parameter_references_list comment_label? 'as'")]
+    [Rule($"invokable_label : 'Define' label_word+ parameter_references_list comment_label? 'as'")]
     private static InvokableLabel MakeInvokableLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
@@ -533,7 +556,7 @@ public partial class EngLangParser : IEngLangParser
         return new InvokableLabel(labelName + (comment is null ? "" : " " + comment), identifierTokens.IdentifierReferences.ToArray());
     }
 
-    [Rule($"invokable_label : label_word+ identifier_references_list '->'")]
+    [Rule($"invokable_label : label_word+ parameter_references_list '->'")]
     private static InvokableLabel MakeInvokableLabel(
         IReadOnlyList<IToken<EngLangTokenType>> firstToken,
         IdentifierReferencesList identifierTokens,

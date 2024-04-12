@@ -26,7 +26,7 @@ public enum EngLangTokenType
     [Token("put")] PutKeyword,
     [Token("let")] LetKeyword,
 
-    [Token("if")] IfKeyword,
+    [Regex("(if|If)")] IfKeyword,
     [Token("is")] IsKeyword,
     [Token("are")] AreKeyword,
     [Token("has")] HasKeyword,
