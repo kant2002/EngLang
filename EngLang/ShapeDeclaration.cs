@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace EngLang;
 
-public record ShapeDeclaration(string Name, IdentifierReference? BaseShapeName, IdentifierReferencesList? WellKnownSlots = null) : SyntaxNode
+public record ShapeDeclaration(string Name, TypeIdentifierReference? BaseShapeName, IdentifierReferencesList? WellKnownSlots = null) : SyntaxNode
 {
     public override IEnumerable<SyntaxNode> Children
     {

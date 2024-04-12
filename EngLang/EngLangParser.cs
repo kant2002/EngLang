@@ -27,8 +27,9 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
+    [Rule($"{IdentifierReference} : DefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     private static IdentifierReference MakeIdentifierReference(
-        IToken<EngLangTokenType> indefiniteArticleKeyword,
+        IToken<EngLangTokenType> articleKeyword,
         IReadOnlyList<string> identifiersList,
         (IToken<EngLangTokenType> ofToken,
         IdentifierReference parentReference)? parent)
@@ -150,16 +151,16 @@ public partial class EngLangParser : IEngLangParser
         _ => throw new InvalidOperationException($"Unexpected token {token} for math expression"),
     };
 
-    [Rule($"inplace_addition_expression : 'add' literal_expression 'to' {IdentifierReference}")]
-    [Rule($"inplace_addition_expression : 'Add' literal_expression 'to' {IdentifierReference}")]
+    [Rule($"inplace_addition_expression : 'add' constant_expression 'to' {IdentifierReference}")]
+    [Rule($"inplace_addition_expression : 'Add' constant_expression 'to' {IdentifierReference}")]
     private static InPlaceAdditionExpression MakeInPlaceAdditionExpression(
         IToken<EngLangTokenType> addToken,
         Expression literalExpression,
         IToken<EngLangTokenType> toToken,
         IdentifierReference identifierReference) => new(literalExpression, identifierReference);
 
-    [Rule($"inplace_subtract_expression : 'subtract' literal_expression 'from' {IdentifierReference}")]
-    [Rule($"inplace_subtract_expression : 'Subtract' literal_expression 'from' {IdentifierReference}")]
+    [Rule($"inplace_subtract_expression : 'subtract' constant_expression 'from' {IdentifierReference}")]
+    [Rule($"inplace_subtract_expression : 'Subtract' constant_expression 'from' {IdentifierReference}")]
     private static InPlaceSubtractExpression MakeInPlaceSubtractExpression(
         IToken<EngLangTokenType> subtractToken,
         Expression literalExpression,
@@ -229,12 +230,12 @@ public partial class EngLangParser : IEngLangParser
         IdentifierReferencesList second)
         => new IdentifierReferencesList(first.IdentifierReferences.Union(second.IdentifierReferences).ToImmutableList());
 
-    [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {IdentifierReference} ('with' shape_slot_list)?")]
+    [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
         IReadOnlyList<string> identifier,
         IToken<EngLangTokenType> isToken,
-        IdentifierReference identifierReference,
+        TypeIdentifierReference identifierReference,
         (IToken<EngLangTokenType> withToken, IdentifierReferencesList slots)? slotsList)
         => new ShapeDeclaration(string.Join(' ', identifier), identifierReference, slotsList?.slots);
 
@@ -431,14 +432,14 @@ public partial class EngLangParser : IEngLangParser
         Expression expression)
         => new ExpressionStatement(expression);
 
-    [Rule($"logical_expression : {IdentifierReference} 'is' literal_expression")]
+    [Rule($"logical_expression : {IdentifierReference} 'is' constant_expression")]
     private static LogicalExpression MakeLogicalExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         Expression literalExpression)
         => new LogicalExpression(LogicalOperator.Equals, new VariableExpression(identifierReference), literalExpression);
 
-    [Rule($"logical_expression : {IdentifierReference} 'is' 'not' literal_expression")]
+    [Rule($"logical_expression : {IdentifierReference} 'is' 'not' constant_expression")]
     private static LogicalExpression MakeNegativeLogicalExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
@@ -446,7 +447,7 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression)
         => new LogicalExpression(LogicalOperator.NotEquals, new VariableExpression(identifierReference), literalExpression);
 
-    [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' literal_expression")]
+    [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' constant_expression")]
     private static LogicalExpression MakeLogicalExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> operatorToken,
