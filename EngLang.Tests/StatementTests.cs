@@ -146,6 +146,39 @@ To calculate area from a width and a height ->
     }
 
     [Fact]
+    public void MultipleParagraphsStartingFromEmptyLine()
+    {
+        var sentence = @"
+
+the width is a number.
+the height is a number.
+
+To calculate area from a width and a height ->
+  result is a width multiplied by a height.
+
+";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraphs = Assert.IsType<ParagraphList>(parseResult).Paragraphs;
+        Assert.Equal(2, paragraphs.Count);
+
+        var statements = paragraphs[0].Statements;
+        Assert.Equal(2, statements.Count);
+        var widthDeclarationStatement = Assert.IsType<VariableDeclarationStatement>(statements[0]);
+        Assert.Equal("width", widthDeclarationStatement.Declaration.Name);
+        Assert.Equal("number", widthDeclarationStatement.Declaration.TypeName.Name);
+
+        var heightDeclarationStatement = Assert.IsType<VariableDeclarationStatement>(statements[1]);
+        Assert.Equal("height", heightDeclarationStatement.Declaration.Name);
+        Assert.Equal("number", heightDeclarationStatement.Declaration.TypeName.Name);
+
+        var blockStatement = paragraphs[1];
+        Assert.Single(blockStatement.Statements);
+        Assert.IsType<MathExpression>(Assert.IsType<ResultStatement>(blockStatement.Statements[0]).Value);
+    }
+
+    [Fact]
     public void LastLabeledSentenceMissed()
     {
         var sentence = @"the width is a number.

@@ -361,8 +361,9 @@ public partial class EngLangParser : IEngLangParser
         => (true, invokableLabel);
 
     // invokable_label
-    [Rule("paragraph_list : invokable_label? (paragraph (paragraph_separator paragraph)*)")]
+    [Rule("paragraph_list : Multiline* invokable_label? (paragraph (paragraph_separator paragraph)*)")]
     private static ParagraphList MakeParagraphList(
+        IReadOnlyList<IToken<EngLangTokenType>> leadingMutlilines,
         InvokableLabel? firstInvokableLabel,
         Punctuated<Paragraph, (bool, InvokableLabel?)> statements)
     {
@@ -585,7 +586,7 @@ public partial class EngLangParser : IEngLangParser
         {
             if (!lexer.IsEnd)
             {
-                throw new Exception($"Parser error. Do not reach end of file. Currently at position {lexer.Position}");
+                throw new Exception($"Parser error. Do not reach end of file. Currently at position {lexer.Position}, next lexema is {lexer.Next()}");
             }
 
             var blockStatement = blockStatementResult.Ok.Value;

@@ -9,6 +9,7 @@ public enum EngLangTokenType
     [End] End,
     [Ignore] [Regex("([ \t]+((\r\n|\n|\r)[ \t]*)?|(\r\n|\n|\r))")] Whitespace,
     [Regex("(\r\n|\n|\r){2,}")] Multiline,
+    [Ignore] [Regex("\\\\[ \ta-zA-Z0-9,():.\\-/+=]*")] Comment,
 
     [Regex("(a|an|An)")] IndefiniteArticleKeyword,
     [Token("some")] SomeKeyword,

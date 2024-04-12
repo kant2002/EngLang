@@ -150,4 +150,20 @@ public class VariableNameTests
         var expression = Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression);
         Assert.Equal(40, expression.Value);
     }
+
+    [Fact]
+    public void ParseComment()
+    {
+        var sentence = "put 40 into a value. \\ 123";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+
+        var assignmentStatement = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
+        var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
+        Assert.Equal("value", assignmentExpression.Variable.Name);
+        var expression = Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression);
+        Assert.Equal(40, expression.Value);
+    }
 }
