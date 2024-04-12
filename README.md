@@ -220,6 +220,15 @@ a rectangle is a shape with
     and a height.
 ```
 
+We can have aliases for the shape slots.
+
+```
+a pen has
+    a color,
+    a width,
+    a size at the width.
+```
+
 ## Arrays or lists
 
 I think we as humans operate on some objects. Language assume that we either have some set of ordered objects. Probably closer to dynamic lists.

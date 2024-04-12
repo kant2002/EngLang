@@ -83,7 +83,17 @@ a pen has
 """)]
     [InlineData("""
 a pen has
+    a width and
+    a size is a width.
+""")]
+    [InlineData("""
+a pen has
     a width,
+    a size at the width.
+""")]
+    [InlineData("""
+a pen has
+    a width and
     a size at the width.
 """)]
     public void ShapeDeclarationWithSlotsAndAlias(string sentence)
