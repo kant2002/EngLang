@@ -102,19 +102,46 @@ public class ExpressionTests
     }
 
     [Theory]
-    [InlineData("a value is 42.", LogicalOperator.Equals)]
-    [InlineData("a value is not 42.", LogicalOperator.NotEquals)]
-    [InlineData("a value less than 42.", LogicalOperator.Less)]
-    [InlineData("a value smaller than 42.", LogicalOperator.Less)]
-    [InlineData("a value greater than 42.", LogicalOperator.Greater)]
-    [InlineData("a value bigger than 42.", LogicalOperator.Greater)]
-    public void LogicalBinaryOperationsOperation(string sentence, LogicalOperator logicalOperator)
+    [InlineData("a value divide by a dummy.", MathOperator.Divide)]
+    [InlineData("a value divided by a dummy.", MathOperator.Divide)]
+    [InlineData("a value multiply by a dummy.", MathOperator.Multiply)]
+    [InlineData("a value multiply a dummy.", MathOperator.Multiply)]
+    [InlineData("a value multiplied by a dummy.", MathOperator.Multiply)]
+    [InlineData("a value minus a dummy.", MathOperator.Minus)]
+    [InlineData("a value plus a dummy.", MathOperator.Plus)]
+    [InlineData("a value + a dummy.", MathOperator.Plus)]
+    [InlineData("a value - a dummy.", MathOperator.Minus)]
+    [InlineData("a value * a dummy.", MathOperator.Multiply)]
+    [InlineData("a value / a dummy.", MathOperator.Divide)]
+    public void MathExpressionsWithVar(string sentence, MathOperator mathOperator)
     {
         var parseResult = EngLangParser.Parse(sentence);
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
         var expression = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
-        var additionExpression = Assert.IsType<LogicalExpression>(expression.Expression);
+        var additionExpression = Assert.IsType<MathExpression>(expression.Expression);
+        Assert.Equal(mathOperator, additionExpression.Operator);
+        var addend = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.SecondOperand).Identifier);
+        Assert.Equal("dummy", addend.Name);
+        var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);
+        Assert.Equal("value", variable.Name);
+    }
+
+    [Theory]
+    [InlineData("a value is 42", LogicalOperator.Equals)]
+    [InlineData("a value is not 42", LogicalOperator.NotEquals)]
+    [InlineData("a value less than 42", LogicalOperator.Less)]
+    [InlineData("a value smaller than 42", LogicalOperator.Less)]
+    [InlineData("a value greater than 42", LogicalOperator.Greater)]
+    [InlineData("a value bigger than 42", LogicalOperator.Greater)]
+    public void LogicalBinaryOperationsOperation(string sentence, LogicalOperator logicalOperator)
+    {
+        var lexer = new EngLangLexer(sentence);
+        var parser = new EngLangParser(lexer);
+        var parseResult = parser.ParseLogicalExpression();
+        Assert.True(parseResult.IsOk);
+
+        var additionExpression = parseResult.Ok.Value;
         Assert.Equal(logicalOperator, additionExpression.Operator);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
         Assert.Equal(42, addend.Value);

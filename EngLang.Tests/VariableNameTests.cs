@@ -151,11 +151,11 @@ public class VariableNameTests
         Assert.Equal(40, expression.Value);
     }
 
-    [Fact]
-    public void ParseComment()
+    [Theory]
+    [InlineData("put 40 into a value. \\ 123")]
+    [InlineData("put 40 into a value. \\ your's")]
+    public void ParseComment(string sentence)
     {
-        var sentence = "put 40 into a value. \\ 123";
-
         var parseResult = EngLangParser.Parse(sentence);
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);

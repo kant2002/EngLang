@@ -247,7 +247,8 @@ To calculate area from a width and a height ->
     [InlineData("calculate area from a width and a height-> result is 1.", "calculate area from and")]
     [InlineData("define calculate area from a width and a height as result is 1.", "calculate area from and")]
     [InlineData("Define calculate area from a width and a height as result is 1.", "calculate area from and")]
-    [InlineData("define the factorial of a number as result is 1.", "the factorial of")]
+    [InlineData("define factorial of a number as result is 1.", "factorial of")]
+    //[InlineData("define the factorial of a number as result is 1.", "the factorial of")]
     [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
     [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
     [InlineData("To calculate the area of a rectangle (multiplication): result is 1.", "calculate the area of (multiplication)")]
@@ -255,6 +256,7 @@ To calculate area from a width and a height ->
     [InlineData("to apply some parameters: result is 1.", "apply")]
     [InlineData("to do something with some parameters: result is 1.", "do something with")]
     [InlineData("To put an object at the end of some objects: result is 1.", "put at the end of")]
+    [InlineData("to check if the selection is a string: result is 1.", "check if the selection is")]
     public void LabeledWithParameterStatement(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);
@@ -270,6 +272,8 @@ To calculate area from a width and a height ->
 
     [Theory]
     [InlineData("calculate factorial of a previous number into a previous factorial.", "calculate factorial of")]
+    [InlineData("calculate factorial of a previous number into a previous factorial (recursion).", "calculate factorial of (recursion)")]
+    [InlineData("calculate factorial of a previous number in the previous factorial (recursion).", "calculate factorial of (recursion)")]
     public void LabeledStatementInvocation(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);
