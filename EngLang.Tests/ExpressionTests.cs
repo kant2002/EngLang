@@ -82,6 +82,10 @@ public class ExpressionTests
     [InlineData("a value multiplied by 42.", MathOperator.Multiply)]
     [InlineData("a value minus 42.", MathOperator.Minus)]
     [InlineData("a value plus 42.", MathOperator.Plus)]
+    [InlineData("a value + 42.", MathOperator.Plus)]
+    [InlineData("a value - 42.", MathOperator.Minus)]
+    [InlineData("a value * 42.", MathOperator.Multiply)]
+    [InlineData("a value / 42.", MathOperator.Divide)]
     public void MathExpressions(string sentence, MathOperator mathOperator)
     {
 
@@ -116,5 +120,20 @@ public class ExpressionTests
         Assert.Equal(42, addend.Value);
         var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);
         Assert.Equal("value", variable.Name);
+    }
+
+    [Fact]
+    public void AddMathExpressionToVariable()
+    {
+        var sentence = "add 42 * 13 to a value";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var additionExpression = Assert.IsType<InPlaceAdditionExpression>(parseResult);
+        var addend = Assert.IsType<MathExpression>(additionExpression.Addend);
+        Assert.Equal(MathOperator.Multiply, addend.Operator);
+        Assert.Equal(42, Assert.IsType<IntLiteralExpression>(addend.FirstOperand).Value);
+        Assert.Equal(13, Assert.IsType<IntLiteralExpression>(addend.SecondOperand).Value);
+        Assert.Equal("value", additionExpression.TargetVariable.Name);
     }
 }

@@ -136,7 +136,9 @@ public class CSharpConverter : ILanguageConverter
         {
             LogicalOperator.Equals => "==",
             LogicalOperator.Less => "<",
+            LogicalOperator.LessOrEquals => "<=",
             LogicalOperator.Greater => ">",
+            LogicalOperator.GreaterOrEquals => ">=",
             _ => throw new NotImplementedException($"Operator {@operator} does not supported"),
         };
     }

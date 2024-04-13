@@ -120,11 +120,15 @@ public partial class EngLangParser : IEngLangParser
     private static Expression MakeExpression(Expression e) => e;
 
     [Rule($"addition_expression : primitive_expression 'plus' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression '+' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'minus' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression '-' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'multiply' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'multiplied' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression '*' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'divide' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'divided' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression '/' primitive_expression")]
     private static MathExpression MakeAdditionExpression(
         Expression firstExpression,
         IToken<EngLangTokenType> mathToken,
@@ -143,40 +147,44 @@ public partial class EngLangParser : IEngLangParser
     private static MathOperator ToMathOperator(IToken<EngLangTokenType> token) => token.Text switch
     {
         "plus" => MathOperator.Plus,
+        "+" => MathOperator.Plus,
         "minus" => MathOperator.Minus,
+        "-" => MathOperator.Minus,
         "multiply" => MathOperator.Multiply,
         "multiplied" => MathOperator.Multiply,
+        "*" => MathOperator.Multiply,
         "divide" => MathOperator.Divide,
         "divided" => MathOperator.Divide,
+        "/" => MathOperator.Divide,
         _ => throw new InvalidOperationException($"Unexpected token {token} for math expression"),
     };
 
-    [Rule($"inplace_addition_expression : 'add' constant_expression 'to' {IdentifierReference}")]
-    [Rule($"inplace_addition_expression : 'Add' constant_expression 'to' {IdentifierReference}")]
+    [Rule($"inplace_addition_expression : 'add' math_expression 'to' {IdentifierReference}")]
+    [Rule($"inplace_addition_expression : 'Add' math_expression 'to' {IdentifierReference}")]
     private static InPlaceAdditionExpression MakeInPlaceAdditionExpression(
         IToken<EngLangTokenType> addToken,
         Expression literalExpression,
         IToken<EngLangTokenType> toToken,
         IdentifierReference identifierReference) => new(literalExpression, identifierReference);
 
-    [Rule($"inplace_subtract_expression : 'subtract' constant_expression 'from' {IdentifierReference}")]
-    [Rule($"inplace_subtract_expression : 'Subtract' constant_expression 'from' {IdentifierReference}")]
+    [Rule($"inplace_subtract_expression : 'subtract' math_expression 'from' {IdentifierReference}")]
+    [Rule($"inplace_subtract_expression : 'Subtract' math_expression 'from' {IdentifierReference}")]
     private static InPlaceSubtractExpression MakeInPlaceSubtractExpression(
         IToken<EngLangTokenType> subtractToken,
         Expression literalExpression,
         IToken<EngLangTokenType> fromToken,
         IdentifierReference identifierReference) => new(literalExpression, identifierReference);
 
-    [Rule($"inplace_multiply_expression : 'multiply' {IdentifierReference} 'by' primitive_expression")]
-    [Rule($"inplace_multiply_expression : 'Multiply' {IdentifierReference} 'by' primitive_expression")]
+    [Rule($"inplace_multiply_expression : 'multiply' {IdentifierReference} 'by' math_expression")]
+    [Rule($"inplace_multiply_expression : 'Multiply' {IdentifierReference} 'by' math_expression")]
     private static InPlaceMultiplyExpression MakeInPlaceMultiplyExpression(
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> byToken,
         Expression literalExpression) => new(literalExpression, identifierReference);
 
-    [Rule($"inplace_divide_expression : 'divide' {IdentifierReference} 'by' primitive_expression")]
-    [Rule($"inplace_divide_expression : 'Divide' {IdentifierReference} 'by' primitive_expression")]
+    [Rule($"inplace_divide_expression : 'divide' {IdentifierReference} 'by' math_expression")]
+    [Rule($"inplace_divide_expression : 'Divide' {IdentifierReference} 'by' math_expression")]
     private static InPlaceDivisionExpression MakeInPlaceDivisionExpression(
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
@@ -247,7 +255,7 @@ public partial class EngLangParser : IEngLangParser
         SlotDeclarationsList slotsList)
         => new ShapeDeclaration(string.Join(' ', identifier), null, slotsList);
 
-    [Rule($"assignment_expression: PutKeyword primitive_expression IntoKeyword {IdentifierReference}")]
+    [Rule($"assignment_expression: PutKeyword math_expression IntoKeyword {IdentifierReference}")]
     private static AssignmentExpression MakeAssignmentExpression(
         IToken<EngLangTokenType> putToken,
         Expression expression,
@@ -448,10 +456,27 @@ public partial class EngLangParser : IEngLangParser
         => new LogicalExpression(LogicalOperator.NotEquals, new VariableExpression(identifierReference), literalExpression);
 
     [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' constant_expression")]
-    private static LogicalExpression MakeLogicalExpression(
+    private static LogicalExpression MakeLogicalThanExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> operatorToken,
         IToken<EngLangTokenType> thanToken,
+        Expression literalExpression)
+        => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
+
+    [Rule($"logical_expression : {IdentifierReference} 'at' LogicalOperationKeyword constant_expression")]
+    private static LogicalExpression MakeLogicalAtExpression(
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> atToken,
+        IToken<EngLangTokenType> operatorToken,
+        Expression literalExpression)
+        => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
+
+    [Rule($"logical_expression : {IdentifierReference} 'is' 'at' LogicalOperationKeyword constant_expression")]
+    private static LogicalExpression MakeLogicalIsAtExpression(
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> isToken,
+        IToken<EngLangTokenType> atToken,
+        IToken<EngLangTokenType> operatorToken,
         Expression literalExpression)
         => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
 
@@ -463,6 +488,8 @@ public partial class EngLangParser : IEngLangParser
             "smaller" => LogicalOperator.Less,
             "greater" => LogicalOperator.Greater,
             "bigger" => LogicalOperator.Greater,
+            "least" => LogicalOperator.GreaterOrEquals,
+            "most" => LogicalOperator.LessOrEquals,
             _ => throw new InvalidOperationException($"Unknown logical operator {operatorToken.Text}"),
         };
     }
@@ -533,6 +560,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"label_word : DefiniteArticleKeyword")]
     [Rule($"label_word : AndKeyword")]
     [Rule($"label_word : AtKeyword")]
+    [Rule($"label_word : ByKeyword")]
     [Rule($"label_word : MathOperationKeyword")]
     [Rule($"label_word : LogicalOperationKeyword")]
     [Rule($"label_word : WithKeyword")]

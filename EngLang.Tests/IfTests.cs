@@ -19,17 +19,26 @@ public class IfTests
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
     }
 
-    [Fact]
-    public void IfSmallerStatement()
+    [Theory]
+    [InlineData("if a number is 0 then add 42 to a value.", LogicalOperator.Equals)]
+    [InlineData("if a number is not 0 then add 42 to a value.", LogicalOperator.NotEquals)]
+    [InlineData("if a number smaller than 0 then add 42 to a value.", LogicalOperator.Less)]
+    [InlineData("if a number less than 0 then add 42 to a value.", LogicalOperator.Less)]
+    [InlineData("if a number at most 0 then add 42 to a value.", LogicalOperator.LessOrEquals)]
+    [InlineData("if a number is at most 0 then add 42 to a value.", LogicalOperator.LessOrEquals)]
+    [InlineData("if a number greater than 0 then add 42 to a value.", LogicalOperator.Greater)]
+    [InlineData("if a number bigger than 0 then add 42 to a value.", LogicalOperator.Greater)]
+    [InlineData("if a number at least 0 then add 42 to a value.", LogicalOperator.GreaterOrEquals)]
+    [InlineData("if a number is at least 0 then add 42 to a value.", LogicalOperator.GreaterOrEquals)]
+    public void IfSmallerStatement(string sentence, LogicalOperator expected)
     {
-        var sentence = "if a number smaller than 0 then add 42 to a value.";
-
         var parseResult = EngLangParser.Parse(sentence);
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
         var statement = Assert.Single(paragraph.Statements);
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
-        Assert.IsType<LogicalExpression>(ifStatement.Condition);
+        var logicalExpression = Assert.IsType<LogicalExpression>(ifStatement.Condition);
+        Assert.Equal(expected, logicalExpression.Operator);
         Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
     }
 

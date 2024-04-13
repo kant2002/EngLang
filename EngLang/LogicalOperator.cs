@@ -6,4 +6,6 @@ public enum LogicalOperator
     NotEquals,
     Less,
     Greater,
+    LessOrEquals,
+    GreaterOrEquals,
 }
