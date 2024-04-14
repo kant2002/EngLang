@@ -603,36 +603,38 @@ public partial class EngLangParser : IEngLangParser
         return $"({labelName})";
     }
 
-    [Rule($"invokable_label : 'to' label_word extended_label_word* parameter_references_list (IntoKeyword {IdentifierReference})? comment_label? ':'")]
-    [Rule($"invokable_label : 'to' label_word extended_label_word* parameter_references_list (IntoKeyword {IdentifierReference})? comment_label? '->'")]
-    [Rule($"invokable_label : 'To' label_word extended_label_word* parameter_references_list (IntoKeyword {IdentifierReference})? comment_label? ':'")]
-    [Rule($"invokable_label : 'To' label_word extended_label_word* parameter_references_list (IntoKeyword {IdentifierReference})? comment_label? '->'")]
-    [Rule($"invokable_label : 'define' label_word extended_label_word* parameter_references_list (IntoKeyword {IdentifierReference})? comment_label? 'as'")]
-    [Rule($"invokable_label : 'Define' label_word extended_label_word* parameter_references_list (IntoKeyword {IdentifierReference})? comment_label? 'as'")]
+    [Rule($"invokable_label_definition : label_word extended_label_word* parameter_references_list (IntoKeyword {IdentifierReference})? comment_label?")]
     private static InvokableLabel MakeInvokableLabel(
-        IToken<EngLangTokenType> toToken,
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (IEnumerable<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
         (IToken<EngLangTokenType> intoToken, IdentifierReference OutParameter)? outParameter,
-        string? comment,
-        IToken<EngLangTokenType> colonToken)
+        string? comment)
     {
         string labelName = string.Join(" ", new[] { firstToken }.Union(otherInitialTokens).Union(identifierTokens.InnerText).Select(i => i.Text));
         return new InvokableLabel(labelName + (comment is null ? "" : " " + comment), identifierTokens.Parameters.ToArray(), outParameter?.OutParameter);
     }
 
-    [Rule($"invokable_label : label_word extended_label_word* parameter_references_list (IntoKeyword {IdentifierReference})? comment_label? '->'")]
+    [Rule($"invokable_label : 'to' invokable_label_definition ':'")]
+    [Rule($"invokable_label : 'to' invokable_label_definition '->'")]
+    [Rule($"invokable_label : 'To' invokable_label_definition ':'")]
+    [Rule($"invokable_label : 'To' invokable_label_definition '->'")]
+    [Rule($"invokable_label : 'define' invokable_label_definition 'as'")]
+    [Rule($"invokable_label : 'Define' invokable_label_definition 'as'")]
     private static InvokableLabel MakeInvokableLabel(
-        IToken<EngLangTokenType> firstToken,
-        IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
-        (IEnumerable<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
-        (IToken<EngLangTokenType> intoToken, IdentifierReference OutParameter)? outParameter,
-        string? comment,
+        IToken<EngLangTokenType> toToken,
+        InvokableLabel label,
+        IToken<EngLangTokenType> colonToken)
+    {
+        return label;
+    }
+
+    [Rule($"invokable_label : invokable_label_definition '->'")]
+    private static InvokableLabel MakeInvokableLabel(
+        InvokableLabel label,
         IToken<EngLangTokenType> asToken)
     {
-        string labelName = string.Join(" ", new[] { firstToken }.Union(otherInitialTokens).Union(identifierTokens.InnerText).Select(i => i.Text));
-        return new InvokableLabel(labelName + (comment is null ? "" : " " + comment), identifierTokens.Parameters.ToArray(), outParameter?.OutParameter);
+        return label;
     }
 
     [Rule($"labeled_statement_simple : invokable_label block_statement")]
