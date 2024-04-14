@@ -102,15 +102,7 @@ public class StupidEngLangParser : IEngLangParser
             return ParseResult.Ok(para, 0);
         }
 
-        //return ParseResult.Ok(new InvalidStatement(), 0);
         return ParseResult.Error("Blockstatement", "ParagraphList", 1, text);
-
-        string StripComments(string text)
-        {
-            var commentStartPosition = text.IndexOf("\\");
-            if (commentStartPosition == -1) return text;
-            return text[0..commentStartPosition];
-        }
     }
 
     string RemoveCommentsComments(string text)
