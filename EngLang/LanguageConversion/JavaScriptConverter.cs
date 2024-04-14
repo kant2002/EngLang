@@ -142,8 +142,9 @@ public class JavaScriptConverter : ILanguageConverter
         var label = paragraph.Label;
         if (label is not null)
         {
+            var primaryMarker = label.Markers.First();
             var parameterString = string.Join(", ", label.Parameters.Select(_ => _.Name.Replace(" ", "_")));
-            builder.Append($"function {label.Marker.Replace(" ", "_")}({parameterString}) ");
+            builder.Append($"function {primaryMarker.Replace(" ", "_")}({parameterString}) ");
             builder.OpenBraces();
         }
 
@@ -202,7 +203,8 @@ public class JavaScriptConverter : ILanguageConverter
                 break;
             case LabeledStatement labeledStatement:
                 var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
-                builder.Append($"function {labeledStatement.Marker.Replace(" ", "_")}({parameterString}) ");
+                var primaryMarker = labeledStatement.Marker.Markers.First();
+                builder.Append($"function {primaryMarker.Replace(" ", "_")}({parameterString}) ");
                 builder.OpenBraces();
                 ConvertStatement(builder, labeledStatement.Statement);
                 builder.CloseBraces();

@@ -97,7 +97,7 @@ public class StupidEngLangParser : IEngLangParser
             var label = parts[0];
             var code = parts[1];
             var stmts = code.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(_ => new InvocationStatement(_, Array.Empty<IdentifierReference>(), null));
-            var labelledStatement = new InvokableLabel(label, Array.Empty<IdentifierReference>(), null);
+            var labelledStatement = new InvokableLabel(new[] { label }, Array.Empty<IdentifierReference>(), null);
             var para = new Paragraph(stmts.ToImmutableList<Statement>(), labelledStatement);
             return ParseResult.Ok(para, 0);
         }

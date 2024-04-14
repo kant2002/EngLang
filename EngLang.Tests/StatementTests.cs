@@ -1,3 +1,4 @@
+using System.Linq;
 using Xunit;
 
 namespace EngLang.Tests;
@@ -233,7 +234,7 @@ To calculate area from a width and a height ->
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
         Assert.NotNull(paragraph.Label);
         var labeledStatement = paragraph.Label;
-        Assert.Equal("do something", labeledStatement.Marker);
+        Assert.Equal("do something", labeledStatement.Markers.First());
         var statement = Assert.Single(paragraph.Statements);
         var resultStatement = Assert.IsType<ResultStatement>(statement);
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
@@ -265,7 +266,7 @@ To calculate area from a width and a height ->
         Assert.NotNull(paragraph.Label);
         var labeledStatement = paragraph.Label;
         var statement = Assert.Single(paragraph.Statements);
-        Assert.Equal(marker, labeledStatement.Marker);
+        Assert.Equal(marker, labeledStatement.Markers.First());
         var resultStatement = Assert.IsType<ResultStatement>(statement);
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
     }
@@ -303,5 +304,20 @@ To calculate area from a width and a height ->
         var statement = Assert.Single(paragraph.Statements);
 
         var invocationStatement = Assert.IsType<InvalidStatement>(statement);
+    }
+
+    [Theory]
+    [InlineData("to do something else with a parameter identi; to do something a parameter identi: result is 1.", new[] { "do something else with", "do something" })]
+    public void MultipleLabelsWithParameterStatement(string sentence, string[] marker)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        Assert.NotNull(paragraph.Label);
+        var labeledStatement = paragraph.Label;
+        var statement = Assert.Single(paragraph.Statements);
+        Assert.Equal(marker, labeledStatement.Markers);
+        var resultStatement = Assert.IsType<ResultStatement>(statement);
+        Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
     }
 }

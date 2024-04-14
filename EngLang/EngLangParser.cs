@@ -612,30 +612,38 @@ public partial class EngLangParser : IEngLangParser
         string? comment)
     {
         string labelName = string.Join(" ", new[] { firstToken }.Union(otherInitialTokens).Union(identifierTokens.InnerText).Select(i => i.Text));
-        return new InvokableLabel(labelName + (comment is null ? "" : " " + comment), identifierTokens.Parameters.ToArray(), outParameter?.OutParameter);
+        string labelWithComment = labelName + (comment is null ? "" : " " + comment);
+        return new InvokableLabel(new[] { labelWithComment }, identifierTokens.Parameters.ToArray(), outParameter?.OutParameter);
     }
 
-    [Rule($"invokable_label : 'to' invokable_label_definition ':'")]
-    [Rule($"invokable_label : 'to' invokable_label_definition '->'")]
-    [Rule($"invokable_label : 'To' invokable_label_definition ':'")]
-    [Rule($"invokable_label : 'To' invokable_label_definition '->'")]
-    [Rule($"invokable_label : 'define' invokable_label_definition 'as'")]
-    [Rule($"invokable_label : 'Define' invokable_label_definition 'as'")]
-    private static InvokableLabel MakeInvokableLabel(
+    [Rule($"prefixed_invokable_label : 'to' invokable_label_definition")]
+    [Rule($"prefixed_invokable_label : 'To' invokable_label_definition")]
+    [Rule($"prefixed_invokable_label : 'define' invokable_label_definition")]
+    [Rule($"prefixed_invokable_label : 'Define' invokable_label_definition")]
+    private static InvokableLabel MakePrefixedInvokableLabel(
         IToken<EngLangTokenType> toToken,
-        InvokableLabel label,
-        IToken<EngLangTokenType> colonToken)
+        InvokableLabel label) => label;
+
+    [Rule($"invokable_label_aliases : (prefixed_invokable_label (';' prefixed_invokable_label)*)")]
+    private static InvokableLabel MakeInvokableLabelAliases(
+        Punctuated<InvokableLabel, IToken<EngLangTokenType>> labels)
     {
-        return label;
+        var primaryLabel = labels.Values.First();
+        return labels.Count == 1 ? primaryLabel : new InvokableLabel(labels.Values.SelectMany(_ => _.Markers).ToArray(), primaryLabel.Parameters, primaryLabel.ResultIdentifier);
     }
+
+
+    [Rule($"invokable_label : invokable_label_aliases ':'")]
+    [Rule($"invokable_label : invokable_label_aliases '->'")]
+    [Rule($"invokable_label : invokable_label_aliases 'as'")]
+    private static InvokableLabel MakeInvokableLabel(
+        InvokableLabel label,
+        IToken<EngLangTokenType> colonToken) => label;
 
     [Rule($"invokable_label : invokable_label_definition '->'")]
-    private static InvokableLabel MakeInvokableLabel(
+    private static InvokableLabel MakeTrivialInvokableLabel(
         InvokableLabel label,
-        IToken<EngLangTokenType> asToken)
-    {
-        return label;
-    }
+        IToken<EngLangTokenType> asToken) => label;
 
     [Rule($"labeled_statement_simple : invokable_label block_statement")]
     private static LabeledStatement MakeSimpleLabeledStatement(
@@ -648,7 +656,7 @@ public partial class EngLangParser : IEngLangParser
         InvokableLabel invokableLabel,
         Statement statement)
     {
-        return new LabeledStatement(invokableLabel.Marker, invokableLabel.Parameters, statement);
+        return new LabeledStatement(invokableLabel, invokableLabel.Parameters, statement);
     }
 
     [Rule($"invocation_statement : label_word extended_label_word* identifier_references_list (IntoKeyword {IdentifierReference})? comment_label?")]

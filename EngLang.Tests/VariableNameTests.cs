@@ -154,6 +154,7 @@ public class VariableNameTests
     [Theory]
     [InlineData("put 40 into a value. \\ 123")]
     [InlineData("put 40 into a value. \\ your's")]
+    //[InlineData("put 40 into a value [super value].")]
     public void ParseComment(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
