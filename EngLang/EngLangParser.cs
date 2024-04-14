@@ -194,6 +194,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule("literal_expression : StringLiteral")]
     [Rule("literal_expression : IntLiteral")]
     [Rule("literal_expression : NullLiteral")]
+    [Rule("literal_expression : HexLiteral")]
     private static Expression MakeIdentifierReference(
         IToken<EngLangTokenType> token)
         => token.Kind switch
@@ -201,8 +202,16 @@ public partial class EngLangParser : IEngLangParser
             EngLangTokenType.StringLiteral => new StringLiteralExpression(token.Text.Trim('"')),
             EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text)),
             EngLangTokenType.NullLiteral => new NullLiteralExpression(),
+            EngLangTokenType.HexLiteral => new ByteArrayLiteralExpression(ConvertHexToByteArray(token.Text[0] == '$' ? token.Text[1..] : token.Text[2..])),
             _ => throw new InvalidOperationException()
         };
+    private static byte[] ConvertHexToByteArray(string hexString)
+    {
+        return Enumerable.Range(0, hexString.Length)
+                         .Where(x => x % 2 == 0)
+                         .Select(x => Convert.ToByte(hexString.Substring(x, 2), 16))
+                         .ToArray();
+    }
 
     [Rule("constant_expression : ('+' | '-')? literal_expression")]
     private static Expression MakeConstantExpression(
@@ -239,6 +248,7 @@ public partial class EngLangParser : IEngLangParser
         => new SlotDeclarationsList(first.Slots.Union(second.Slots).ToImmutableList());
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
+    [Rule($"shape_declaration: SomeKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
         IReadOnlyList<string> identifier,
@@ -313,12 +323,12 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
         => new InvalidStatement(tokens.ToImmutableArray());
-    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
+    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
     private static Statement MakeStatement222(
         IEnumerable<IToken<EngLangTokenType>> tokens)
         => new InvalidStatement(tokens.ToImmutableArray());
@@ -458,6 +468,15 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' constant_expression")]
     private static LogicalExpression MakeLogicalThanExpression(
         IdentifierReference identifierReference,
+        IToken<EngLangTokenType> operatorToken,
+        IToken<EngLangTokenType> thanToken,
+        Expression literalExpression)
+        => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
+
+    [Rule($"logical_expression : {IdentifierReference} 'is' LogicalOperationKeyword 'than' constant_expression")]
+    private static LogicalExpression MakeLogicalThanExpression(
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> isToken,
         IToken<EngLangTokenType> operatorToken,
         IToken<EngLangTokenType> thanToken,
         Expression literalExpression)

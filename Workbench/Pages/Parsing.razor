@@ -170,7 +170,7 @@
             variables.Add(variableName, new(variableName, typeName, defaultValue));
         }
 
-        if (text.StartsWith("an ") || text.StartsWith("An ") || text.StartsWith("a ") || text.StartsWith("A "))
+        if (text.StartsWith("an ") || text.StartsWith("An ") || text.StartsWith("a ") || text.StartsWith("A ") || text.StartsWith("some ") || text.StartsWith("Some "))
         {
             var parser = new StupidEngLangParser(text);
             var paragraph = parser.ParseParagraph();
@@ -179,9 +179,14 @@
             types.Add(text, new(text, Array.Empty<VariableInformation>()));
         }
 
-        var lines = text.Split("\r\n");
-        return $"<pre>{string.Join("\r\n", lines.Select(MarkFunctionHeader).Select(MarkComments))}</pre>";
+        {
+            var parser = new StupidEngLangParser(text);
+            var labelledStatement = parser.ParseLabeledStatement();
+            System.Diagnostics.Debug.Assert(labelledStatement.IsOk);
 
+            var lines = text.Split("\r\n");
+            return $"<pre>{string.Join("\r\n", lines.Select(MarkFunctionHeader).Select(MarkComments))}</pre>";
+        }
         string MarkFunctionHeader(string text)
         {
             var (code, comment) = ParseComments(text);

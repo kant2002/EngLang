@@ -163,4 +163,43 @@ public class ExpressionTests
         Assert.Equal(13, Assert.IsType<IntLiteralExpression>(addend.SecondOperand).Value);
         Assert.Equal("value", additionExpression.TargetVariable.Name);
     }
+
+    [Fact]
+    public void StringLiteral()
+    {
+        var sentence = "\"Some string\"";
+
+        var parser = new EngLangParser(new EngLangLexer(sentence));
+        var parseResult = parser.ParseExpression();
+
+        Assert.True(parseResult.IsOk);
+        var stringLiteralExpression = Assert.IsType<StringLiteralExpression>(parseResult.Ok.Value);
+        Assert.Equal("Some string", stringLiteralExpression.Value);
+    }
+
+    [Fact]
+    public void IntLiteral()
+    {
+        var sentence = "42";
+
+        var parser = new EngLangParser(new EngLangLexer(sentence));
+        var parseResult = parser.ParseExpression();
+
+        Assert.True(parseResult.IsOk);
+        var intLiteralExpression = Assert.IsType<IntLiteralExpression>(parseResult.Ok.Value);
+        Assert.Equal(42, intLiteralExpression.Value);
+    }
+
+    [Fact]
+    public void ByteArrayLiteral()
+    {
+        var sentence = "0x0102030405060708";
+
+        var parser = new EngLangParser(new EngLangLexer(sentence));
+        var parseResult = parser.ParseExpression();
+
+        Assert.True(parseResult.IsOk);
+        var intLiteralExpression = Assert.IsType<ByteArrayLiteralExpression>(parseResult.Ok.Value);
+        Assert.Equal(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, intLiteralExpression.Value);
+    }
 }

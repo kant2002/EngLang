@@ -128,4 +128,24 @@ a pen has
         Assert.NotNull(variableExpression.Identifier.Owner);
         Assert.Equal("sprite", variableExpression.Identifier.Owner.Name);
     }
+
+    [Theory]
+    [InlineData("some method procedures is a record with a getname pointer and a tostring pointer.")]
+    public void ShapeForMultipleSameItems(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
+        var shapeDeclaration = shapeStatement.Declaration;
+        Assert.Equal("method procedures", shapeDeclaration.Name);
+        Assert.NotNull(shapeDeclaration.BaseShapeName);
+        Assert.Equal("record", shapeDeclaration.BaseShapeName.Name);
+        Assert.NotNull(shapeDeclaration.WellKnownSlots);
+        Assert.Equal("getname pointer", shapeDeclaration.WellKnownSlots.Slots[0].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[0].AliasFor);
+        Assert.Equal("tostring pointer", shapeDeclaration.WellKnownSlots.Slots[1].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
+    }
 }

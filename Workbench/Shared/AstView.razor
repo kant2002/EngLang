@@ -40,6 +40,8 @@
             MathExpression me => typeName + "(" + me.Operator + ")",
             StringLiteralExpression sle => typeName + "(" + sle.Value + ")",
             VariableDeclaration vd => typeName + "(" + vd.Name + ")",
+            InvokableLabel il => typeName + "(" + il.Marker + ")",
+            InvocationStatement ist => typeName + "(" + ist.Marker + ")",
             InvalidStatement invalidStatement => typeName + "(" + string.Join(" ", invalidStatement.Tokens.Select(t => t.Text)) + ")",
             _ => typeName,
         };

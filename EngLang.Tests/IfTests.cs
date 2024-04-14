@@ -24,6 +24,7 @@ public class IfTests
     [InlineData("if a number is not 0 then add 42 to a value.", LogicalOperator.NotEquals)]
     [InlineData("if a number smaller than 0 then add 42 to a value.", LogicalOperator.Less)]
     [InlineData("if a number less than 0 then add 42 to a value.", LogicalOperator.Less)]
+    [InlineData("if a number is less than 0 then add 42 to a value.", LogicalOperator.Less)]
     [InlineData("if a number at most 0 then add 42 to a value.", LogicalOperator.LessOrEquals)]
     [InlineData("if a number is at most 0 then add 42 to a value.", LogicalOperator.LessOrEquals)]
     [InlineData("if a number greater than 0 then add 42 to a value.", LogicalOperator.Greater)]

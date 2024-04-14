@@ -1,4 +1,4 @@
-@page "/parser"
+@page "/parser/{Kind?}"
 @using EngLang
 @using Yoakke.SynKit.Parser
 @inject NavigationManager navigationManager
@@ -57,7 +57,9 @@
             StateHasChanged();
         }
     }
-    public bool SimpleParser { get; set; }
+    [Parameter]
+    public string? Kind { get; set; }
+    public bool SimpleParser => Kind == "simple";
     private List<SyntaxNode> SyntaxNodes = new();
 
     private ParseResult<ParagraphList> ParagraphList;
@@ -70,7 +72,7 @@
     protected override void OnInitialized()
     {
         var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
-        this.SimpleParser = System.Web.HttpUtility.ParseQueryString(uri.Query).Get("simple") == "true";
+        //this.SimpleParser = System.Web.HttpUtility.ParseQueryString(uri.Query).Get("simple") == "true";
     }
 
     protected override void OnParametersSet()
