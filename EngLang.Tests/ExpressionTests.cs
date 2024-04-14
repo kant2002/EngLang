@@ -164,17 +164,18 @@ public class ExpressionTests
         Assert.Equal("value", additionExpression.TargetVariable.Name);
     }
 
-    [Fact]
-    public void StringLiteral()
+    [Theory]
+    [InlineData("\"Some string\"", "Some string")]
+    [InlineData("\"\\\"", "\\")]
+    [InlineData("\"\"\"\"", "\"")]
+    public void StringLiteral(string sentence, string expected)
     {
-        var sentence = "\"Some string\"";
-
         var parser = new EngLangParser(new EngLangLexer(sentence));
         var parseResult = parser.ParseExpression();
 
         Assert.True(parseResult.IsOk);
         var stringLiteralExpression = Assert.IsType<StringLiteralExpression>(parseResult.Ok.Value);
-        Assert.Equal("Some string", stringLiteralExpression.Value);
+        Assert.Equal(expected, stringLiteralExpression.Value);
     }
 
     [Fact]

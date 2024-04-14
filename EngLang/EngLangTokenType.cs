@@ -10,7 +10,7 @@ public enum EngLangTokenType
     [Ignore] [Regex("([ \t]+((\r\n|\n|\r)[ \t]*)?|(\r\n|\n|\r))")] Whitespace,
     [Regex("(\r\n|\n|\r){2,}")] Multiline,
     [Ignore][Regex("\\\\[^\n]*")] Comment,
-    //[Ignore][Regex("\\[[ a-zA-Z\\-]\\]")] InlineComment,
+    [Ignore][Regex("\\[[^\\]]*\\]")] InlineComment,
 
     [Regex("(a|an|An)")] IndefiniteArticleKeyword,
     [Token("some")] SomeKeyword,
@@ -48,5 +48,5 @@ public enum EngLangTokenType
     Identifier,
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex("(0x|$)[0-9A-Fa-f]+")] HexLiteral,
-    [Regex(Regexes.StringLiteral)] StringLiteral,
+    [Regex("\"((\"\")|[^\\r\\n\"])*\"")] StringLiteral,
 }
