@@ -135,6 +135,7 @@ public class CSharpConverter : ILanguageConverter
         return @operator switch
         {
             LogicalOperator.Equals => "==",
+            LogicalOperator.NotEquals => "!=",
             LogicalOperator.Less => "<",
             LogicalOperator.LessOrEquals => "<=",
             LogicalOperator.Greater => ">",

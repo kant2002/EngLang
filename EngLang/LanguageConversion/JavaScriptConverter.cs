@@ -119,8 +119,11 @@ public class JavaScriptConverter : ILanguageConverter
         return @operator switch
         {
             LogicalOperator.Equals => "==",
+            LogicalOperator.NotEquals => "!=",
             LogicalOperator.Less => "<",
+            LogicalOperator.LessOrEquals => "<=",
             LogicalOperator.Greater => ">",
+            LogicalOperator.GreaterOrEquals => ">=",
             _ => throw new NotImplementedException($"Operator {@operator} does not supported"),
         };
     }
