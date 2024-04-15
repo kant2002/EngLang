@@ -5,7 +5,13 @@ import spacy
 from spacy.language import Language
 from nltk.tree import Tree
 
-nlp: Language = spacy.load("en_core_web_trf")
+nlp: Language = spacy.load("en_core_web_lg")
+
+process_spacy = True
+process_nltk = False
+print_sentence_tree = False
+detect_grammar = False
+print_tagged_tokens = True
 
 @Language.component("custom_sentence_boundaries")
 def set_custom_boundaries(doc):
@@ -66,29 +72,41 @@ def tokenize_sentence(sentence: str):
     return nltk.word_tokenize(sentence)
 
 def analyse_sentence_spacy(sentence: str):
-    print('spacy')
+    print('Processing using Spacy')
     doc = nlp(sentence)
     #print ([(token.text, token.pos_) for token in doc])
     assert doc.has_annotation("SENT_START")
     tagged_tokens: list[tuple[str, str]] = []
     for sent in doc.sents:
         print(sent.text)
-        nltk_spacy_tree(sent).pretty_print()
-        tagged_tokens.append([(token.text, token.tag_) for token in sent])
+        if print_sentence_tree:
+            nltk_spacy_tree(sent).pretty_print()
+        sent_tokens = [(token.text, token.tag_) for token in sent]
+        tagged_tokens.append(sent_tokens)
 
     # print tagged tokens
-    print('[')
-    for l in tagged_tokens:
-        print('   ', l)
-        pos_tags = [normalize_token(token, pos) for (token,pos) in l]
-        detected_sentences = 0
-        for sentence_structure in grammar_parser.parse( filter(lambda x: x != '_SP', pos_tags) ):
-            print(sentence_structure)
-            detected_sentences += 1
+    if print_tagged_tokens:
+        print('[')
+        for l in tagged_tokens:
+            print('   ', l)
+        print(']')
 
-        if (detected_sentences == 0):
+    if detect_grammar:
+        try:
+            print('[')
+            for l in tagged_tokens:
+                print('   ', l)
+                pos_tags = [normalize_token(token, pos) for (token,pos) in l]
+                detected_sentences = 0
+                for sentence_structure in grammar_parser.parse( filter(lambda x: x != '_SP', pos_tags) ):
+                    print(sentence_structure)
+                    detected_sentences += 1
+
+                if (detected_sentences == 0):
+                    print("Cannot detect sentence", pos_tags)
+            print(']')
+        except:
             print("Cannot detect sentence", pos_tags)
-    print(']')
 
     dump_tokens_nltk(tagged_tokens)
 
@@ -103,7 +121,7 @@ def dump_tokens_nltk(tagged_tokens: list[list[tuple[str,str]]]):
     print(list(set(sum(pos_tags,[]) )))
 
 def analyse_sentence_nltk(sentence):
-    print('nltk')
+    print('Processing using NLTK')
     tokens = [tokenize_sentence(t) for t in nltk.sent_tokenize(sentence)]
 
     # parts of speech tagging
@@ -118,8 +136,10 @@ def analyse_sentence_nltk(sentence):
     dump_tokens_nltk(tagged_tokens)
 
 def analyse_sentence(sentence):
-    analyse_sentence_nltk(sentence)
-    analyse_sentence_spacy(sentence)
+    if process_nltk:
+        analyse_sentence_nltk(sentence)
+    if process_spacy:
+        analyse_sentence_spacy(sentence)
 
 def sample():
     # input text
@@ -145,6 +165,55 @@ def sample():
     sentence4 = """To calculate rectangle's area from a width and a height: multiply a width by a height."""
     #analyse_sentence(sentence4)
 
+    sentence5 = """Subtract 1 from the substring's last."""
+    analyse_sentence(sentence5)
+
+    sentence6 = """Handle capitalize given the source's text."""
+    analyse_sentence(sentence6)
+
+    sentence7 = """Clear the source's text's last operation."""
+    analyse_sentence(sentence7)
+
+    sentence8 = """Input the number N whose square you want to find."""
+    analyse_sentence(sentence8)
+
+    sentence9 = """Store the result of the multiplication in a variable."""
+    analyse_sentence(sentence9)
+
+    sentence10 = """Output the value of the variable."""
+    analyse_sentence(sentence10)
+
+    analyse_sentence("""set the nectar of all flowers to 0.""") # https://www.cs.cmu.edu/~NatProg/papers/Myers2004NaturalProgramming.pdf
+    analyse_sentence("""Define the bus state and initial state.""") # https://ntrs.nasa.gov/api/citations/20140004055/downloads/20140004055.pdf
+    analyse_sentence("""Import low-level requirements for a bus.""") # https://ntrs.nasa.gov/api/citations/20140004055/downloads/20140004055.pdf
+    analyse_sentence("""Compute next state of Bus and Right Side.""") # https://ntrs.nasa.gov/api/citations/20140004055/downloads/20140004055.pdf
+
+    analyse_sentence("""Import goods from China.""")
+    analyse_sentence("""Construct a house.""")
+    analyse_sentence("""Destroy his confidence.""")
+    analyse_sentence("""Observe the reaction.""")
+    analyse_sentence("""Peruse the index.""")
+    analyse_sentence("""Speak to me.""")
+    analyse_sentence("""Prove that every reachable state is a valid state.""") # https://ntrs.nasa.gov/api/citations/20140004055/downloads/20140004055.pdf
+    analyse_sentence("""Counts the lines of text in a folder full of text files.""")
+    analyse_sentence("""Say yes.""")
+    analyse_sentence("""Beep three times.""")
+    analyse_sentence("""Move that email to the trash folder.""")
+    analyse_sentence("""Return 1 if number is smaller 2.""")
+    analyse_sentence("""Assert fibonacci of 5 is 8.""")
+    analyse_sentence("""To toggle the light in a room.""")
+    analyse_sentence("""Integrate a function from x to y.""")
+
+    analyse_sentence("""Increment the turn count.""") # https://ganelson.github.io/inform-website/book/WI_19_15.html#e121
+    analyse_sentence("""Increase the time of day by 5 minutes.""")
+    analyse_sentence("""Follow the time allotment rules.""")
+    analyse_sentence("""Continue the action.""")
+    analyse_sentence("""decrease the price of the money by the price of the noun.""") #https://ganelson.github.io/inform-website/book/WI_15_19.html#e66
+    analyse_sentence("""Schedule launch with an owner at 12.""") # https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
+    analyse_sentence("""Cancel my 3 o'clock appointment.""") # https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
+    analyse_sentence("""Delete the meeting beginning at 3:00 p.m""") # https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
+    analyse_sentence("""Display flight information for flights from New York to Pittsburgh.""") # https://www.cs.cmu.edu/~jgc/Student%20Dissertations/1989-Jill%20Fain%20Lehman.pdf
+
 """
 [
     [('To', 'TO'), ('Calculate', 'NNP'), ('factorial', 'NN'), ('of', 'IN'), ('a', 'DT'), ('number', 'NN'),
@@ -164,7 +233,7 @@ def sample():
     [('multiply', 'VB'), ('a', 'DT'), ('value', 'NN'), ('by', 'IN'), ('42', 'CD'), ('.', '.')]
 ]
 [
-    [('To', 'TO'), ('get', 'VB'), ('answer', 'JJR'), ('to', 'TO'), ('all', 'DT'), ('questions', 'NNS'), (':', ':'), ('result', 'NN'), ('is', 'VBZ'), ('42', 'CD'), ('.', '.')]
+    [('To', 'TO'), ('get', 'VB  '), ('answer', 'JJR'), ('to', 'TO'), ('all', 'DT'), ('questions', 'NNS'), (':', ':'), ('result', 'NN'), ('is', 'VBZ'), ('42', 'CD'), ('.', '.')]
 ]
 [
     [('To', 'TO'), ('calculate', 'VB'), ('area', 'NN'), ('from', 'IN'), ('a', 'DT'), ('width', 'NN'), ('and', 'CC'), ('a', 'DT'), ('height', 'NN'), (':', ':'), ('multiply', 'VB'), ('a', 'DT'), ('width', 'NN'), ('by', 'IN'), ('a', 'DT'), ('height', 'NN'), ('.', '.')]
