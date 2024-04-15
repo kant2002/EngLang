@@ -1,45 +1,75 @@
 using Catalyst;
 using Mosaik.Core;
 using static System.Console;
+#if SPACY
+using NlpPipeline = Catalyst.Spacy.Pipeline;
+#else
+using NlpPipeline = Catalyst.Pipeline;
+#endif
 
-Catalyst.Models.English.Register(); // You need to pre-register each language (and install the respective NuGet Packages)
+var samples = new[]
+{
+    "To calculate area from a width and a height: multiply a width by a height.",
+    "the console is a console. the name is an string.",
+    "the red vibrating console is a console. the name is an string.",
+    "the my vibrating console is a console. the name is an string.",
+    "the shiny red vibrating console is a console. the name is an string.",
+    "the my console is a console. the name is an string.",
+    "add 42 to a value",
+    "add two to a value",
+    "add forty two to a value",
+    "if a number is 0 then add 42 to a value.",
+    "add 42 to a value; subtract 42 from a value; multiply a value by 42; divide a value by 42. ",
+};
 
-Storage.Current = new DiskStorage("catalyst-models");
-var nlp = await Pipeline.ForAsync(Language.English);
+string[] strings = samples;
+if (args.Length > 0)
+{
+    strings = await CollectSentences(args[0]);
+}
 
-var analyzer = new TextAnalyzer(nlp);
-analyzer.AnalyseText("To calculate area from a width and a height: multiply a width by a height.");
-analyzer.AnalyseText("the console is a console. the name is an string.");
-analyzer.AnalyseText("the red vibrating console is a console. the name is an string.");
-analyzer.AnalyseText("the my vibrating console is a console. the name is an string.");
-analyzer.AnalyseText("the shiny red vibrating console is a console. the name is an string.");
-analyzer.AnalyseText("the my console is a console. the name is an string.");
-analyzer.AnalyseText("add 42 to a value");
-analyzer.AnalyseText("add two to a value");
-analyzer.AnalyseText("add forty two to a value");
-analyzer.AnalyseText("if a number is 0 then add 42 to a value.");
-analyzer.AnalyseText("add 42 to a value; subtract 42 from a value; multiply a value by 42; divide a value by 42. ");
+await ProcessSpacy(strings);
 
+async Task<string[]> CollectSentences(string fileName)
+{
+    var strings = await File.ReadAllLinesAsync(args[0]);
+    return strings;
+}
+
+
+async Task ProcessSpacy(string[] samples)
+{
+#if SPACY
+    using var pythonLock = await Spacy.Initialize(Spacy.ModelSize.Large, Language.English);
+    var nlp = Spacy.For(Spacy.ModelSize.Large, Language.English);
+#else
+    Catalyst.Models.English.Register(); // You need to pre-register each language (and install the respective NuGet Packages)
+
+    Storage.Current = new DiskStorage("catalyst-models");
+    var nlp = await Pipeline.ForAsync(Language.English);
+#endif
+    var analyzer = new TextAnalyzer(nlp);
+    foreach (var sample in samples)
+    {
+        analyzer.AnalyseText(sample);
+    }
+}
 
 class TextAnalyzer
 {
     Document doc;
-    Pipeline nlp;
-    public TextAnalyzer(Pipeline pipeline)
-    {
-        this.nlp = pipeline;
-    }
+    NlpPipeline nlp;
+    public TextAnalyzer(NlpPipeline pipeline) => this.nlp = pipeline;
 
     public void AnalyseText(string text)
     {
+        WriteLine($"========== {text} =============");
         doc = new Document(text, Language.English);
         nlp.ProcessSingle(doc);
         foreach (var sentence in doc.TokensData)
         {
-            //WriteLine("========== Sentence =============");
             PrintSentence(sentence);
         }
-
     }
 
     void PrintSentence(List<TokenData> tokens)
