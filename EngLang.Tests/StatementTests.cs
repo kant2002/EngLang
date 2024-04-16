@@ -305,6 +305,19 @@ To calculate area from a width and a height ->
 
         var invocationStatement = Assert.IsType<InvalidStatement>(statement);
     }
+    [Theory]
+    [InlineData("if a number is 0, if number.")]
+    public void ParseInvalidStatementInsideIf(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+
+        var ifStatement = Assert.IsType<IfStatement>(statement);
+
+        var invocationStatement = Assert.IsType<InvalidStatement>(Assert.IsType<BlockStatement>(ifStatement.Then).Statements[0]);
+    }
 
     [Theory]
     [InlineData("to do something else with a parameter identi; to do something a parameter identi: result is 1.", new[] { "do something else with", "do something" })]

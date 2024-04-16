@@ -303,7 +303,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule("simple_statement : variable_declaration_statement")]
     [Rule("simple_statement : if_statement")]
     [Rule("simple_statement : shape_declaration_statement")]
-    //[Rule("simple_statement : statementyy")]
+    [Rule("simple_statement : statementyy")]
     private static Statement MakeSimpleStatement(
         Statement statement)
         => statement;
