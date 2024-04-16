@@ -14,4 +14,8 @@
         <PackageReference Include="Catalyst.Models.English" Version="1.0.30952" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\EngLang\EngLang.csproj" />
+    </ItemGroup>
+
 </Project>

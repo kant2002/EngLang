@@ -1,4 +1,5 @@
 using Catalyst;
+using EngLang;
 using Mosaik.Core;
 using static System.Console;
 #if SPACY
@@ -22,18 +23,25 @@ var samples = new[]
     "add 42 to a value; subtract 42 from a value; multiply a value by 42; divide a value by 42. ",
 };
 
-string[] strings = samples;
 if (args.Length > 0)
 {
-    strings = await CollectSentences(args[0]);
+    var lines = await CollectSentences(args[0]);
+    foreach (var line in lines)
+    {
+        await Out.WriteLineAsync(line);
+    }
 }
-
-await ProcessSpacy(strings);
+else
+{
+    await ProcessSpacy(samples);
+}
 
 async Task<string[]> CollectSentences(string fileName)
 {
-    var strings = await File.ReadAllLinesAsync(args[0]);
-    return strings;
+    var text = await File.ReadAllTextAsync(args[0]);
+    var parser = (ParagraphList)EngLangParser.Parse(text);
+    var markers = parser.Paragraphs.Where(p => p.Label is not null).SelectMany(p => p.Label!.Markers);
+    return markers.ToArray();
 }
 
 
