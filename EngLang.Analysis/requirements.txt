@@ -3,3 +3,4 @@ setuptools==66.1.1
 wheel==0.38.4
 nltk==3.8.1
 spacy==3.5.0
+stanza==1.8.1

@@ -2,13 +2,19 @@ import sys
 import argparse
 import nltk
 import spacy
+import stanza
 from spacy.language import Language
 from nltk.tree import Tree
 
 nlp: Language = spacy.load("en_core_web_lg")
 
-process_spacy = True
+stanza.download('en', logging_level='WARN')
+stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
+
+
+process_spacy = False
 process_nltk = False
+process_stanza = True
 print_sentence_tree = False
 detect_grammar = False
 print_tagged_tokens = True
@@ -135,11 +141,21 @@ def analyse_sentence_nltk(sentence):
 
     dump_tokens_nltk(tagged_tokens)
 
+def analyse_sentence_stanza(sentence: str):
+    print(sentence)
+    doc = stanza(sentence)
+    for i, sent in enumerate(doc.sentences):
+        # print(f'====== Sentence {i+1} tokens =======')
+        print(*[f'({token.upos} {token.text})' for token in sent.words], sep=' ')
+
+
 def analyse_sentence(sentence):
     if process_nltk:
         analyse_sentence_nltk(sentence)
     if process_spacy:
         analyse_sentence_spacy(sentence)
+    if process_stanza:
+        analyse_sentence_stanza(sentence)
 
 def sample():
     # input text
