@@ -87,6 +87,21 @@ public class IfTests
         Assert.Equal("exit", Assert.IsType<InvocationStatement>(ifStatement.Then).Marker);
     }
 
+    [Fact]
+    public void IfStatementWithInvalidExpression()
+    {
+        var sentence = "if a number is invalid then exit.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
+        var invalidExpression = Assert.IsType<InvalidExpression>(ifStatement.Condition);
+        Assert.Equal("a number is invalid", invalidExpression.Code);
+        Assert.Equal("exit", Assert.IsType<InvocationStatement>(ifStatement.Then).Marker);
+    }
+
     [Theory]
     [InlineData("if a number is 0 , exit.")]
     [InlineData("if a number is 0, exit.")]

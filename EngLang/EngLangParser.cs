@@ -323,12 +323,12 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
         => new InvalidStatement(tokens.ToImmutableArray());
-    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
+    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
     private static Statement MakeStatement222(
         IEnumerable<IToken<EngLangTokenType>> tokens)
         => new InvalidStatement(tokens.ToImmutableArray());
@@ -381,37 +381,59 @@ public partial class EngLangParser : IEngLangParser
         => new Paragraph(statement.Statements, null);
 
     [Rule("paragraph_separator : Multiline+")]
-    private static (bool, InvokableLabel?) MakeParagraphSeparator(
+    private static (bool, IReadOnlyList<InvokableLabel>?) MakeParagraphSeparator(
         IReadOnlyList<IToken<EngLangTokenType>> paragraphToken)
         => (true, null);
 
-    [Rule("paragraph_separator : invokable_label")]
-    private static (bool, InvokableLabel?) MakeParagraphSeparator(
-        InvokableLabel invokableLabel)
+    [Rule("paragraph_separator : invokable_label+")]
+    private static (bool, IReadOnlyList<InvokableLabel>?) MakeParagraphSeparator(
+        IReadOnlyList<InvokableLabel> invokableLabel)
         => (false, invokableLabel);
 
-    [Rule("paragraph_separator : Multiline+ invokable_label")]
-    private static (bool, InvokableLabel?) MakeParagraphSeparator(
+    [Rule("paragraph_separator : Multiline+ invokable_label+")]
+    private static (bool, IReadOnlyList<InvokableLabel>?) MakeParagraphSeparator(
         IReadOnlyList<IToken<EngLangTokenType>> paragraphToken,
-        InvokableLabel invokableLabel)
+        IReadOnlyList<InvokableLabel> invokableLabel)
         => (true, invokableLabel);
 
     // invokable_label
-    [Rule("paragraph_list : Multiline* invokable_label? (paragraph (paragraph_separator paragraph)*)")]
+    [Rule("paragraph_list : Multiline* invokable_label* (paragraph (paragraph_separator paragraph)*)?")]
     private static ParagraphList MakeParagraphList(
         IReadOnlyList<IToken<EngLangTokenType>> leadingMutlilines,
-        InvokableLabel? firstInvokableLabel,
-        Punctuated<Paragraph, (bool, InvokableLabel?)> statements)
+        IReadOnlyList<InvokableLabel> firstInvokableLabel,
+        Punctuated<Paragraph, (bool, IReadOnlyList<InvokableLabel>?)>? statements)
     {
-        InvokableLabel? currentLabel = firstInvokableLabel;
         var paragraphs = new List<Paragraph>();
-        for (int i = 0; i < statements.Count; i++)
+        foreach (var empty in firstInvokableLabel.SkipLast(1))
         {
-            var paragraph = currentLabel is null
-                ? statements[i].Value
-                : statements[i].Value with { Label = currentLabel };
-            currentLabel = statements[i].Punctuation.Item2;
-            paragraphs.Add(paragraph);
+            paragraphs.Add(new Paragraph(ImmutableList<Statement>.Empty, empty));
+        }
+
+        if (statements is not null)
+        {
+            InvokableLabel? currentLabel = firstInvokableLabel.LastOrDefault();
+            for (int i = 0; i < statements.Count; i++)
+            {
+                var paragraph = currentLabel is null
+                    ? statements[i].Value
+                    : statements[i].Value with { Label = currentLabel };
+                var labelsPack = statements[i].Punctuation.Item2;
+                if (labelsPack is not null)
+                {
+                    foreach (var empty in labelsPack.SkipLast(1))
+                    {
+                        paragraphs.Add(new Paragraph(ImmutableList<Statement>.Empty, empty));
+                    }
+                }
+
+                currentLabel = labelsPack?.Last();
+                paragraphs.Add(paragraph);
+            }
+
+            if (currentLabel is not null && statements.Count == 0)
+            {
+                paragraphs.Add(new Paragraph(ImmutableList<Statement>.Empty, currentLabel));
+            }
         }
 
         return new ParagraphList(paragraphs.ToImmutableList());
@@ -499,6 +521,11 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression)
         => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
 
+    [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|'of'|{Identifier}|IntLiteral|HexLiteral|StringLiteral)*")]
+    private static LogicalExpression MakeInvalidLogicalExpression(
+        IReadOnlyList<IToken<EngLangTokenType>> someTokens)
+        => new InvalidExpression(string.Join(" ", someTokens.Select(_ => _.Text)));
+
     private static LogicalOperator GetLogicalOperator(IToken<EngLangTokenType> operatorToken)
     {
         return operatorToken.Text switch
@@ -576,6 +603,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"label_word : OfKeyword")]
     [Rule($"label_word : AndKeyword")]
     [Rule($"label_word : AtKeyword")]
+    [Rule($"label_word : OnKeyword")]
     [Rule($"label_word : ByKeyword")]
     [Rule($"label_word : MathOperationKeyword")]
     [Rule($"label_word : LogicalOperationKeyword")]
@@ -588,6 +616,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"extended_label_word : label_word")]
     [Rule($"extended_label_word : IfKeyword")]
     [Rule($"extended_label_word : IsKeyword")]
+    [Rule($"extended_label_word : HasKeyword")]
     //[Rule($"extended_label_word : IntoKeyword")]
     [Rule($"extended_label_word : DefiniteArticleKeyword")]
     private static IToken<EngLangTokenType> MakeExtendedLabelWord(IToken<EngLangTokenType> marker)
@@ -659,6 +688,13 @@ public partial class EngLangParser : IEngLangParser
         return new LabeledStatement(invokableLabel, invokableLabel.Parameters, statement);
     }
 
+    [Rule($"labeled_statement : invokable_label")]
+    private static LabeledStatement MakeLabeledStatement(
+        InvokableLabel invokableLabel)
+    {
+        return new LabeledStatement(invokableLabel, invokableLabel.Parameters, new BlockStatement(ImmutableList<Statement>.Empty));
+    }
+
     [Rule($"invocation_statement : label_word extended_label_word* identifier_references_list (IntoKeyword {IdentifierReference})? comment_label?")]
     private static Statement MakeInvocationStatement(
         IToken<EngLangTokenType> firstToken,
@@ -673,7 +709,7 @@ public partial class EngLangParser : IEngLangParser
 
     public static SyntaxNode Parse(string sourceCode)
     {
-        if (!sourceCode.Contains('.'))
+        if (!sourceCode.Contains('.') && !sourceCode.Contains(':'))
         {
             // Fallback to expression parsing.
             return ParseNode(sourceCode);

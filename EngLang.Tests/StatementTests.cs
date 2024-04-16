@@ -294,7 +294,7 @@ To calculate area from a width and a height ->
     [Theory]
     [InlineData("if.")]
     [InlineData("if number.")]
-    [InlineData("if number is 0 then result is 1.")]
+    //[InlineData("if number is 0 then result is 1.")]
     [InlineData("result is a number times factorial of a number minus one.")]
     public void InvalidStatement(string sentence)
     {
@@ -332,5 +332,25 @@ To calculate area from a width and a height ->
         Assert.Equal(marker, labeledStatement.Markers);
         var resultStatement = Assert.IsType<ResultStatement>(statement);
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
+    }
+
+    [Fact]
+    public void EmptyFunction()
+    {
+        var parseResult = EngLangParser.Parse("to initialize terminal: ");
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        Assert.NotNull(paragraph.Label);
+        var labeledStatement = paragraph.Label;
+        Assert.Equal("initialize terminal", labeledStatement.Markers.Single());
+    }
+
+    [Fact(Skip = "Not implemented yet.")]
+    public void EmptyFunctionInsideOtherBlocks()
+    {
+        var parseResult = EngLangParser.Parse("to prepare things: result is 1. \n\n\nto initialize terminal: \n\n\nto initialize things: result is 1");
+
+        var paragraphs = Assert.IsType<ParagraphList>(parseResult).Paragraphs;
+        Assert.Equal(new[] { "prepare things", "initialize terminal", "initialize things" }, paragraphs.SelectMany(p => p.Label.Markers).ToArray());
     }
 }
