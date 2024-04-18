@@ -345,12 +345,17 @@ To calculate area from a width and a height ->
         Assert.Equal("initialize terminal", labeledStatement.Markers.Single());
     }
 
-    [Fact(Skip = "Not implemented yet.")]
-    public void EmptyFunctionInsideOtherBlocks()
+    [Theory]
+    [InlineData("to initialize terminal:", new[] { "initialize terminal" })]
+    [InlineData("to initialize terminal:\n\n\n", new[] { "initialize terminal" })]
+    [InlineData("to prepare things: result is 1. \n\n\nto initialize terminal:", new[] { "prepare things", "initialize terminal" })]
+    [InlineData("to prepare things: result is 1. \n\n\nto initialize terminal:\n\n", new[] { "prepare things", "initialize terminal" })]
+    [InlineData("to prepare things: result is 1. \n\n\nto initialize terminal: \n\n\nto initialize things: result is 1.", new[] { "prepare things", "initialize terminal", "initialize things" })]
+    public void EmptyFunctionInsideOtherBlocks(string sentence, string[] markers)
     {
-        var parseResult = EngLangParser.Parse("to prepare things: result is 1. \n\n\nto initialize terminal: \n\n\nto initialize things: result is 1");
+        var parseResult = EngLangParser.Parse(sentence);
 
         var paragraphs = Assert.IsType<ParagraphList>(parseResult).Paragraphs;
-        Assert.Equal(new[] { "prepare things", "initialize terminal", "initialize things" }, paragraphs.SelectMany(p => p.Label.Markers).ToArray());
+        Assert.Equal(markers, paragraphs.SelectMany(p => p.Label.Markers).ToArray());
     }
 }

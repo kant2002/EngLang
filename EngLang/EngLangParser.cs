@@ -380,63 +380,22 @@ public partial class EngLangParser : IEngLangParser
         BlockStatement statement)
         => new Paragraph(statement.Statements, null);
 
-    [Rule("paragraph_separator : Multiline+")]
-    private static (bool, IReadOnlyList<InvokableLabel>?) MakeParagraphSeparator(
-        IReadOnlyList<IToken<EngLangTokenType>> paragraphToken)
-        => (true, null);
-
-    [Rule("paragraph_separator : invokable_label+")]
-    private static (bool, IReadOnlyList<InvokableLabel>?) MakeParagraphSeparator(
-        IReadOnlyList<InvokableLabel> invokableLabel)
-        => (false, invokableLabel);
-
-    [Rule("paragraph_separator : Multiline+ invokable_label+")]
-    private static (bool, IReadOnlyList<InvokableLabel>?) MakeParagraphSeparator(
-        IReadOnlyList<IToken<EngLangTokenType>> paragraphToken,
-        IReadOnlyList<InvokableLabel> invokableLabel)
-        => (true, invokableLabel);
-
-    // invokable_label
-    [Rule("paragraph_list : Multiline* invokable_label* (paragraph (paragraph_separator paragraph)*)?")]
-    private static ParagraphList MakeParagraphList(
-        IReadOnlyList<IToken<EngLangTokenType>> leadingMutlilines,
-        IReadOnlyList<InvokableLabel> firstInvokableLabel,
-        Punctuated<Paragraph, (bool, IReadOnlyList<InvokableLabel>?)>? statements)
+    [Rule("paragraph_list_element : invokable_label paragraph?")]
+    private static Paragraph MakeParagraphListElement(InvokableLabel il, Paragraph p)
     {
-        var paragraphs = new List<Paragraph>();
-        foreach (var empty in firstInvokableLabel.SkipLast(1))
-        {
-            paragraphs.Add(new Paragraph(ImmutableList<Statement>.Empty, empty));
-        }
+        return new Paragraph(p?.Statements ?? ImmutableList<Statement>.Empty, il);
+    }
 
-        if (statements is not null)
-        {
-            InvokableLabel? currentLabel = firstInvokableLabel.LastOrDefault();
-            for (int i = 0; i < statements.Count; i++)
-            {
-                var paragraph = currentLabel is null
-                    ? statements[i].Value
-                    : statements[i].Value with { Label = currentLabel };
-                var labelsPack = statements[i].Punctuation.Item2;
-                if (labelsPack is not null)
-                {
-                    foreach (var empty in labelsPack.SkipLast(1))
-                    {
-                        paragraphs.Add(new Paragraph(ImmutableList<Statement>.Empty, empty));
-                    }
-                }
+    [Rule("paragraph_list_element : paragraph")]
+    private static Paragraph MakeParagraphListElement(Paragraph p)
+    {
+        return p;
+    }
 
-                currentLabel = labelsPack?.Last();
-                paragraphs.Add(paragraph);
-            }
-
-            if (currentLabel is not null && statements.Count == 0)
-            {
-                paragraphs.Add(new Paragraph(ImmutableList<Statement>.Empty, currentLabel));
-            }
-        }
-
-        return new ParagraphList(paragraphs.ToImmutableList());
+    [Rule("paragraph_list : Multiline* (paragraph_list_element (Multiline* paragraph_list_element)*)? Multiline*")]
+    private static ParagraphList MakeParagraphList(IReadOnlyList<IToken<EngLangTokenType>> leading, Punctuated<Paragraph, IReadOnlyList<IToken<EngLangTokenType>>> para, IReadOnlyList<IToken<EngLangTokenType>> trailing)
+    {
+        return new ParagraphList(para.Values.ToImmutableList());
     }
 
     [Rule("statement_list : statement+")]
