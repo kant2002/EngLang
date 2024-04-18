@@ -93,6 +93,8 @@ public class JavaScriptConverter : ILanguageConverter
                 return intLiteralExpression.Value.ToString();
             case StringLiteralExpression stringLiteralExpression:
                 return $"\"{stringLiteralExpression.Value}\"";
+            case NullLiteralExpression nullLiteralExpression:
+                return $"null";
             case VariableExpression variableExpression:
                 return $"{ConvertIdentifierReference(variableExpression.Identifier)}";
             case InPlaceAdditionExpression additionExpression:
@@ -105,6 +107,8 @@ public class JavaScriptConverter : ILanguageConverter
                 return $"{ConvertIdentifierReference(divisionExpression.TargetVariable)} /= {ConvertExpression(divisionExpression.Denominator)}";
             case AssignmentExpression assignmentExpression:
                 return $"{ConvertIdentifierReference(assignmentExpression.Variable)} = {ConvertExpression(assignmentExpression.Expression)}";
+            case InvalidExpression invalidExpression:
+                return $"/* {invalidExpression.Code} */";
             case LogicalExpression equalityExpression:
                 return $"{ConvertExpression(equalityExpression.FirstOperand)} {Convert(equalityExpression.Operator)} {ConvertExpression(equalityExpression.SecondOperand)}";
             case MathExpression mathExpression:
