@@ -12,7 +12,7 @@ public enum EngLangTokenType
     [Ignore][Regex("\\\\[^\n]*")] Comment,
     [Ignore][Regex("\\[[^\\]]*\\]")] InlineComment,
 
-    [Regex("(a|an|An)")] IndefiniteArticleKeyword,
+    [Regex("(a|an|An|A|Another|another)")] IndefiniteArticleKeyword,
     [Token("some")] SomeKeyword,
     [Token("the")] DefiniteArticleKeyword,
 
@@ -20,7 +20,7 @@ public enum EngLangTokenType
     [Token(".")] DotKeyword,
     [Regex("->")] FunctionBodyKeyword,
 
-    [Regex("(add|subtract|multiply|multiplied|divide|divided|plus|minus)")] MathOperationKeyword,
+    [Regex("(add|subtract|multiply|multiplied|divide|divided|plus|minus|-|\\+|/|\\*)")] MathOperationKeyword,
 
     [Regex("(smaller|bigger|less|greater|most|least)")] LogicalOperationKeyword,
 
@@ -46,7 +46,7 @@ public enum EngLangTokenType
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
     //[Regex(Regexes.Identifier)]
-    [Regex("[A-Za-z_]([A-Za-z0-9_\\-/']*[A-Za-z_']|[A-Za-z_']?)")]
+    [Regex("[A-Za-z_]([A-Za-z0-9_\\-/']*[A-Za-z_']|[A-Za-z_']?)#?")]
     Identifier,
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex("(0x|$)[0-9A-Fa-f]+")] HexLiteral,

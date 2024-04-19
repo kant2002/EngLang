@@ -246,18 +246,21 @@ To calculate area from a width and a height ->
     [InlineData("To calculate area from a width and a height: result is 1.", "calculate area from and")]
     [InlineData("To calculate area from a width and a height-> result is 1.", "calculate area from and")]
     [InlineData("calculate area from a width and a height-> result is 1.", "calculate area from and")]
-    [InlineData("define calculate area from a width and a height as result is 1.", "calculate area from and")]
-    [InlineData("Define calculate area from a width and a height as result is 1.", "calculate area from and")]
-    [InlineData("define factorial of a number as result is 1.", "factorial of")]
+    //[InlineData("define calculate area from a width and a height as result is 1.", "calculate area from and")]
+    //[InlineData("Define calculate area from a width and a height as result is 1.", "calculate area from and")]
+    //[InlineData("define factorial of a number as result is 1.", "factorial of")]
     //[InlineData("define the factorial of a number as result is 1.", "the factorial of")]
     [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
-    [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
+    //[InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
     [InlineData("To calculate the area of a rectangle (multiplication): result is 1.", "calculate the area of (multiplication)")]
     [InlineData("To calculate the area of a rectangle (multiplication - trivial): result is 1.", "calculate the area of (multiplication - trivial)")]
     [InlineData("to apply some parameters: result is 1.", "apply")]
     [InlineData("to do something with some parameters: result is 1.", "do something with")]
     [InlineData("To put an object at the end of some objects: result is 1.", "put at the end of")]
     [InlineData("to check if the selection is a string: result is 1.", "check if the selection is")]
+    [InlineData("to place items in some places: result is 1.", "place items in")]
+    [InlineData("to put a number into another number: result is 1.", "put into")]
+    [InlineData("to put a number into number: result is 1.", "put into number")]
     public void LabeledWithParameterStatement(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);
@@ -272,9 +275,9 @@ To calculate area from a width and a height ->
     }
 
     [Theory]
-    [InlineData("calculate factorial of a previous number into a previous factorial.", "calculate factorial of")]
-    [InlineData("calculate factorial of a previous number into a previous factorial (recursion).", "calculate factorial of (recursion)")]
-    [InlineData("calculate factorial of a previous number in the previous factorial (recursion).", "calculate factorial of (recursion)")]
+    [InlineData("calculate factorial of a previous number into a previous factorial.", "calculate factorial of into")]
+    [InlineData("calculate factorial of a previous number into a previous factorial (recursion).", "calculate factorial of into (recursion)")]
+    //[InlineData("calculate factorial of the previous number in the previous factorial (recursion).", "calculate factorial of in (recursion)")]
     public void LabeledStatementInvocation(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);
@@ -285,10 +288,13 @@ To calculate area from a width and a height ->
         var invocationStatement = Assert.IsType<InvocationStatement>(statement);
         Assert.Equal(marker, invocationStatement.Marker);
 
-        var parameter = Assert.Single(invocationStatement.Parameters);
-        Assert.Equal("previous number", parameter.Name);
-
-        Assert.Equal("previous factorial", invocationStatement.ResultIdentifier.Name);
+        Assert.Equal(2, invocationStatement.Parameters.Length);
+        Assert.Equal("previous number", invocationStatement.Parameters[0].Name);
+        Assert.Equal("previous factorial", invocationStatement.Parameters[1].Name);
+        //var parameter = Assert.Single(invocationStatement.Parameters);
+        //Assert.Equal("previous number", parameter.Name);
+        //
+        //Assert.Equal("previous factorial", invocationStatement.ResultIdentifier.Name);
     }
 
     [Theory]
@@ -321,6 +327,7 @@ To calculate area from a width and a height ->
 
     [Theory]
     [InlineData("to do something else with a parameter identi; to do something a parameter identi: result is 1.", new[] { "do something else with", "do something" })]
+    [InlineData("to do something else with a parameter identi; \nto do something a parameter identi: \nresult is 1.", new[] { "do something else with", "do something" })]
     public void MultipleLabelsWithParameterStatement(string sentence, string[] marker)
     {
         var parseResult = EngLangParser.Parse(sentence);

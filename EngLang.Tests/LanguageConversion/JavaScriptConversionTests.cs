@@ -37,7 +37,7 @@ value /= 42;
 }
 ".ReplaceLineEndings(NewLine);
 
-    protected override string GetExpectedInvocationStatementParametersCode() => @"previous_factorial = calculate_factorial_of(previous_number);
+    protected override string GetExpectedInvocationStatementParametersCode() => @"calculate_factorial_of_into(previous_number, previous_factorial);
 ".ReplaceLineEndings(NewLine);
 
     protected override string GetExpectedObjectPropertiesAccess() => @"rectangle.width *= rectangle.height;

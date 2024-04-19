@@ -111,6 +111,8 @@ public class CSharpConverter : ILanguageConverter
                 return $"\"{stringLiteralExpression.Value}\"";
             case NullLiteralExpression nullLiteralExpression:
                 return $"null";
+            case ByteArrayLiteralExpression byteArrayLiteralExpression:
+                return $"new byte[] {{ {string.Join(", ", byteArrayLiteralExpression.Value)} }}";
             case VariableExpression variableExpression:
                 return $"{ConvertIdentifierReference(variableExpression.Identifier)}";
             case InPlaceAdditionExpression additionExpression:
