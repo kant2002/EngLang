@@ -333,7 +333,7 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|OnKeyword|'/'|'('|')')* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
@@ -456,7 +456,7 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression)
         => new LogicalExpression(LogicalOperator.NotEquals, new VariableExpression(identifierReference), literalExpression);
 
-    [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' constant_expression")]
+    [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' primitive_expression")]
     private static LogicalExpression MakeLogicalThanExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> operatorToken,
@@ -464,7 +464,7 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression)
         => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
 
-    [Rule($"logical_expression : {IdentifierReference} 'is' LogicalOperationKeyword 'than' constant_expression")]
+    [Rule($"logical_expression : {IdentifierReference} 'is' LogicalOperationKeyword 'than' primitive_expression")]
     private static LogicalExpression MakeLogicalThanExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
@@ -578,12 +578,12 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<(IdentifierReference, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
         => (identifierReferences.SelectMany(_ => _.Item2), identifierReferences.Select(_ => _.Item1).ToImmutableList());
 
-    [Rule($"slot_declaration : {IdentifierReference} ('is' {IdentifierReference})?")]
-    [Rule($"slot_declaration : {IdentifierReference} ('at' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {TypeIdentifierReference} ('is' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {TypeIdentifierReference} ('at' {IdentifierReference})?")]
     private static SlotDeclaration MakeSlotDeclaration(
-        IdentifierReference identifierReferences,
+        TypeIdentifierReference identifierReferences,
         (IToken<EngLangTokenType>, IdentifierReference AliasFor)? alias)
-        => new SlotDeclaration(identifierReferences.Name, alias?.AliasFor?.Name);
+        => new SlotDeclaration(identifierReferences.Name, identifierReferences.IsCollection, alias?.AliasFor?.Name);
 
     [Rule($"comma_identifier_references_list : (slot_declaration (CommaKeyword slot_declaration)*)")]
     private static SlotDeclarationsList MakeCommaDelimitedIdentifierReferencesList(
