@@ -39,7 +39,8 @@ public partial class EngLangParser : IEngLangParser
         bool nonFirst = false;
         foreach (var identifierPart in identifiersList)
         {
-            if (!identifierPart.EndsWith("'s"))
+            var possessive = identifierPart.EndsWith("'s") || identifierPart.EndsWith("'");
+            if (!possessive)
             {
                 if (nonFirst)
                 {
@@ -56,7 +57,8 @@ public partial class EngLangParser : IEngLangParser
                     currentIdentifier.Append(" ");
                 }
 
-                currentIdentifier.Append(identifierPart[..(identifierPart.Length - 2)]);
+                var cleaned = identifierPart.EndsWith("'") ? identifierPart[..(identifierPart.Length - 1)] : identifierPart[..(identifierPart.Length - 2)];
+                currentIdentifier.Append(cleaned);
                 parentReference = new IdentifierReference(currentIdentifier.ToString(), parentReference);
                 currentIdentifier = new();
             }
@@ -218,6 +220,14 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType>? token,
         Expression expression)
     {
+        if (token?.Text == "-")
+        {
+            if (expression is IntLiteralExpression intLiteralExpression)
+            {
+                return new IntLiteralExpression(intLiteralExpression.Value);
+            }
+        }
+
         Debug.Assert(token?.Text != "-", "negated expressions does not supported.");
         return expression;
     }
@@ -323,7 +333,7 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword)* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
@@ -480,7 +490,19 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression)
         => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
 
-    [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|'of'|{Identifier}|IntLiteral|HexLiteral|StringLiteral)*")]
+    [Rule($"logical_expression : {IdentifierReference} 'is'? LogicalOperationKeyword 'than' 'or' 'equal' 'to'? constant_expression")]
+    private static LogicalExpression MakeLogicalThanExpression(
+        IdentifierReference identifierReference,
+        IToken<EngLangTokenType> isToken,
+        IToken<EngLangTokenType> operatorToken,
+        IToken<EngLangTokenType> thanToken,
+        IToken<EngLangTokenType> orToken,
+        IToken<EngLangTokenType> equalToken,
+        IToken<EngLangTokenType>? toToken,
+        Expression literalExpression)
+        => new LogicalExpression(GetLogicalOperatorOrEqual(GetLogicalOperator(operatorToken)), new VariableExpression(identifierReference), literalExpression);
+
+    [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|WithKeyword|'of'|{Identifier}|IntLiteral|HexLiteral|StringLiteral)*")]
     private static LogicalExpression MakeInvalidLogicalExpression(
         IReadOnlyList<IToken<EngLangTokenType>> someTokens)
         => new InvalidExpression(string.Join(" ", someTokens.Select(_ => _.Text)));
@@ -496,6 +518,16 @@ public partial class EngLangParser : IEngLangParser
             "least" => LogicalOperator.GreaterOrEquals,
             "most" => LogicalOperator.LessOrEquals,
             _ => throw new InvalidOperationException($"Unknown logical operator {operatorToken.Text}"),
+        };
+    }
+
+    private static LogicalOperator GetLogicalOperatorOrEqual(LogicalOperator operatorToken)
+    {
+        return operatorToken switch
+        {
+            LogicalOperator.Less => LogicalOperator.LessOrEquals,
+            LogicalOperator.Greater => LogicalOperator.GreaterOrEquals,
+            _ => throw new InvalidOperationException($"Logical operator {operatorToken} cannot be converted to 'or equals' form"),
         };
     }
 

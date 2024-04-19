@@ -40,14 +40,14 @@ public class VariableNameTests
         Assert.Equal(expectedVariableName, variableDeclaration.Name);
     }
 
-    [Fact]
-    public void VariableNameCanHaveDash()
+    [Theory]
+    [InlineData("a zero-indexed", "zero-indexed")]
+    [InlineData("a i/o", "i/o")]
+    [InlineData("a things' first", "first")]
+    public void VariableNameCanHaveDash(string sentence, string expectedVariableName)
     {
-        var sentence = "a zero-indexed";
-
         var parseResult = EngLangParser.Parse(sentence);
 
-        var expectedVariableName = "zero-indexed";
         var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
         Assert.Equal(expectedVariableName, variableDeclaration.Name);
     }

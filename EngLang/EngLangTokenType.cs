@@ -18,7 +18,7 @@ public enum EngLangTokenType
 
     [Token(";")] SemicolonKeyword,
     [Token(".")] DotKeyword,
-    [Regex("(->|as)")] FunctionBodyKeyword,
+    [Regex("->")] FunctionBodyKeyword,
 
     [Regex("(add|subtract|multiply|multiplied|divide|divided|plus|minus)")] MathOperationKeyword,
 
@@ -30,6 +30,7 @@ public enum EngLangTokenType
     [Regex("(if|If)")] IfKeyword,
     [Token("is")] IsKeyword,
     [Token("at")] AtKeyword,
+    [Token("as")] FunctionBodyOrAsKeyword,
     [Token("on")] OnKeyword,
     [Token("are")] AreKeyword,
     [Token("has")] HasKeyword,
@@ -45,7 +46,7 @@ public enum EngLangTokenType
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
     //[Regex(Regexes.Identifier)]
-    [Regex("[A-Za-z_]([A-Za-z0-9_\\-]*[A-Za-z_]|[A-Za-z_]?)('s)?")]
+    [Regex("[A-Za-z_]([A-Za-z0-9_\\-/']*[A-Za-z_']|[A-Za-z_']?)")]
     Identifier,
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex("(0x|$)[0-9A-Fa-f]+")] HexLiteral,
