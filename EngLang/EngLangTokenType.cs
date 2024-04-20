@@ -42,6 +42,7 @@ public enum EngLangTokenType
     [Token("of")] OfKeyword,
     [Regex("then")] ThenKeyword,
     [Regex(",")] CommaKeyword,
+    [Regex("from")] FromKeyword,
     [Regex("(null|nil)")] NullLiteral,
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
