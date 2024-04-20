@@ -270,3 +270,6 @@ look really wierd.
 - [15] https://web.media.mit.edu/%7Elieber/Publications/Programmatic-Semantics.pdf
 - [15] https://web.media.mit.edu/%7Elieber/Publications/Feasibility-Nat-Lang-Prog.pdf
 - [16] https://www.cs.cmu.edu/~NatProg/papers/Myers2004NaturalProgramming.pdf
+- [17] https://en.wikipedia.org/wiki/Definite_clause_grammar
+- [16] https://aclanthology.org/J88-4001.pdf
+- [17] https://link.springer.com/article/10.1007/s10462-015-9449-3
