@@ -233,8 +233,7 @@ public partial class EngLangParser : IEngLangParser
         return expression;
     }
 
-    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {TypeIdentifierReference} (EqualKeyword 'to' constant_expression)?")]
-    [Rule($"variable_declaration: DefiniteArticleKeyword {LongIdentifier} 'are' {TypeIdentifierReference} (EqualKeyword 'to' constant_expression)?")]
+    [Rule($"variable_declaration: (DefiniteArticleKeyword|SomeKeyword) {LongIdentifier} ('is'|'are') {TypeIdentifierReference} (EqualKeyword 'to' constant_expression)?")]
     private static VariableDeclaration MakeVariableDeclaration(
         IToken<EngLangTokenType> definiteArticle,
         IReadOnlyList<string> identifier,
@@ -334,12 +333,12 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|OnKeyword|'/'|'('|')')* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|OnKeyword|SomeKeyword|AtKeyword|'/'|'('|')')* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
         => new InvalidStatement(tokens.ToImmutableArray());
-    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
+    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
     private static Statement MakeStatement222(
         IEnumerable<IToken<EngLangTokenType>> tokens)
         => new InvalidStatement(tokens.ToImmutableArray());
@@ -503,7 +502,7 @@ public partial class EngLangParser : IEngLangParser
         Expression literalExpression)
         => new LogicalExpression(GetLogicalOperatorOrEqual(GetLogicalOperator(operatorToken)), new VariableExpression(identifierReference), literalExpression);
 
-    [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|WithKeyword|'of'|{Identifier}|IntoKeyword|AndKeyword|IntLiteral|AreKeyword|FunctionBodyOrAsKeyword|HexLiteral|StringLiteral|'/'|LogicalOperationKeyword)*")]
+    [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|WithKeyword|'of'|{Identifier}|IntoKeyword|AndKeyword|IntLiteral|AreKeyword|FunctionBodyOrAsKeyword|HexLiteral|StringLiteral|'/'|LogicalOperationKeyword|MathOperationKeyword|ByKeyword|NullLiteral|')'|'(')*")]
     private static LogicalExpression MakeInvalidLogicalExpression(
         IReadOnlyList<IToken<EngLangTokenType>> someTokens)
         => new InvalidExpression(string.Join(" ", someTokens.Select(_ => _.Text)));
@@ -614,12 +613,13 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"extended_label_word : FunctionBodyOrAsKeyword")]
     //[Rule($"extended_label_word : IntoKeyword")]
     [Rule($"extended_label_word : DefiniteArticleKeyword")]
+    [Rule($"extended_label_word : NullLiteral")]
     [Rule($"extended_label_word : 'given'")]
     private static IToken<EngLangTokenType> MakeExtendedLabelWord(IToken<EngLangTokenType> marker)
         => marker;
 
-    [Rule($"comment_label : '(' ({Identifier} | '-' | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword)* ')'")]
-    private static string MakeInvokableLabel(
+    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | IntLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral)* ')'")]
+    private static string MakeCommentLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> names,
         IToken<EngLangTokenType> colonToken)
@@ -780,6 +780,7 @@ public partial class EngLangParser : IEngLangParser
 
                 throw new Exception($"Parser error. Got {variableReferenceResult.Error.Got} at position {variableReferenceResult.Error.Position}");
             case "the":
+            case "some":
                 var variableDeclarationResult = parser.ParseVariableDeclaration();
                 if (variableDeclarationResult.IsOk)
                 {

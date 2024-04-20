@@ -80,6 +80,20 @@ public class VariableNameTests
     }
 
     [Fact]
+    public void DeclareCollectionVariableWithAnType2()
+    {
+        var sentence = "some names are a apple";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
+        Assert.Equal("names", variableDeclaration.Name);
+        Assert.Equal("apple", variableDeclaration.TypeName.Name);
+        Assert.False(variableDeclaration.TypeName.IsCollection);
+        Assert.Null(variableDeclaration.Expression);
+    }
+
+    [Fact]
     public void DeclareCollectionVariableWithAnType()
     {
         var sentence = "the apples are some fruits";

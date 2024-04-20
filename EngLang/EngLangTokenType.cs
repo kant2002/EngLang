@@ -46,9 +46,10 @@ public enum EngLangTokenType
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
     //[Regex(Regexes.Identifier)]
-    [Regex("[A-Za-z_]([A-Za-z0-9_\\-/']*[A-Za-z_']|[A-Za-z_']?)#?")]
+    [Regex("[A-Za-z_]([A-Za-z0-9_\\-/':]*[A-Za-z0-9_']|[A-Za-z0-9_']?)#?")]
     Identifier,
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex("(0x|$)[0-9A-Fa-f]+")] HexLiteral,
     [Regex("\"((\"\")|[^\\r\\n\"])*\"")] StringLiteral,
+    [Regex("-?[0-9]+°(-?[0-9]+’)?(-?[0-9.]+”)?(-?[0-9.]+cas)?")] TemperatureLiteral,
 }
