@@ -54,4 +54,5 @@ public enum EngLangTokenType
     [Regex("(0x|$)[0-9A-Fa-f]+")] HexLiteral,
     [Regex("\"((\"\")|[^\\r\\n\"])*\"")] StringLiteral,
     [Regex("-?[0-9]+°(-?[0-9]+’)?(-?[0-9.]+”)?(-?[0-9.]+cas)?")] TemperatureLiteral,
+    [Regex("('s|')")] PosessiveKeyword,
 }

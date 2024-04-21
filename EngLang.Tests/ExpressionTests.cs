@@ -203,4 +203,34 @@ public class ExpressionTests
         var intLiteralExpression = Assert.IsType<ByteArrayLiteralExpression>(parseResult.Ok.Value);
         Assert.Equal(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, intLiteralExpression.Value);
     }
+
+    [Theory]
+    [InlineData("a terminal's color")]
+    [InlineData("a color of a terminal")]
+    public void PosessiveForm(string sentence)
+    {
+        var lexer = new EngLangLexer(sentence);
+        var parser = new EngLangParser(lexer);
+        var parseResult = parser.ParseExpression();
+        Assert.True(parseResult.IsOk);
+
+        var expression = parseResult.Ok.Value;
+        var variableExpression = Assert.IsType<VariableExpression>(expression);
+        Assert.Equal("color", variableExpression.Identifier.Name);
+        Assert.Equal("terminal", variableExpression.Identifier.Owner.Name);
+    }
+
+    [Fact]
+    public void StringPosessiveForm()
+    {
+        var lexer = new EngLangLexer("\" blabla \"'s pointer");
+        var parser = new EngLangParser(lexer);
+        var parseResult = parser.ParseExpression();
+        Assert.True(parseResult.IsOk);
+
+        var expression = parseResult.Ok.Value;
+        var variableExpression = Assert.IsType<PosessiveExpression>(expression);
+        Assert.Equal("pointer", variableExpression.Identifier.Name);
+        Assert.IsType<StringLiteralExpression>(variableExpression.Owner);
+    }
 }

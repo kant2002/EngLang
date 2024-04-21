@@ -106,8 +106,13 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"variable_expression : {IdentifierReference}")]
     private static VariableExpression MakeVariableExpression(IdentifierReference e) => new (e);
 
+    [Rule($"posessive_expression : literal_expression PosessiveKeyword {LongIdentifier}")]
+    private static PosessiveExpression MakePosessiveExpression(Expression target, IToken<EngLangTokenType> posessiveKeyword, IReadOnlyList<string> names)
+        => new(new(string.Join(" ", names), null), target);
+
     [Rule("primitive_expression : constant_expression")]
     [Rule($"primitive_expression : variable_expression")]
+    [Rule($"primitive_expression : posessive_expression")]
     private static Expression MakePrimitiveExpression(Expression e) => e;
 
     [Rule("math_expression : primitive_expression")]
@@ -334,12 +339,12 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|OnKeyword|SomeKeyword|AtKeyword|FromKeyword|ToKeyword|'/'|'('|')')* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|OnKeyword|SomeKeyword|AtKeyword|FromKeyword|ToKeyword|PosessiveKeyword|'/'|'('|')')* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
         => new InvalidStatement(tokens.ToImmutableArray());
-    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword)*")]
+    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|FromKeyword|ToKeyword|PosessiveKeyword)*")]
     private static Statement MakeStatement222(
         IEnumerable<IToken<EngLangTokenType>> tokens)
         => new InvalidStatement(tokens.ToImmutableArray());

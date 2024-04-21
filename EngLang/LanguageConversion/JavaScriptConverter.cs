@@ -115,6 +115,8 @@ public class JavaScriptConverter : ILanguageConverter
                 return $"{ConvertExpression(equalityExpression.FirstOperand)} {Convert(equalityExpression.Operator)} {ConvertExpression(equalityExpression.SecondOperand)}";
             case MathExpression mathExpression:
                 return $"{ConvertExpression(mathExpression.FirstOperand)} {Convert(mathExpression.Operator)} {ConvertExpression(mathExpression.SecondOperand)}";
+            case PosessiveExpression posessiveExpression:
+                return $"{ConvertExpression(posessiveExpression.Owner)}.{ConvertIdentifierReference(posessiveExpression.Identifier)}";
             default:
                 throw new NotImplementedException();
         }
