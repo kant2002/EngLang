@@ -40,7 +40,7 @@ public abstract class BaseVariableTests
     [Fact]
     public void ConvertVariableWithIntLiteral()
     {
-        var sentence = "the answer to all things is an number equal to 42";
+        var sentence = "the answer is an number equal to 42";
         var parseResult = EngLangParser.Parse(sentence);
         var converter = CreateConverter();
 

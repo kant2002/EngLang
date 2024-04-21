@@ -124,12 +124,12 @@ public class VariableNameTests
     [Fact]
     public void DeclareVariableWithAnIntLiteralInitializer()
     {
-        var sentence = "the answer to all things is an number equal to 42";
+        var sentence = "the answer is an number equal to 42";
 
         var parseResult = EngLangParser.Parse(sentence);
 
         var variableDeclaration = Assert.IsType<VariableDeclaration>(parseResult);
-        Assert.Equal("answer to all things", variableDeclaration.Name);
+        Assert.Equal("answer", variableDeclaration.Name);
         Assert.Equal("number", variableDeclaration.TypeName.Name);
         var intLiteralExpression = Assert.IsType<IntLiteralExpression>(variableDeclaration.Expression);
         Assert.Equal(42, intLiteralExpression.Value);

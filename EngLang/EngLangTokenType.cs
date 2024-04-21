@@ -30,6 +30,7 @@ public enum EngLangTokenType
     [Regex("(if|If)")] IfKeyword,
     [Token("is")] IsKeyword,
     [Token("at")] AtKeyword,
+    [Regex("(to|To)")] ToKeyword,
     [Token("as")] FunctionBodyOrAsKeyword,
     [Token("on")] OnKeyword,
     [Token("are")] AreKeyword,

@@ -12,7 +12,7 @@ public class JavaScriptVariableTests : BaseVariableTests
 
     protected override string GetExpectedVariableWithStringLiteral() => "let greetings = \"Hello\"";
 
-    protected override string GetExpectedVariableWithIntLiteral() => "let answer_to_all_things = 42";
+    protected override string GetExpectedVariableWithIntLiteral() => "let answer = 42";
 
     protected override string GetExpectedVariableWithDash() => @"zero_index_variable".ReplaceLineEndings(NewLine);
 }

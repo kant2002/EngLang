@@ -153,7 +153,7 @@ public class JavaScriptConverter : ILanguageConverter
         {
             var primaryMarker = label.Markers.First();
             var parameterString = string.Join(", ", label.Parameters.Select(_ => _.Name.Replace(" ", "_")));
-            builder.Append($"function {primaryMarker.Replace(" ", "_")}({parameterString}) ");
+            builder.Append($"function {ConvertToIdentifier(primaryMarker)}({parameterString}) ");
             builder.OpenBraces();
         }
 
@@ -213,14 +213,14 @@ public class JavaScriptConverter : ILanguageConverter
             case LabeledStatement labeledStatement:
                 var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
                 var primaryMarker = labeledStatement.Marker.Markers.First();
-                builder.Append($"function {primaryMarker.Replace(" ", "_")}({parameterString}) ");
+                builder.Append($"function {ConvertToIdentifier(primaryMarker)}({parameterString}) ");
                 builder.OpenBraces();
                 ConvertStatement(builder, labeledStatement.Statement);
                 builder.CloseBraces();
                 break;
             case InvocationStatement invocationStatement:
                 var invocationParameterString = string.Join(", ", invocationStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
-                var invocationStatementText = $"{invocationStatement.Marker.Replace(" ", "_")}({invocationParameterString});";
+                var invocationStatementText = $"{ConvertToIdentifier(invocationStatement.Marker)}({invocationParameterString});";
                 if (invocationStatement.ResultIdentifier != null)
                 {
                     builder.AppendLine($"{Convert(invocationStatement.ResultIdentifier)} = {invocationStatementText}");
@@ -243,6 +243,6 @@ public class JavaScriptConverter : ILanguageConverter
 
     private string ConvertToIdentifier(string name)
     {
-        return name.Replace(' ', '_').Replace('-', '_');
+        return name.Replace(' ', '_').Replace('-', '_').Replace('(', '_').Replace(')', '_');
     }
 }

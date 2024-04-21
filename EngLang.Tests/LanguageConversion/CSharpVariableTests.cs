@@ -12,7 +12,7 @@ public class CSharpVariableTests : BaseVariableTests
 
     protected override string GetExpectedVariableWithStringLiteral() => "string greetings = \"Hello\"";
 
-    protected override string GetExpectedVariableWithIntLiteral() => "number answer_to_all_things = 42";
+    protected override string GetExpectedVariableWithIntLiteral() => "number answer = 42";
 
     protected override string GetExpectedVariableWithDash() => @"zero_index_variable".ReplaceLineEndings(NewLine);
 }
