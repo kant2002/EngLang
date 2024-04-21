@@ -62,6 +62,7 @@ public partial class EngLangParser : IEngLangParser
                 currentIdentifier.Append(cleaned);
                 parentReference = new IdentifierReference(currentIdentifier.ToString(), parentReference);
                 currentIdentifier = new();
+                nonFirst = false;
             }
         }
 
