@@ -327,11 +327,16 @@ Types of Parts or speech which is used.
 	'WDT', 'WP', 'WRB']
 """
 
-def analyze_file(filename):
+def analyze_file(filename: str, lines: bool):
     with open(filename, "r+", encoding="utf-8") as program_file:
-        # Reading from a file
-        program_content = program_file.read()
-        analyse_sentence(program_content)
+        if lines:
+            # Reading from a file
+            for program_content in program_file.readlines(): 
+                analyse_sentence(program_content)
+        else:
+            # Reading from a file
+            program_content = program_file.read()
+            analyse_sentence(program_content)
 
 def split_sentence_spacy(filename, output_file):
     print("split_sentence_spacy " + filename)
@@ -364,6 +369,8 @@ arg_parser = argparse.ArgumentParser(
 arg_parser.add_argument('command', nargs='?', default = 'sample')
 arg_parser.add_argument('-f', '--filename')
 arg_parser.add_argument('-o', '--output', required = False)
+arg_parser.add_argument('--lines',
+                    action='store_true') 
 arg_parser.add_argument('-v', '--verbose',
                     action='store_true')  # on/off flag
 
@@ -375,7 +382,8 @@ match args.command:
         sample()
     case "analyze":
         filename = args.filename
-        analyze_file(filename)
+        lines = args.lines
+        analyze_file(filename, lines)
     case "sentencize":
         filename = args.filename
         output_file = args.output if args.output else args.filename +'.sentence'
