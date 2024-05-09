@@ -273,3 +273,4 @@ look really wierd.
 - [17] https://en.wikipedia.org/wiki/Definite_clause_grammar
 - [16] https://aclanthology.org/J88-4001.pdf
 - [17] https://link.springer.com/article/10.1007/s10462-015-9449-3
+- [18] http://www.bitsavers.org/pdf/univac/flow-matic/U1518_FLOW-MATIC_Programming_System_1958.pdf
