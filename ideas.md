@@ -155,3 +155,29 @@ For example
 Logger logger = new();
 ```
 Tuples maybe in some form works? Javascript has notion for short copying of variables to properties of the objects, like `{ foo }` which seems close somewhat.
+
+## Human brain as hybrid stack machine?
+
+Okay, I have to write this to at least capture some thought which I have for a long time. Obviously there no surprise that humans have Short term memory and Long term memory.
+But while writing instructions and try to explain processes to people, I think we see some interesting properties of how people (or at least some of them) organize computational thinking.
+This I belive somewhat highlight how brain works.
+
+Consider this procedure from FLOW-MATIC.
+```
+COMPARE PRODUCT - NO (A) WITH PRODUCT - NO (B); 
+IF GREATER GO TO OPERATION 10; 
+IF EQUAL GO TO OPERATION 5; 
+OTHERWISE GO TO OPERATION 2 • 
+```
+
+1. First sentence establish context for 2 items A and B. 
+2. Second sentence attempt to perform operation `if greater` in this case on some items in the STM context. 
+3. and then provide instructions based on results
+4. After that we again perform `if greater` on local context and assign operation
+5. and finally `otherwise` assume(?) that all comparison fails and assign operation
+
+I have hunch that local context in human mind is some form of stack where last placed item on the stack given priority.
+That mean, each operation before execution match with last placed item in the context, then subsequence one and one more.
+
+I'm not sure, but I think we usually operate in langauge only 2 and 3 items in the context. Otherwise it become messy. I do not sure how
+that corresponds to STM size, probably this is other mechanism in place.
