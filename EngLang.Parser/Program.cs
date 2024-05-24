@@ -2,11 +2,17 @@ using Catalyst;
 using EngLang;
 using Mosaik.Core;
 using static System.Console;
+using System.Text.RegularExpressions;
+using Yoakke.SynKit.Text;
+
+
 #if SPACY
 using NlpPipeline = Catalyst.Spacy.Pipeline;
 #else
 using NlpPipeline = Catalyst.Pipeline;
 #endif
+
+using EngLangToken = Yoakke.SynKit.Lexer.IToken<EngLang.EngLangTokenType>;
 
 var samples = new[]
 {
@@ -39,11 +45,13 @@ else
 async Task<string[]> CollectSentences(string fileName)
 {
     var text = await File.ReadAllTextAsync(args[0]);
-    var parser = (ParagraphList)EngLangParser.Parse(text);
-    var markers = parser.Paragraphs.Where(p => p.Label is not null).SelectMany(p => p.Label!.Markers);
-    return markers.ToArray();
+    var collector = new SentenceCollector(text)
+    {
+        CollectMarkers = true,
+        CollectSentences = true,
+    };
+    return collector.Collect();
 }
-
 
 async Task ProcessSpacy(string[] samples)
 {
@@ -61,6 +69,78 @@ async Task ProcessSpacy(string[] samples)
     {
         analyzer.AnalyseText(sample);
     }
+}
+
+class SentenceCollector
+{
+    private readonly string text;
+    private readonly int[] linePositions;
+
+    public SentenceCollector(string text)
+    {
+        this.text = text;
+        this.linePositions = new[] { 0 }.Union(Regex.Matches(text, "(\r\n|\n|\r)").OfType<Match>().Select(_ => _.Index + _.ValueSpan.Length)).ToArray();
+    }
+
+    public required bool CollectMarkers { get; set; }
+
+    public required bool CollectSentences { get; set; }
+
+    public string[] Collect()
+    {
+        var parser = (ParagraphList)EngLangParser.Parse(text);
+        var paragraphWithLabels = parser.Paragraphs.Where(p => p.Label is not null);
+        var markers = paragraphWithLabels.SelectMany(CollectSentencesFromParagraph);
+        return markers.OrderBy(_ => _).Distinct().ToArray();
+    }
+
+    IEnumerable<string> CollectSentencesFromParagraph(Paragraph p)
+    {
+        if (CollectMarkers)
+        {
+            foreach (var marker in p.Label!.Markers)
+                yield return marker;
+        }
+
+        if (CollectSentences)
+        {
+            foreach (var statement in p.Statements.SelectMany(CollectSentencesFromStatement))
+                yield return statement;
+        }
+    }
+
+    IEnumerable<string> CollectSentencesFromStatement(Statement s)
+    {
+        switch (s)
+        {
+            case BlockStatement blockStatement:
+                {
+                    foreach (var statement in blockStatement.Statements.SelectMany(CollectSentencesFromStatement))
+                        yield return statement;
+                }
+                break;
+            case InvocationStatement invocationStatement:
+                {
+                    yield return invocationStatement.Marker;
+                }
+                break;
+            case InvalidStatement invalidStatement:
+                yield return GetText(invalidStatement.Tokens.First(), invalidStatement.Tokens.Last());
+                break;
+        }
+    }
+
+    string GetText(EngLangToken token) => GetText(token.Range);
+
+    string GetText(Yoakke.SynKit.Text.Range range) => text[GetPosition(range.Start)..GetPosition(range.End)];
+
+    string GetText(EngLangToken start, EngLangToken end)
+    {
+        System.Range range = GetPosition(start.Location.Range.Start)..GetPosition(end.Location.Range.End);
+        return text[range];
+    }
+
+    int GetPosition(Position pos) => this.linePositions[pos.Line] + pos.Column;
 }
 
 class TextAnalyzer
