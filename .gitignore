@@ -4,3 +4,4 @@ obj/
 *.user
 libs/
 /EngLang.Analysis/env
+/EngLang.Parser/Properties/launchSettings.json

@@ -8,7 +8,7 @@ public record ShapeDeclaration(SymbolName Name, TypeIdentifierReference? BaseSha
     {
         get
         {
-            yield return new IdentifierReference(Name, null);
+            yield return new IdentifierReference(Name, null, Name.Range);
             if (BaseShapeName is not null)
                 yield return BaseShapeName;
 

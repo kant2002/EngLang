@@ -55,6 +55,8 @@ public class VariableNameTests
 
         var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
         Assert.Equal(expectedVariableName, variableDeclaration.Name.Name);
+        Assert.Equal(new Position(0, 0), variableDeclaration.Range.Start);
+        Assert.Equal(new Position(0, sentence.Length), variableDeclaration.Range.End);
     }
 
     [Fact]

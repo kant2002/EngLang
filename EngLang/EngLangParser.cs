@@ -69,14 +69,20 @@ public partial class EngLangParser : IEngLangParser
                 var cleaned = identifierPart.Name.EndsWith("'") ? identifierPart.Name[..(identifierPart.Name.Length - 1)] : identifierPart.Name[..(identifierPart.Name.Length - 2)];
                 currentIdentifier.Append(cleaned);
                 last = identifierPart.Range.End;
-                parentReference = new IdentifierReference(new SymbolName(currentIdentifier.ToString(), new(start, last)), parentReference);
+                parentReference = new IdentifierReference(
+                    new SymbolName(currentIdentifier.ToString(), new(start, last)),
+                    parentReference,
+                    parentReference is null ? new(start, last) : new(start, parentReference.Range.End));
                 currentIdentifier = new();
                 nonFirst = false;
             }
         }
 
         var identifier = currentIdentifier.ToString();
-        return new IdentifierReference(new SymbolName(identifier, new(start, last)), parentReference);
+        return new IdentifierReference(
+            new SymbolName(identifier, new(start, last)),
+            parentReference,
+            parentReference is null ? new(articleKeyword.Range.Start, last) : new(articleKeyword.Range.Start, last > parentReference.Range.End ? last : parentReference.Range.End));
     }
 
     [Rule($"{TypeIdentifierReference} : IndefiniteArticleKeyword {LongIdentifier}")]
@@ -95,7 +101,7 @@ public partial class EngLangParser : IEngLangParser
         var symbol = new SymbolName(
             string.Join(" ", identifiersList.Select(_ => _.Name)),
             new (identifiersList.First().Range.Start, identifiersList.Last().Range.End));
-        return new IdentifierReference(symbol, null);
+        return new IdentifierReference(symbol, null, symbol.Range);
     }
 
     [Rule($"{ParameterReference} : 'some' {LongIdentifier}")]
@@ -106,7 +112,7 @@ public partial class EngLangParser : IEngLangParser
         var symbol = new SymbolName(
             string.Join(" ", identifiersList.Select(_ => _.Name)),
             new(identifiersList.First().Range.Start, identifiersList.Last().Range.End));
-        return new IdentifierReference(symbol, null);
+        return new IdentifierReference(symbol, null, symbol.Range);
     }
 
     [Rule($"{TypeIdentifierReference} : 'some' {LongIdentifier}")]
@@ -127,7 +133,7 @@ public partial class EngLangParser : IEngLangParser
         var symbol = new SymbolName(
             string.Join(" ", names.Select(_ => _.Name)),
             new(names.First().Range.Start, names.Last().Range.End));
-        IdentifierReference identifier = new IdentifierReference(symbol, null);
+        IdentifierReference identifier = new IdentifierReference(symbol, null, symbol.Range);
         return new PosessiveExpression(identifier, target);
     }
 
@@ -611,9 +617,9 @@ public partial class EngLangParser : IEngLangParser
         => (identifierReferences.Where(_ => _.Item2 is not null).Select(_ => _.Item2!), new IdentifierReferencesList(identifierReferences.Select(_ => _.Item1).ToImmutableList()));
 
     [Rule($"parameter_references_list : ({ParameterReference} extended_def_label_word*)*")]
-    private static (IEnumerable<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) MakeParameterReferencesList(
+    private static (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) MakeParameterReferencesList(
         IReadOnlyList<(IdentifierReference, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
-        => (identifierReferences.SelectMany(_ => _.Item2), identifierReferences.Select(_ => _.Item1).ToImmutableList());
+        => (identifierReferences.SelectMany(_ => _.Item2).ToImmutableList(), identifierReferences.Select(_ => _.Item1).ToImmutableList());
 
     [Rule($"slot_declaration : {TypeIdentifierReference} ('is' {IdentifierReference})?")]
     [Rule($"slot_declaration : {TypeIdentifierReference} ('at' {IdentifierReference})?")]
@@ -663,23 +669,22 @@ public partial class EngLangParser : IEngLangParser
         => marker;
 
     [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | IntLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword)* ')'")]
-    private static string MakeCommentLabel(
+    private static CommentLabel MakeCommentLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> names,
         IToken<EngLangTokenType> colonToken)
     {
         string labelName = string.Join(" ", names.Select(token => token.Text));
-        return $"({labelName})";
+        return new CommentLabel($"({labelName})", new(toToken.Range.Start, colonToken.Range.End));
     }
 
     [Rule($"invokable_label_definition : label_word extended_def_label_word* parameter_references_list (IntoKeyword extended_def_label_word* parameter_references_list)? comment_label?")]
     private static InvokableLabel MakeInvokableLabel(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
-        (IEnumerable<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
-        (IToken<EngLangTokenType> intoToken,
-        IEnumerable<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters)? outParameter,
-        string? comment)
+        (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
+        (IToken<EngLangTokenType> intoToken, IEnumerable<IToken<EngLangTokenType>> OtherWords, (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters)? outParameter,
+        CommentLabel? comment)
     {
         string labelName = string.Join(" ",
             new[] { firstToken }
@@ -687,24 +692,36 @@ public partial class EngLangParser : IEngLangParser
             .Union(identifierTokens.InnerText)
             .Union(outParameter is null ? Array.Empty<IToken<EngLangTokenType>>() : new[] { outParameter.Value.intoToken })
             .Union(outParameter?.OtherWords ?? Array.Empty<IToken<EngLangTokenType>>())
-            .Union(outParameter?.OutParameters.InnerText ?? Array.Empty<IToken<EngLangTokenType>>())
+            .Union(outParameter?.OutParameters.InnerText ?? ImmutableList<IToken<EngLangTokenType>>.Empty)
             .Select(i => i.Text));
-        string labelWithComment = labelName + (comment is null ? "" : " " + comment);
-        return new InvokableLabel(new[] { labelWithComment }, identifierTokens.Parameters.Union(outParameter?.OutParameters.Parameters ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null);
+        string labelWithComment = labelName + (comment is null ? "" : " " + comment.Text);
+        var last = comment is not null
+            ? comment.Range.End
+            : outParameter is not null
+                ? (outParameter.Value.OutParameters.Parameters.Count > 0 ? outParameter.Value.OutParameters.Parameters.Last().Range.End : outParameter.Value.OutParameters.InnerText.Count > 0 ? outParameter.Value.OutParameters.InnerText.Last().Range.End : outParameter.Value.OtherWords.Last().Range.End)
+                : identifierTokens.Parameters.Count > 0 ? identifierTokens.Parameters.Last().Range.End : identifierTokens.InnerText.Count > 0
+                    ? identifierTokens.InnerText.Last().Range.End
+                    : otherInitialTokens.Count > 0 ? otherInitialTokens.Last().Range.End : firstToken.Range.End;
+        var range = new Yoakke.SynKit.Text.Range(firstToken.Range.Start, last);
+        return new InvokableLabel(new[] { labelWithComment }, identifierTokens.Parameters.Union(outParameter?.OutParameters.Parameters ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null, range);
     }
 
     [Rule($"invokable_label_definition : label_word extended_def_label_word* parameter_references_list IntoKeyword {LongIdentifier} comment_label?")]
     private static InvokableLabel MakeInvokableLabel(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
-        (IEnumerable<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
+        (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
         IToken<EngLangTokenType> intoToken,
         IReadOnlyList<SymbolName> outParameter,
-        string? comment)
+        CommentLabel? comment)
     {
         string labelName = string.Join(" ", new[] { firstToken }.Union(otherInitialTokens).Union(identifierTokens.InnerText).Select(i => i.Text).Union(new[] { intoToken.Text }).Union(outParameter.Select(_ => _.Name)));
-        string labelWithComment = labelName + (comment is null ? "" : " " + comment);
-        return new InvokableLabel(new[] { labelWithComment }, identifierTokens.Parameters.ToArray(), null);
+        string labelWithComment = labelName + (comment is null ? "" : " " + comment.Text);
+        var last = comment is not null
+            ? comment.Range.End
+            : outParameter.Last().Range.End;
+        var range = new Yoakke.SynKit.Text.Range(firstToken.Range.Start, last);
+        return new InvokableLabel(new[] { labelWithComment }, identifierTokens.Parameters.ToArray(), null, range);
     }
 
     [Rule($"prefixed_invokable_label : ToKeyword invokable_label_definition")]
@@ -719,7 +736,13 @@ public partial class EngLangParser : IEngLangParser
         Punctuated<InvokableLabel, IToken<EngLangTokenType>> labels)
     {
         var primaryLabel = labels.Values.First();
-        return labels.Count == 1 ? primaryLabel : new InvokableLabel(labels.Values.SelectMany(_ => _.Markers).ToArray(), primaryLabel.Parameters, primaryLabel.ResultIdentifier);
+        if (labels.Count == 1)
+        {
+            return primaryLabel;
+        }
+
+        var range = new Yoakke.SynKit.Text.Range(primaryLabel.Range.Start, labels.Values.Last().Range.End);
+        return new InvokableLabel(labels.Values.SelectMany(_ => _.Markers).ToArray(), primaryLabel.Parameters, primaryLabel.ResultIdentifier, range);
     }
 
 
@@ -762,7 +785,7 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) identifierTokens,
         (IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens, (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) identifierTokens)? saveResultsGroup,
-        string? comment)
+        CommentLabel? comment)
     {
         string labelName = string.Join(" ",
             new[] { firstToken }
@@ -773,7 +796,7 @@ public partial class EngLangParser : IEngLangParser
             .Union(saveResultsGroup is null ? Array.Empty<IToken<EngLangTokenType>>() : saveResultsGroup.Value.identifierTokens.InnerText)
             .Select(i => i.Text));
         return new InvocationStatement(
-            labelName + (comment is null ? "" : " " + comment),
+            labelName + (comment is null ? "" : " " + comment.Text),
             identifierTokens.Identifiers.IdentifierReferences.Union(saveResultsGroup?.identifierTokens.Identifiers.IdentifierReferences ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null);
     }
 
