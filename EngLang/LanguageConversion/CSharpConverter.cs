@@ -170,7 +170,7 @@ public class CSharpConverter : ILanguageConverter
         if (label is not null)
         {
             var primaryMarker = label.Markers.First();
-            var parameterString = string.Join(", ", label.Parameters.Select(_ => _.Name.Replace(" ", "_")));
+            var parameterString = string.Join(", ", label.Parameters.Select(_ => _.Name.Name.Replace(" ", "_")));
             builder.AppendLine($"void {ConvertToIdentifier(primaryMarker)}({parameterString})");
             builder.OpenBraces();
         }
@@ -229,7 +229,7 @@ public class CSharpConverter : ILanguageConverter
                 builder.AppendLine($"return {Convert(resultStatement.Value)};");
                 break;
             case LabeledStatement labeledStatement:
-                var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
+                var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => ConvertToIdentifier(_.Name)));
                 var primaryMarker = labeledStatement.Marker.Markers.First();
                 builder.AppendLine($"void {ConvertToIdentifier(primaryMarker)}({parameterString})");
                 builder.OpenBraces();
@@ -237,7 +237,7 @@ public class CSharpConverter : ILanguageConverter
                 builder.CloseBraces();
                 break;
             case InvocationStatement invocationStatement:
-                var invocationParameterString = string.Join(", ", invocationStatement.Parameters.Select(_ => _.Name.Replace(" ", "_")));
+                var invocationParameterString = string.Join(", ", invocationStatement.Parameters.Select(_ => ConvertToIdentifier(_.Name)));
                 var invocationStatementText = $"{ConvertToIdentifier(invocationStatement.Marker)}({invocationParameterString});";
                 if (invocationStatement.ResultIdentifier != null)
                 {
@@ -258,6 +258,8 @@ public class CSharpConverter : ILanguageConverter
                 throw new NotImplementedException();
         }
     }
+
+    private static string ConvertToIdentifier(SymbolName name) => ConvertToIdentifier(name.Name);
 
     private static string ConvertToIdentifier(string name)
     {

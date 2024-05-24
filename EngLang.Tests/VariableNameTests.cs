@@ -1,4 +1,6 @@
 using Xunit;
+using Yoakke.SynKit.Text;
+using Range = Yoakke.SynKit.Text.Range;
 
 namespace EngLang.Tests;
 
@@ -13,7 +15,8 @@ public class VariableNameTests
 
         var expectedVariableName = "apple";
         var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
-        Assert.Equal(expectedVariableName, variableDeclaration.Name);
+        Assert.Equal(expectedVariableName, variableDeclaration.Name.Name);
+        Assert.Equal(new Range(new Position(0, 3), new Position(0, 8)), variableDeclaration.Name.Range);
     }
 
     [Fact]
@@ -25,7 +28,8 @@ public class VariableNameTests
 
         var expectedVariableName = "red apple";
         var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
-        Assert.Equal(expectedVariableName, variableDeclaration.Name);
+        Assert.Equal(expectedVariableName, variableDeclaration.Name.Name);
+        Assert.Equal(new Range(new Position(0, 2), new Position(0, 11)), variableDeclaration.Name.Range);
     }
 
     [Fact]
@@ -37,7 +41,8 @@ public class VariableNameTests
 
         var expectedVariableName = "red apple";
         var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
-        Assert.Equal(expectedVariableName, variableDeclaration.Name);
+        Assert.Equal(expectedVariableName, variableDeclaration.Name.Name);
+        Assert.Equal(new Range(new Position(0, 2), new Position(0, 13)), variableDeclaration.Name.Range);
     }
 
     [Theory]
@@ -49,7 +54,7 @@ public class VariableNameTests
         var parseResult = EngLangParser.Parse(sentence);
 
         var variableDeclaration = Assert.IsType<IdentifierReference>(parseResult);
-        Assert.Equal(expectedVariableName, variableDeclaration.Name);
+        Assert.Equal(expectedVariableName, variableDeclaration.Name.Name);
     }
 
     [Fact]
@@ -160,7 +165,8 @@ public class VariableNameTests
 
         var assignmentStatement = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
-        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
+        Assert.Equal(new Range(new Position(0, 14), new Position(0, 19)), assignmentExpression.Variable.Name.Range);
         var expression = Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression);
         Assert.Equal(40, expression.Value);
     }
@@ -177,7 +183,8 @@ public class VariableNameTests
 
         var assignmentStatement = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
-        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
+        Assert.Equal(new Range(new Position(0, 14), new Position(0, 19)), assignmentExpression.Variable.Name.Range);
         var expression = Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression);
         Assert.Equal(40, expression.Value);
     }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace EngLang;
 
-public record ShapeDeclaration(string Name, TypeIdentifierReference? BaseShapeName, SlotDeclarationsList? WellKnownSlots = null) : SyntaxNode
+public record ShapeDeclaration(SymbolName Name, TypeIdentifierReference? BaseShapeName, SlotDeclarationsList? WellKnownSlots = null) : SyntaxNode
 {
     public override IEnumerable<SyntaxNode> Children
     {

@@ -76,7 +76,7 @@ public class StupidEngLangParser : IEngLangParser
             {
                 parts = code.Split(" has ", 2); ;
                 var typeName = Regex.Replace(parts[0], @"^an?\s", "");
-                Statement shapeDeclStat = new ShapeDeclarationStatement(new ShapeDeclaration(typeName, null));
+                Statement shapeDeclStat = new ShapeDeclarationStatement(new ShapeDeclaration(new (typeName, new()), null));
                 var para = new Paragraph(new[] { shapeDeclStat }.ToImmutableList(), null);
                 return ParseResult.Ok(para, 0);
             }
@@ -84,7 +84,7 @@ public class StupidEngLangParser : IEngLangParser
             {
                 var typeName = Regex.Replace(parts[0], @"^an?\s", "");
                 var basePart = Regex.Replace(parts[1], @"^an?\s", "");
-                Statement shapeDeclStat = new ShapeDeclarationStatement(new ShapeDeclaration(typeName, new TypeIdentifierReference(basePart, false)));
+                Statement shapeDeclStat = new ShapeDeclarationStatement(new ShapeDeclaration(new(typeName, new()), new TypeIdentifierReference(basePart, false)));
                 var para = new Paragraph(new[] { shapeDeclStat }.ToImmutableList(), null);
                 return ParseResult.Ok(para, 0);
             }

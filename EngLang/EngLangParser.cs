@@ -21,9 +21,9 @@ public partial class EngLangParser : IEngLangParser
     private const string Identifier = "Identifier";
 
     [Rule($"{LongIdentifier} : {Identifier}+")]
-    private static IReadOnlyList<string> MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
+    private static IReadOnlyList<SymbolName> MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
     {
-        return identifierParts.Select(_ => _.Text).ToList();
+        return identifierParts.Select(_ => new SymbolName(_.Text, _.Range)).ToList();
     }
 
     [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
@@ -31,16 +31,23 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"{IdentifierReference} : 'some' {LongIdentifier} ('of' {IdentifierReference})?")]
     private static IdentifierReference MakeIdentifierReference(
         IToken<EngLangTokenType> articleKeyword,
-        IReadOnlyList<string> identifiersList,
-        (IToken<EngLangTokenType> ofToken,
-        IdentifierReference parentReference)? parent)
+        IReadOnlyList<SymbolName> identifiersList,
+        (IToken<EngLangTokenType> ofToken, IdentifierReference parentReference)? parent)
     {
         StringBuilder currentIdentifier = new();
+        Yoakke.SynKit.Text.Position start = default;
+        Yoakke.SynKit.Text.Position last = default;
         IdentifierReference? parentReference = parent?.parentReference;
         bool nonFirst = false;
         foreach (var identifierPart in identifiersList)
         {
-            var possessive = identifierPart.EndsWith("'s") || identifierPart.EndsWith("'");
+            if (currentIdentifier.Length == 0)
+            {
+                start = identifierPart.Range.Start;
+                last = identifierPart.Range.Start;
+            }
+
+            var possessive = identifierPart.Name.EndsWith("'s") || identifierPart.Name.EndsWith("'");
             if (!possessive)
             {
                 if (nonFirst)
@@ -48,7 +55,8 @@ public partial class EngLangParser : IEngLangParser
                     currentIdentifier.Append(" ");
                 }
 
-                currentIdentifier.Append(identifierPart);
+                currentIdentifier.Append(identifierPart.Name);
+                last = identifierPart.Range.End;
                 nonFirst = true;
             }
             else
@@ -58,48 +66,55 @@ public partial class EngLangParser : IEngLangParser
                     currentIdentifier.Append(" ");
                 }
 
-                var cleaned = identifierPart.EndsWith("'") ? identifierPart[..(identifierPart.Length - 1)] : identifierPart[..(identifierPart.Length - 2)];
+                var cleaned = identifierPart.Name.EndsWith("'") ? identifierPart.Name[..(identifierPart.Name.Length - 1)] : identifierPart.Name[..(identifierPart.Name.Length - 2)];
                 currentIdentifier.Append(cleaned);
-                parentReference = new IdentifierReference(currentIdentifier.ToString(), parentReference);
+                last = identifierPart.Range.End;
+                parentReference = new IdentifierReference(new SymbolName(currentIdentifier.ToString(), new(start, last)), parentReference);
                 currentIdentifier = new();
                 nonFirst = false;
             }
         }
 
         var identifier = currentIdentifier.ToString();
-        return new IdentifierReference(identifier, parentReference);
+        return new IdentifierReference(new SymbolName(identifier, new(start, last)), parentReference);
     }
 
     [Rule($"{TypeIdentifierReference} : IndefiniteArticleKeyword {LongIdentifier}")]
     private static TypeIdentifierReference MakeTypeIdentifierReference(
         IToken<EngLangTokenType> indefiniteArticleKeyword,
-        IReadOnlyList<string> identifiersList)
+        IReadOnlyList<SymbolName> identifiersList)
     {
-        return new TypeIdentifierReference(string.Join(" ", identifiersList), false);
+        return new TypeIdentifierReference(string.Join(" ", identifiersList.Select(_ => _.Name)), false);
     }
 
     [Rule($"{ParameterReference} : IndefiniteArticleKeyword {LongIdentifier}")]
     private static IdentifierReference MakeParameterReference(
         IToken<EngLangTokenType> indefiniteArticleKeyword,
-        IReadOnlyList<string> identifiersList)
+        IReadOnlyList<SymbolName> identifiersList)
     {
-        return new IdentifierReference(string.Join(" ", identifiersList), null);
+        var symbol = new SymbolName(
+            string.Join(" ", identifiersList.Select(_ => _.Name)),
+            new (identifiersList.First().Range.Start, identifiersList.Last().Range.End));
+        return new IdentifierReference(symbol, null);
     }
 
     [Rule($"{ParameterReference} : 'some' {LongIdentifier}")]
     private static IdentifierReference MakeParameterArrayReference(
         IToken<EngLangTokenType> indefiniteArticleKeyword,
-        IReadOnlyList<string> identifiersList)
+        IReadOnlyList<SymbolName> identifiersList)
     {
-        return new IdentifierReference(string.Join(" ", identifiersList), null);
+        var symbol = new SymbolName(
+            string.Join(" ", identifiersList.Select(_ => _.Name)),
+            new(identifiersList.First().Range.Start, identifiersList.Last().Range.End));
+        return new IdentifierReference(symbol, null);
     }
 
     [Rule($"{TypeIdentifierReference} : 'some' {LongIdentifier}")]
     private static TypeIdentifierReference MakeCollectionTypeIdentifierReference(
         IToken<EngLangTokenType> indefiniteArticleKeyword,
-        IReadOnlyList<string> identifiersList)
+        IReadOnlyList<SymbolName> identifiersList)
     {
-        var typeName = string.Join(" ", identifiersList.SkipLast(1).Append(identifiersList.Last().Singularize()));
+        var typeName = string.Join(" ", identifiersList.SkipLast(1).Select(_ => _.Name).Append(identifiersList[identifiersList.Count - 1].Name.Singularize()));
         return new TypeIdentifierReference(typeName, true);
     }
 
@@ -107,8 +122,14 @@ public partial class EngLangParser : IEngLangParser
     private static VariableExpression MakeVariableExpression(IdentifierReference e) => new (e);
 
     [Rule($"posessive_expression : literal_expression PosessiveKeyword {LongIdentifier}")]
-    private static PosessiveExpression MakePosessiveExpression(Expression target, IToken<EngLangTokenType> posessiveKeyword, IReadOnlyList<string> names)
-        => new(new(string.Join(" ", names), null), target);
+    private static PosessiveExpression MakePosessiveExpression(Expression target, IToken<EngLangTokenType> posessiveKeyword, IReadOnlyList<SymbolName> names)
+    {
+        var symbol = new SymbolName(
+            string.Join(" ", names.Select(_ => _.Name)),
+            new(names.First().Range.Start, names.Last().Range.End));
+        IdentifierReference identifier = new IdentifierReference(symbol, null);
+        return new PosessiveExpression(identifier, target);
+    }
 
     [Rule("primitive_expression : constant_expression")]
     [Rule($"primitive_expression : variable_expression")]
@@ -242,13 +263,13 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"variable_declaration: (DefiniteArticleKeyword|SomeKeyword) {LongIdentifier} ('is'|'are') {TypeIdentifierReference} (EqualKeyword 'to' constant_expression)?")]
     private static VariableDeclaration MakeVariableDeclaration(
         IToken<EngLangTokenType> definiteArticle,
-        IReadOnlyList<string> identifier,
+        IReadOnlyList<SymbolName> identifier,
         IToken<EngLangTokenType> isToken,
         TypeIdentifierReference typeReference,
         (IToken<EngLangTokenType> equalToken,
         IToken<EngLangTokenType> toToken,
         Expression literalExpression)? x)
-        => new VariableDeclaration(string.Join(' ', identifier), typeReference, x?.literalExpression);
+        => new VariableDeclaration(string.Join(' ', identifier.Select(_ => _.Name)), typeReference, x?.literalExpression);
 
     [Rule($"shape_slot_list: (comma_identifier_references_list ('and' comma_identifier_references_list)*)")]
     private static SlotDeclarationsList MakeShapeSlotList(
@@ -267,19 +288,29 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"shape_declaration: SomeKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
-        IReadOnlyList<string> identifier,
+        IReadOnlyList<SymbolName> identifier,
         IToken<EngLangTokenType> isToken,
         TypeIdentifierReference identifierReference,
         (IToken<EngLangTokenType> withToken, SlotDeclarationsList slots)? slotsList)
-        => new ShapeDeclaration(string.Join(' ', identifier), identifierReference, slotsList?.slots);
+    {
+        var symbol = new SymbolName(
+            string.Join(" ", identifier.Select(_ => _.Name)),
+            new(identifier.First().Range.Start, identifier.Last().Range.End));
+        return new ShapeDeclaration(symbol, identifierReference, slotsList?.slots);
+    }
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'has' shape_slot_list")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
-        IReadOnlyList<string> identifier,
+        IReadOnlyList<SymbolName> identifier,
         IToken<EngLangTokenType> hasToken,
         SlotDeclarationsList slotsList)
-        => new ShapeDeclaration(string.Join(' ', identifier), null, slotsList);
+    {
+        var symbol = new SymbolName(
+            string.Join(" ", identifier.Select(_ => _.Name)),
+            new(identifier[0].Range.Start, identifier[identifier.Count - 1].Range.End));
+        return new ShapeDeclaration(symbol, null, slotsList);
+    }
 
     [Rule($"assignment_expression: PutKeyword math_expression IntoKeyword {IdentifierReference}")]
     private static AssignmentExpression MakeAssignmentExpression(
@@ -589,7 +620,7 @@ public partial class EngLangParser : IEngLangParser
     private static SlotDeclaration MakeSlotDeclaration(
         TypeIdentifierReference identifierReferences,
         (IToken<EngLangTokenType>, IdentifierReference AliasFor)? alias)
-        => new SlotDeclaration(identifierReferences.Name, identifierReferences.IsCollection, alias?.AliasFor?.Name);
+        => new SlotDeclaration(identifierReferences.Name, identifierReferences.IsCollection, alias?.AliasFor?.Name.Name);
 
     [Rule($"comma_identifier_references_list : (slot_declaration (CommaKeyword slot_declaration)*)")]
     private static SlotDeclarationsList MakeCommaDelimitedIdentifierReferencesList(
@@ -668,10 +699,10 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (IEnumerable<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
         IToken<EngLangTokenType> intoToken,
-        IReadOnlyList<string> outParameter,
+        IReadOnlyList<SymbolName> outParameter,
         string? comment)
     {
-        string labelName = string.Join(" ", new[] { firstToken }.Union(otherInitialTokens).Union(identifierTokens.InnerText).Select(i => i.Text).Union(new[] { intoToken.Text }).Union(outParameter));
+        string labelName = string.Join(" ", new[] { firstToken }.Union(otherInitialTokens).Union(identifierTokens.InnerText).Select(i => i.Text).Union(new[] { intoToken.Text }).Union(outParameter.Select(_ => _.Name)));
         string labelWithComment = labelName + (comment is null ? "" : " " + comment);
         return new InvokableLabel(new[] { labelWithComment }, identifierTokens.Parameters.ToArray(), null);
     }

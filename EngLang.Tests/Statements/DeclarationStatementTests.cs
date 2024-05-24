@@ -15,7 +15,7 @@ public class DeclarationStatementTests
         var statement = Assert.Single(paragraph.Statements);
         var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
         var shapeDeclaration = shapeStatement.Declaration;
-        Assert.Equal("apple", shapeDeclaration.Name);
+        Assert.Equal("apple", shapeDeclaration.Name.Name);
         Assert.Equal("fruit", shapeDeclaration.BaseShapeName.Name);
         Assert.Null(shapeDeclaration.WellKnownSlots);
     }
@@ -39,7 +39,7 @@ An rectangle is a shape with a width and a height.
         var statement = Assert.Single(paragraph.Statements);
         var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
         var shapeDeclaration = shapeStatement.Declaration;
-        Assert.Equal("rectangle", shapeDeclaration.Name);
+        Assert.Equal("rectangle", shapeDeclaration.Name.Name);
         Assert.Equal("shape", shapeDeclaration.BaseShapeName.Name);
         Assert.NotNull(shapeDeclaration.WellKnownSlots);
         Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
@@ -67,7 +67,7 @@ An rectangle has some widths, a height, and some fill colour.
         var statement = Assert.Single(paragraph.Statements);
         var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
         var shapeDeclaration = shapeStatement.Declaration;
-        Assert.Equal("rectangle", shapeDeclaration.Name);
+        Assert.Equal("rectangle", shapeDeclaration.Name.Name);
         Assert.Null(shapeDeclaration.BaseShapeName);
         Assert.NotNull(shapeDeclaration.WellKnownSlots);
         Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
@@ -107,7 +107,7 @@ a pen has
         var statement = Assert.Single(paragraph.Statements);
         var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
         var shapeDeclaration = shapeStatement.Declaration;
-        Assert.Equal("pen", shapeDeclaration.Name);
+        Assert.Equal("pen", shapeDeclaration.Name.Name);
         Assert.Null(shapeDeclaration.BaseShapeName);
         Assert.NotNull(shapeDeclaration.WellKnownSlots);
         Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
@@ -127,9 +127,9 @@ a pen has
         var statement = Assert.Single(paragraph.Statements);
         var expressionStatement = Assert.IsType<ExpressionStatement>(statement);
         var variableExpression = Assert.IsType<VariableExpression>(expressionStatement.Expression);
-        Assert.Equal("rectangle", variableExpression.Identifier.Name);
+        Assert.Equal("rectangle", variableExpression.Identifier.Name.Name);
         Assert.NotNull(variableExpression.Identifier.Owner);
-        Assert.Equal("sprite", variableExpression.Identifier.Owner.Name);
+        Assert.Equal("sprite", variableExpression.Identifier.Owner.Name.Name);
     }
 
     [Theory]
@@ -142,7 +142,7 @@ a pen has
         var statement = Assert.Single(paragraph.Statements);
         var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
         var shapeDeclaration = shapeStatement.Declaration;
-        Assert.Equal("method procedures", shapeDeclaration.Name);
+        Assert.Equal("method procedures", shapeDeclaration.Name.Name);
         Assert.NotNull(shapeDeclaration.BaseShapeName);
         Assert.Equal("record", shapeDeclaration.BaseShapeName.Name);
         Assert.NotNull(shapeDeclaration.WellKnownSlots);

@@ -15,7 +15,7 @@ public class AssignmentStatementTests
         var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
-        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
     }
 
     [Theory]
@@ -29,7 +29,7 @@ public class AssignmentStatementTests
         var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
-        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class AssignmentStatementTests
         var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
-        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
         Assert.Equal(20, Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression).Value);
     }
 
@@ -58,7 +58,7 @@ public class AssignmentStatementTests
         var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
-        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
         Assert.Equal(20, Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression).Value);
     }
 
@@ -73,7 +73,7 @@ public class AssignmentStatementTests
         var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
-        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
         var additionExpression = Assert.IsType<MathExpression>(assignmentExpression.Expression);
         Assert.Equal(20, Assert.IsType<IntLiteralExpression>(additionExpression.FirstOperand).Value);
         Assert.Equal(10, Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand).Value);
@@ -90,7 +90,7 @@ public class AssignmentStatementTests
         var statement = Assert.Single(paragraph.Statements);
         var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
         var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
-        Assert.Equal("value", assignmentExpression.Variable.Name);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
         Assert.Equal(20, Assert.IsType<IntLiteralExpression>(assignmentExpression.Expression).Value);
     }
 }

@@ -1,4 +1,5 @@
 using Xunit;
+using Yoakke.SynKit.Text;
 
 namespace EngLang.Tests;
 
@@ -14,7 +15,8 @@ public class ExpressionTests
         var additionExpression = Assert.IsType<InPlaceAdditionExpression>(parseResult);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.Addend);
         Assert.Equal(42, addend.Value);
-        Assert.Equal("value", additionExpression.TargetVariable.Name);
+        Assert.Equal("value", additionExpression.TargetVariable.Name.Name);
+        Assert.Equal(new Range(new Position(0, 12), new Position(0, 17)), additionExpression.TargetVariable.Name.Range);
     }
 
     [Fact]
@@ -27,7 +29,7 @@ public class ExpressionTests
         var subtractExpression = Assert.IsType<InPlaceSubtractExpression>(parseResult);
         var subtrahend = Assert.IsType<IntLiteralExpression>(subtractExpression.Subtrahend);
         Assert.Equal(42, subtrahend.Value);
-        Assert.Equal("value", subtractExpression.TargetVariable.Name);
+        Assert.Equal("value", subtractExpression.TargetVariable.Name.Name);
     }
 
     [Fact]
@@ -40,7 +42,7 @@ public class ExpressionTests
         var multiplyExpression = Assert.IsType<InPlaceMultiplyExpression>(parseResult);
         var multiplicative = Assert.IsType<IntLiteralExpression>(multiplyExpression.Factor);
         Assert.Equal(42, multiplicative.Value);
-        Assert.Equal("value", multiplyExpression.TargetVariable.Name);
+        Assert.Equal("value", multiplyExpression.TargetVariable.Name.Name);
     }
 
     [Fact]
@@ -53,7 +55,7 @@ public class ExpressionTests
         var divisionExpression = Assert.IsType<InPlaceDivisionExpression>(parseResult);
         var divisor = Assert.IsType<IntLiteralExpression>(divisionExpression.Denominator);
         Assert.Equal(42, divisor.Value);
-        Assert.Equal("value", divisionExpression.TargetVariable.Name);
+        Assert.Equal("value", divisionExpression.TargetVariable.Name.Name);
     }
 
     [Fact]
@@ -66,12 +68,12 @@ public class ExpressionTests
         var divisionExpression = Assert.IsType<InPlaceMultiplyExpression>(parseResult);
         var factor = Assert.IsType<VariableExpression>(divisionExpression.Factor).Identifier;
         var target = divisionExpression.TargetVariable;
-        Assert.Equal("width", target.Name);
+        Assert.Equal("width", target.Name.Name);
         Assert.NotNull(target.Owner);
-        Assert.Equal("rectangle", target.Owner.Name);
-        Assert.Equal("height", factor.Name);
+        Assert.Equal("rectangle", target.Owner.Name.Name);
+        Assert.Equal("height", factor.Name.Name);
         Assert.NotNull(factor.Owner);
-        Assert.Equal("rectangle", factor.Owner.Name);
+        Assert.Equal("rectangle", factor.Owner.Name.Name);
     }
 
     [Theory]
@@ -98,7 +100,7 @@ public class ExpressionTests
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
         Assert.Equal(42, addend.Value);
         var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);
-        Assert.Equal("value", variable.Name);
+        Assert.Equal("value", variable.Name.Name);
     }
 
     [Theory]
@@ -122,9 +124,9 @@ public class ExpressionTests
         var additionExpression = Assert.IsType<MathExpression>(expression.Expression);
         Assert.Equal(mathOperator, additionExpression.Operator);
         var addend = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.SecondOperand).Identifier);
-        Assert.Equal("dummy", addend.Name);
+        Assert.Equal("dummy", addend.Name.Name);
         var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);
-        Assert.Equal("value", variable.Name);
+        Assert.Equal("value", variable.Name.Name);
     }
 
     [Theory]
@@ -146,7 +148,7 @@ public class ExpressionTests
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
         Assert.Equal(42, addend.Value);
         var variable = Assert.IsType<IdentifierReference>(Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier);
-        Assert.Equal("value", variable.Name);
+        Assert.Equal("value", variable.Name.Name);
     }
 
     [Fact]
@@ -161,7 +163,7 @@ public class ExpressionTests
         Assert.Equal(MathOperator.Multiply, addend.Operator);
         Assert.Equal(42, Assert.IsType<IntLiteralExpression>(addend.FirstOperand).Value);
         Assert.Equal(13, Assert.IsType<IntLiteralExpression>(addend.SecondOperand).Value);
-        Assert.Equal("value", additionExpression.TargetVariable.Name);
+        Assert.Equal("value", additionExpression.TargetVariable.Name.Name);
     }
 
     [Theory]
@@ -216,8 +218,8 @@ public class ExpressionTests
 
         var expression = parseResult.Ok.Value;
         var variableExpression = Assert.IsType<VariableExpression>(expression);
-        Assert.Equal("color", variableExpression.Identifier.Name);
-        Assert.Equal("terminal", variableExpression.Identifier.Owner.Name);
+        Assert.Equal("color", variableExpression.Identifier.Name.Name);
+        Assert.Equal("terminal", variableExpression.Identifier.Owner.Name.Name);
     }
 
     [Fact]
@@ -230,7 +232,8 @@ public class ExpressionTests
 
         var expression = parseResult.Ok.Value;
         var variableExpression = Assert.IsType<PosessiveExpression>(expression);
-        Assert.Equal("pointer", variableExpression.Identifier.Name);
+        Assert.Equal("pointer", variableExpression.Identifier.Name.Name);
+        Assert.Equal(new Range(new Position(0, 13), new Position(0, 20)), variableExpression.Identifier.Name.Range);
         Assert.IsType<StringLiteralExpression>(variableExpression.Owner);
     }
 }

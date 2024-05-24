@@ -17,7 +17,7 @@ public class StatementTests
         var additionExpression = Assert.IsType<InPlaceAdditionExpression>(additionStatement.Expression);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.Addend);
         Assert.Equal(42, addend.Value);
-        Assert.Equal("value", additionExpression.TargetVariable.Name);
+        Assert.Equal("value", additionExpression.TargetVariable.Name.Name);
     }
 
     [Fact]
@@ -289,8 +289,8 @@ To calculate area from a width and a height ->
         Assert.Equal(marker, invocationStatement.Marker);
 
         Assert.Equal(2, invocationStatement.Parameters.Length);
-        Assert.Equal("previous number", invocationStatement.Parameters[0].Name);
-        Assert.Equal("previous factorial", invocationStatement.Parameters[1].Name);
+        Assert.Equal("previous number", invocationStatement.Parameters[0].Name.Name);
+        Assert.Equal("previous factorial", invocationStatement.Parameters[1].Name.Name);
         //var parameter = Assert.Single(invocationStatement.Parameters);
         //Assert.Equal("previous number", parameter.Name);
         //
