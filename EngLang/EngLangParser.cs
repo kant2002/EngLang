@@ -69,10 +69,11 @@ public partial class EngLangParser : IEngLangParser
                 var cleaned = identifierPart.Name.EndsWith("'") ? identifierPart.Name[..(identifierPart.Name.Length - 1)] : identifierPart.Name[..(identifierPart.Name.Length - 2)];
                 currentIdentifier.Append(cleaned);
                 last = identifierPart.Range.End;
+                var reverseParentRange = parentReference is not null && parentReference.Range.End < start;
                 parentReference = new IdentifierReference(
                     new SymbolName(currentIdentifier.ToString(), new(start, last)),
                     parentReference,
-                    parentReference is null ? new(start, last) : new(start, parentReference.Range.End));
+                    parentReference is null ? new(start, last) : reverseParentRange ? new(parentReference.Range.Start, last) : new(start, parentReference.Range.End));
                 currentIdentifier = new();
                 nonFirst = false;
             }

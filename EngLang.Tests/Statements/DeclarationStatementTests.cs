@@ -133,6 +133,24 @@ a pen has
     }
 
     [Theory]
+    [InlineData("a sprite's rectangle's width.")]
+    //[InlineData("a width of sprite's rectangle.")]
+    public void PosessionDeclarationNesting(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var expressionStatement = Assert.IsType<ExpressionStatement>(statement);
+        var variableExpression = Assert.IsType<VariableExpression>(expressionStatement.Expression);
+        Assert.Equal("width", variableExpression.Identifier.Name.Name);
+        Assert.NotNull(variableExpression.Identifier.Owner);
+        Assert.Equal("rectangle", variableExpression.Identifier.Owner.Name.Name);
+        Assert.NotNull(variableExpression.Identifier.Owner.Owner);
+        Assert.Equal("sprite", variableExpression.Identifier.Owner.Owner.Name.Name);
+    }
+
+    [Theory]
     [InlineData("some method procedures is a record with a getname pointer and a tostring pointer.")]
     public void ShapeForMultipleSameItems(string sentence)
     {
