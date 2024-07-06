@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using Yoakke.SynKit.Lexer;
 using Yoakke.SynKit.Parser;
@@ -127,7 +128,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"variable_expression : {IdentifierReference}")]
-    private static VariableExpression MakeVariableExpression(IdentifierReference e) => new (e);
+    private static VariableExpression MakeVariableExpression(IdentifierReference e) => new (e, e.Range);
 
     [Rule($"posessive_expression : literal_expression PosessiveKeyword {LongIdentifier}")]
     private static PosessiveExpression MakePosessiveExpression(Expression target, IToken<EngLangTokenType> posessiveKeyword, IReadOnlyList<SymbolName> names)
@@ -136,7 +137,8 @@ public partial class EngLangParser : IEngLangParser
             string.Join(" ", names.Select(_ => _.Name)),
             new(names.First().Range.Start, names.Last().Range.End));
         IdentifierReference identifier = new IdentifierReference(symbol, null, symbol.Range);
-        return new PosessiveExpression(identifier, target);
+        var range = new Yoakke.SynKit.Text.Range(target.Range, names.Last().Range);
+        return new PosessiveExpression(identifier, target, range);
     }
 
     [Rule("primitive_expression : constant_expression")]
@@ -170,7 +172,11 @@ public partial class EngLangParser : IEngLangParser
     private static MathExpression MakeAdditionExpression(
         Expression firstExpression,
         IToken<EngLangTokenType> mathToken,
-        Expression secondExpression) => new(ToMathOperator(mathToken), firstExpression, secondExpression);
+        Expression secondExpression)
+    {
+        var range = new Yoakke.SynKit.Text.Range(firstExpression.Range, secondExpression.Range);
+        return new(ToMathOperator(mathToken), firstExpression, secondExpression, range);
+    }
 
     [Rule($"addition_expression : primitive_expression 'multiply' 'by' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'multiplied' 'by' primitive_expression")]
@@ -180,7 +186,11 @@ public partial class EngLangParser : IEngLangParser
         Expression firstExpression,
         IToken<EngLangTokenType> mathToken,
         IToken<EngLangTokenType> byToken,
-        Expression secondExpression) => new(ToMathOperator(mathToken), firstExpression, secondExpression);
+        Expression secondExpression)
+    {
+        var range = new Yoakke.SynKit.Text.Range(firstExpression.Range, secondExpression.Range);
+        return new(ToMathOperator(mathToken), firstExpression, secondExpression, range);
+    }
 
     private static MathOperator ToMathOperator(IToken<EngLangTokenType> token) => token.Text switch
     {
@@ -203,7 +213,11 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> addToken,
         Expression literalExpression,
         IToken<EngLangTokenType> toToken,
-        IdentifierReference identifierReference) => new(literalExpression, identifierReference);
+        IdentifierReference identifierReference)
+    {
+        var range = new Yoakke.SynKit.Text.Range(addToken.Range, identifierReference.Range);
+        return new(literalExpression, identifierReference, range);
+    }
 
     [Rule($"inplace_subtract_expression : 'subtract' math_expression 'from' {IdentifierReference}")]
     [Rule($"inplace_subtract_expression : 'Subtract' math_expression 'from' {IdentifierReference}")]
@@ -211,7 +225,11 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> subtractToken,
         Expression literalExpression,
         IToken<EngLangTokenType> fromToken,
-        IdentifierReference identifierReference) => new(literalExpression, identifierReference);
+        IdentifierReference identifierReference)
+    {
+        var range = new Yoakke.SynKit.Text.Range(subtractToken.Range, identifierReference.Range);
+        return new(literalExpression, identifierReference, range);
+    }
 
     [Rule($"inplace_multiply_expression : 'multiply' {IdentifierReference} 'by' math_expression")]
     [Rule($"inplace_multiply_expression : 'Multiply' {IdentifierReference} 'by' math_expression")]
@@ -219,7 +237,11 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> byToken,
-        Expression literalExpression) => new(literalExpression, identifierReference);
+        Expression literalExpression)
+    {
+        var range = new Yoakke.SynKit.Text.Range(multiplyToken.Range, literalExpression.Range);
+        return new(literalExpression, identifierReference, range);
+    }
 
     [Rule($"inplace_divide_expression : 'divide' {IdentifierReference} 'by' math_expression")]
     [Rule($"inplace_divide_expression : 'Divide' {IdentifierReference} 'by' math_expression")]
@@ -227,7 +249,11 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> multiplyToken,
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> byToken,
-        Expression literalExpression) => new(literalExpression, identifierReference);
+        Expression literalExpression)
+    {
+        var range = new Yoakke.SynKit.Text.Range(multiplyToken.Range, literalExpression.Range);
+        return new(literalExpression, identifierReference, range);
+    }
 
     [Rule("literal_expression : StringLiteral")]
     [Rule("literal_expression : IntLiteral")]
@@ -238,7 +264,7 @@ public partial class EngLangParser : IEngLangParser
         => token.Kind switch
         {
             EngLangTokenType.StringLiteral => new StringLiteralExpression(token.Text[1..(token.Text.Length - 1)].Replace("\"\"", "\""), token.Range),
-            EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text)),
+            EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text), token.Range),
             EngLangTokenType.NullLiteral => new NullLiteralExpression(token.Range),
             EngLangTokenType.HexLiteral => new ByteArrayLiteralExpression(ConvertHexToByteArray(token.Text[0] == '$' ? token.Text[1..] : token.Text[2..]), token.Range),
             _ => throw new InvalidOperationException()
@@ -260,7 +286,7 @@ public partial class EngLangParser : IEngLangParser
         {
             if (expression is IntLiteralExpression intLiteralExpression)
             {
-                return new IntLiteralExpression(intLiteralExpression.Value);
+                return new IntLiteralExpression(intLiteralExpression.Value, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
             }
         }
 
@@ -327,7 +353,10 @@ public partial class EngLangParser : IEngLangParser
         Expression expression,
         IToken<EngLangTokenType> intoToken,
         IdentifierReference identifierReference)
-        => new AssignmentExpression(identifierReference, expression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(putToken.Range, identifierReference.Range);
+        return new AssignmentExpression(identifierReference, expression, range);
+    }
 
     [Rule($"assignment_expression: 'let' {IdentifierReference} 'is' math_expression ")]
     [Rule($"assignment_expression: 'let' {IdentifierReference} EqualKeyword math_expression ")]
@@ -336,7 +365,10 @@ public partial class EngLangParser : IEngLangParser
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         Expression expression)
-        => new AssignmentExpression(identifierReference, expression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(letToken.Range, expression.Range);
+        return new AssignmentExpression(identifierReference, expression, range);
+    }
 
     [Rule($"assignment_expression: 'let' {IdentifierReference} EqualKeyword 'to' math_expression ")]
     private static AssignmentExpression MakeAlternateAssignment2Expression(
@@ -345,7 +377,10 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> equalsToken,
         IToken<EngLangTokenType> toToken,
         Expression expression)
-        => new AssignmentExpression(identifierReference, expression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(letToken.Range, expression.Range);
+        return new AssignmentExpression(identifierReference, expression, range);
+    }
 
     [Rule("expression_or_return_statement : expression_statement")]
     [Rule("expression_or_return_statement : result_statement")]
@@ -492,7 +527,10 @@ public partial class EngLangParser : IEngLangParser
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         Expression literalExpression)
-        => new LogicalExpression(LogicalOperator.Equals, new VariableExpression(identifierReference), literalExpression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(identifierReference.Range, literalExpression.Range);
+        return new LogicalExpression(LogicalOperator.Equals, new VariableExpression(identifierReference, identifierReference.Range), literalExpression, range);
+    }
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are') 'not' constant_expression")]
     private static LogicalExpression MakeNegativeLogicalExpression(
@@ -500,7 +538,10 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> isToken,
         IToken<EngLangTokenType> notToken,
         Expression literalExpression)
-        => new LogicalExpression(LogicalOperator.NotEquals, new VariableExpression(identifierReference), literalExpression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(identifierReference.Range, literalExpression.Range);
+        return new LogicalExpression(LogicalOperator.NotEquals, new VariableExpression(identifierReference, identifierReference.Range), literalExpression, range);
+    }
 
     [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' primitive_expression")]
     private static LogicalExpression MakeLogicalThanExpression(
@@ -508,7 +549,11 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> operatorToken,
         IToken<EngLangTokenType> thanToken,
         Expression literalExpression)
-        => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(identifierReference.Range, literalExpression.Range);
+        var varExpression = new VariableExpression(identifierReference, identifierReference.Range);
+        return new LogicalExpression(GetLogicalOperator(operatorToken), varExpression, literalExpression, range);
+    }
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are') LogicalOperationKeyword 'than' primitive_expression")]
     private static LogicalExpression MakeLogicalThanExpression(
@@ -517,7 +562,11 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> operatorToken,
         IToken<EngLangTokenType> thanToken,
         Expression literalExpression)
-        => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(identifierReference.Range, literalExpression.Range);
+        var varExpression = new VariableExpression(identifierReference, identifierReference.Range);
+        return new LogicalExpression(GetLogicalOperator(operatorToken), varExpression, literalExpression, range);
+    }
 
     [Rule($"logical_expression : {IdentifierReference} 'at' LogicalOperationKeyword primitive_expression")]
     private static LogicalExpression MakeLogicalAtExpression(
@@ -525,7 +574,11 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> atToken,
         IToken<EngLangTokenType> operatorToken,
         Expression literalExpression)
-        => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(identifierReference.Range, literalExpression.Range);
+        var varExpression = new VariableExpression(identifierReference, identifierReference.Range);
+        return new LogicalExpression(GetLogicalOperator(operatorToken), varExpression, literalExpression, range);
+    }
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are') 'at' LogicalOperationKeyword primitive_expression")]
     private static LogicalExpression MakeLogicalIsAtExpression(
@@ -534,7 +587,11 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> atToken,
         IToken<EngLangTokenType> operatorToken,
         Expression literalExpression)
-        => new LogicalExpression(GetLogicalOperator(operatorToken), new VariableExpression(identifierReference), literalExpression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(identifierReference.Range, literalExpression.Range);
+        var varExpression = new VariableExpression(identifierReference, identifierReference.Range);
+        return new LogicalExpression(GetLogicalOperator(operatorToken), varExpression, literalExpression, range);
+    }
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are')? LogicalOperationKeyword 'than' 'or' 'equal' 'to'? primitive_expression ")]
     private static LogicalExpression MakeLogicalThanExpression(
@@ -546,12 +603,19 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> equalToken,
         IToken<EngLangTokenType>? toToken,
         Expression literalExpression)
-        => new LogicalExpression(GetLogicalOperatorOrEqual(GetLogicalOperator(operatorToken)), new VariableExpression(identifierReference), literalExpression);
+    {
+        var range = new Yoakke.SynKit.Text.Range(identifierReference.Range, literalExpression.Range);
+        var varExpression = new VariableExpression(identifierReference, identifierReference.Range);
+        return new LogicalExpression(GetLogicalOperator(operatorToken), varExpression, literalExpression, range);
+    }
 
     [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|WithKeyword|'of'|{Identifier}|IntoKeyword|AndKeyword|IntLiteral|AreKeyword|FunctionBodyOrAsKeyword|HexLiteral|StringLiteral|'/'|LogicalOperationKeyword|MathOperationKeyword|ByKeyword|NullLiteral|FromKeyword|ToKeyword|')'|'(')*")]
     private static LogicalExpression MakeInvalidLogicalExpression(
         IReadOnlyList<IToken<EngLangTokenType>> someTokens)
-        => new InvalidExpression(string.Join(" ", someTokens.Select(_ => _.Text)));
+    {
+        var range = someTokens.Count == 0 ? default : new Yoakke.SynKit.Text.Range(someTokens.First().Range, someTokens.Last().Range);
+        return new InvalidExpression(string.Join(" ", someTokens.Select(_ => _.Text)), range);
+    }
 
     private static LogicalOperator GetLogicalOperator(IToken<EngLangTokenType> operatorToken)
     {

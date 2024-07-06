@@ -1,3 +1,3 @@
 namespace EngLang;
 
-public abstract record Expression : SyntaxNode;
+public abstract record Expression(Yoakke.SynKit.Text.Range Range) : SyntaxNode;
