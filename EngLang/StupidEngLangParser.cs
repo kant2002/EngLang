@@ -63,8 +63,10 @@ public class StupidEngLangParser : IEngLangParser
                 : defaultValue.StartsWith("\"") ? (Expression?)new StringLiteralExpression(defaultValue, default)
                 : defaultValue.StartsWith("$") ? (Expression?)new StringLiteralExpression(defaultValue, default)
                 : new IntLiteralExpression(int.Parse(defaultValue), default);
-            Statement declStat = new VariableDeclarationStatement(new VariableDeclaration(variableName, new TypeIdentifierReference(typeName, false, default), defaultValueExpression));
-            var para = new Paragraph(new[] { declStat }.ToImmutableList(), null);
+            Statement declStat = new VariableDeclarationStatement(
+                new VariableDeclaration(variableName, new TypeIdentifierReference(typeName, false, default), defaultValueExpression, default),
+                default);
+            var para = new Paragraph(new[] { declStat }.ToImmutableList(), null, default);
             return ParseResult.Ok(para, 0);
         }
 
@@ -77,7 +79,7 @@ public class StupidEngLangParser : IEngLangParser
                 parts = code.Split(" has ", 2); ;
                 var typeName = Regex.Replace(parts[0], @"^an?\s", "");
                 Statement shapeDeclStat = new ShapeDeclarationStatement(new ShapeDeclaration(new (typeName, new()), null, null, default), default);
-                var para = new Paragraph(new[] { shapeDeclStat }.ToImmutableList(), null);
+                var para = new Paragraph(new[] { shapeDeclStat }.ToImmutableList(), null, default);
                 return ParseResult.Ok(para, 0);
             }
             else
@@ -85,7 +87,7 @@ public class StupidEngLangParser : IEngLangParser
                 var typeName = Regex.Replace(parts[0], @"^an?\s", "");
                 var basePart = Regex.Replace(parts[1], @"^an?\s", "");
                 Statement shapeDeclStat = new ShapeDeclarationStatement(new ShapeDeclaration(new(typeName, default), new TypeIdentifierReference(basePart, false, default), WellKnownSlots: null, Range: default), default);
-                var para = new Paragraph(new[] { shapeDeclStat }.ToImmutableList(), null);
+                var para = new Paragraph(new[] { shapeDeclStat }.ToImmutableList(), null, default);
                 return ParseResult.Ok(para, 0);
             }
 
@@ -98,7 +100,7 @@ public class StupidEngLangParser : IEngLangParser
             var code = parts[1];
             var stmts = code.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(_ => new InvocationStatement(_, Array.Empty<IdentifierReference>(), null, default));
             var labelledStatement = new InvokableLabel(new[] { label }, Array.Empty<IdentifierReference>(), null, default);
-            var para = new Paragraph(stmts.ToImmutableList<Statement>(), labelledStatement);
+            var para = new Paragraph(stmts.ToImmutableList<Statement>(), labelledStatement, default);
             return ParseResult.Ok(para, 0);
         }
 

@@ -300,10 +300,11 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<SymbolName> identifier,
         IToken<EngLangTokenType> isToken,
         TypeIdentifierReference typeReference,
-        (IToken<EngLangTokenType> equalToken,
-        IToken<EngLangTokenType> toToken,
-        Expression literalExpression)? x)
-        => new VariableDeclaration(string.Join(' ', identifier.Select(_ => _.Name)), typeReference, x?.literalExpression);
+        (IToken<EngLangTokenType> equalToken, IToken<EngLangTokenType> toToken, Expression literalExpression)? x)
+    {
+        var range = new Yoakke.SynKit.Text.Range(definiteArticle.Range, x?.literalExpression.Range ?? typeReference.Range);
+        return new VariableDeclaration(string.Join(' ', identifier.Select(_ => _.Name)), typeReference, x?.literalExpression, range);
+    }
 
     [Rule($"shape_slot_list: (comma_identifier_references_list ('and' comma_identifier_references_list)*)")]
     private static SlotDeclarationsList MakeShapeSlotList(
@@ -418,11 +419,15 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
-        => new InvalidStatement(tokens.ToImmutableArray());
+        => new InvalidStatement(tokens.ToImmutableArray(), new Yoakke.SynKit.Text.Range(tokens.First().Range, tokens.Last().Range));
     [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|FromKeyword|ToKeyword|PosessiveKeyword)*")]
     private static Statement MakeStatement222(
         IEnumerable<IToken<EngLangTokenType>> tokens)
-        => new InvalidStatement(tokens.ToImmutableArray());
+    {
+        var tkns = tokens.ToImmutableArray();
+        var range = tkns.IsEmpty ? default : new Yoakke.SynKit.Text.Range(tokens.First().Range, tokens.Last().Range);
+        return new InvalidStatement(tkns, range);
+    }
 
     [CustomParser("invalid_statement")]
     private ParseResult<EngLang.BlockStatement> parseInvalidStatement1(int offset)
@@ -469,12 +474,13 @@ public partial class EngLangParser : IEngLangParser
     [Rule("paragraph : statement_list")]
     private static Paragraph MakeParagraph(
         BlockStatement statement)
-        => new Paragraph(statement.Statements, null);
+        => new Paragraph(statement.Statements, null, statement.Range);
 
     [Rule("paragraph_list_element : invokable_label paragraph?")]
     private static Paragraph MakeParagraphListElement(InvokableLabel il, Paragraph p)
     {
-        return new Paragraph(p?.Statements ?? ImmutableList<Statement>.Empty, il);
+        var range = p == null ? il.Range : new Yoakke.SynKit.Text.Range(il.Range, p.Range);
+        return new Paragraph(p?.Statements ?? ImmutableList<Statement>.Empty, il, range);
     }
 
     [Rule("paragraph_list_element : paragraph")]
@@ -498,13 +504,13 @@ public partial class EngLangParser : IEngLangParser
             return blockStatement;
         }
 
-        return new BlockStatement(statements.ToImmutableList());
+        return new BlockStatement(statements.ToImmutableList(), new Yoakke.SynKit.Text.Range(statements.First().Range, statements.Last().Range));
     }
 
     [Rule("variable_declaration_statement : variable_declaration")]
     private static VariableDeclarationStatement MakeVariableDeclarationStatement(
         VariableDeclaration declaration)
-        => new VariableDeclarationStatement(declaration);
+        => new VariableDeclarationStatement(declaration, declaration.Range);
 
     [Rule("shape_declaration_statement : shape_declaration")]
     private static ShapeDeclarationStatement MakeShapeDeclarationStatement(
@@ -520,7 +526,7 @@ public partial class EngLangParser : IEngLangParser
     //[Rule("expression_statement : logical_expression")]
     private static ExpressionStatement MakeExpressionStatement(
         Expression expression)
-        => new ExpressionStatement(expression);
+        => new ExpressionStatement(expression, expression.Range);
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are') primitive_expression")]
     private static LogicalExpression MakeLogicalExpression(
@@ -650,14 +656,14 @@ public partial class EngLangParser : IEngLangParser
         LogicalExpression testExpression,
         IToken<EngLangTokenType> thenToken,
         Statement statement)
-        => new IfStatement(testExpression, statement);
+        => new IfStatement(testExpression, statement, new Yoakke.SynKit.Text.Range(ifToken.Range, statement.Range));
 
     [Rule("result_statement : 'result' 'is' math_expression")]
     private static ResultStatement MakeResultStatement(
         IToken<EngLangTokenType> resultToken,
         IToken<EngLangTokenType> isToken,
         Expression expression)
-        => new ResultStatement(expression);
+        => new ResultStatement(expression, new Yoakke.SynKit.Text.Range(resultToken.Range, expression.Range));
 
     [Rule("result_statement : 'the' 'result' 'is' math_expression")]
     private static ResultStatement MakeResultStatement(
@@ -665,18 +671,21 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> resultToken,
         IToken<EngLangTokenType> isToken,
         Expression expression)
-        => new ResultStatement(expression);
+        => new ResultStatement(expression, new Yoakke.SynKit.Text.Range(resultToken.Range, expression.Range));
 
     [Rule("result_statement : 'return' math_expression")]
     private static ResultStatement MakeResultStatement(
         IToken<EngLangTokenType> returnToken,
         Expression expression)
-        => new ResultStatement(expression);
+        => new ResultStatement(expression, new Yoakke.SynKit.Text.Range(returnToken.Range, expression.Range));
 
     [Rule("block_statement : (simple_statement (';' simple_statement)*)")]
     private static BlockStatement MakeBlockStatement(
         Punctuated<Statement, IToken<EngLangTokenType>> statements)
-        => new BlockStatement(statements.Select(s => s.Value).ToImmutableList());
+    {
+        ImmutableList<Statement> stmts = statements.Select(s => s.Value).ToImmutableList();
+        return new BlockStatement(stmts, new Yoakke.SynKit.Text.Range(stmts.First().Range, stmts.Last().Range));
+    }
 
     [Rule($"identifier_references_list : ({IdentifierReference} extended_label_word?)*")]
     private static (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) MakeIdentifierReferencesList(
@@ -839,14 +848,14 @@ public partial class EngLangParser : IEngLangParser
         InvokableLabel invokableLabel,
         Statement statement)
     {
-        return new LabeledStatement(invokableLabel, invokableLabel.Parameters, statement);
+        return new LabeledStatement(invokableLabel, invokableLabel.Parameters, statement, new Yoakke.SynKit.Text.Range(invokableLabel.Range, statement.Range));
     }
 
     [Rule($"labeled_statement : invokable_label")]
     private static LabeledStatement MakeLabeledStatement(
         InvokableLabel invokableLabel)
     {
-        return new LabeledStatement(invokableLabel, invokableLabel.Parameters, new BlockStatement(ImmutableList<Statement>.Empty));
+        return new LabeledStatement(invokableLabel, invokableLabel.Parameters, new BlockStatement(ImmutableList<Statement>.Empty, default), invokableLabel.Range);
     }
 
     [Rule($"invocation_statement : label_word extended_label_word* identifier_references_list (IntoKeyword extended_label_word* identifier_references_list)? comment_label?")]

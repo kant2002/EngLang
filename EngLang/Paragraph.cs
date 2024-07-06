@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace EngLang;
 
-public record Paragraph(ImmutableList<Statement> Statements, InvokableLabel? Label) : Statement
+public record Paragraph(ImmutableList<Statement> Statements, InvokableLabel? Label, Yoakke.SynKit.Text.Range Range) : Statement(Range)
 {
     public override IEnumerable<SyntaxNode> Children
     {
