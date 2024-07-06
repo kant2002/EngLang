@@ -91,7 +91,8 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> indefiniteArticleKeyword,
         IReadOnlyList<SymbolName> identifiersList)
     {
-        return new TypeIdentifierReference(string.Join(" ", identifiersList.Select(_ => _.Name)), false);
+        Debug.Assert(identifiersList.Count != 0, "Identifier should be present");
+        return new TypeIdentifierReference(string.Join(" ", identifiersList.Select(_ => _.Name)), false, new Yoakke.SynKit.Text.Range(indefiniteArticleKeyword.Range, identifiersList.Last().Range));
     }
 
     [Rule($"{ParameterReference} : IndefiniteArticleKeyword {LongIdentifier}")]
@@ -122,7 +123,7 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<SymbolName> identifiersList)
     {
         var typeName = string.Join(" ", identifiersList.SkipLast(1).Select(_ => _.Name).Append(identifiersList[identifiersList.Count - 1].Name.Singularize()));
-        return new TypeIdentifierReference(typeName, true);
+        return new TypeIdentifierReference(typeName, true, new Yoakke.SynKit.Text.Range(indefiniteArticleKeyword.Range, identifiersList.Last().Range));
     }
 
     [Rule($"variable_expression : {IdentifierReference}")]
@@ -627,7 +628,10 @@ public partial class EngLangParser : IEngLangParser
     private static SlotDeclaration MakeSlotDeclaration(
         TypeIdentifierReference identifierReferences,
         (IToken<EngLangTokenType>, IdentifierReference AliasFor)? alias)
-        => new SlotDeclaration(identifierReferences.Name, identifierReferences.IsCollection, alias?.AliasFor?.Name.Name);
+    {
+        var range = alias is null ? identifierReferences.Range : new Yoakke.SynKit.Text.Range(identifierReferences.Range, alias.Value.AliasFor.Range);
+        return new SlotDeclaration(identifierReferences.Name, identifierReferences.IsCollection, alias?.AliasFor?.Name.Name, range);
+    }
 
     [Rule($"comma_identifier_references_list : (slot_declaration (CommaKeyword slot_declaration)*)")]
     private static SlotDeclarationsList MakeCommaDelimitedIdentifierReferencesList(

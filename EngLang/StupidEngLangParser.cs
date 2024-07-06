@@ -63,7 +63,7 @@ public class StupidEngLangParser : IEngLangParser
                 : defaultValue.StartsWith("\"") ? (Expression?)new StringLiteralExpression(defaultValue, default)
                 : defaultValue.StartsWith("$") ? (Expression?)new StringLiteralExpression(defaultValue, default)
                 : new IntLiteralExpression(int.Parse(defaultValue));
-            Statement declStat = new VariableDeclarationStatement(new VariableDeclaration(variableName, new TypeIdentifierReference(typeName, false), defaultValueExpression));
+            Statement declStat = new VariableDeclarationStatement(new VariableDeclaration(variableName, new TypeIdentifierReference(typeName, false, default), defaultValueExpression));
             var para = new Paragraph(new[] { declStat }.ToImmutableList(), null);
             return ParseResult.Ok(para, 0);
         }
@@ -84,7 +84,7 @@ public class StupidEngLangParser : IEngLangParser
             {
                 var typeName = Regex.Replace(parts[0], @"^an?\s", "");
                 var basePart = Regex.Replace(parts[1], @"^an?\s", "");
-                Statement shapeDeclStat = new ShapeDeclarationStatement(new ShapeDeclaration(new(typeName, default), new TypeIdentifierReference(basePart, false)));
+                Statement shapeDeclStat = new ShapeDeclarationStatement(new ShapeDeclaration(new(typeName, default), new TypeIdentifierReference(basePart, false, default)));
                 var para = new Paragraph(new[] { shapeDeclStat }.ToImmutableList(), null);
                 return ParseResult.Ok(para, 0);
             }
