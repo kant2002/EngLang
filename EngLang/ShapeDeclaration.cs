@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace EngLang;
 
-public record ShapeDeclaration(SymbolName Name, TypeIdentifierReference? BaseShapeName, SlotDeclarationsList? WellKnownSlots = null) : SyntaxNode
+public record ShapeDeclaration(SymbolName Name, TypeIdentifierReference? BaseShapeName, SlotDeclarationsList? WellKnownSlots, Yoakke.SynKit.Text.Range Range) : SyntaxNode
 {
     public override IEnumerable<SyntaxNode> Children
     {

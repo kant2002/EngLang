@@ -304,7 +304,8 @@ public partial class EngLangParser : IEngLangParser
         var symbol = new SymbolName(
             string.Join(" ", identifier.Select(_ => _.Name)),
             new(identifier.First().Range.Start, identifier.Last().Range.End));
-        return new ShapeDeclaration(symbol, identifierReference, slotsList?.slots);
+        var range = new Yoakke.SynKit.Text.Range(indefiniteArticle.Range, slotsList is null ? identifierReference.Range : slotsList.Value.slots.Slots.Last().Range);
+        return new ShapeDeclaration(symbol, identifierReference, slotsList?.slots, range);
     }
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'has' shape_slot_list")]
@@ -317,7 +318,7 @@ public partial class EngLangParser : IEngLangParser
         var symbol = new SymbolName(
             string.Join(" ", identifier.Select(_ => _.Name)),
             new(identifier[0].Range.Start, identifier[identifier.Count - 1].Range.End));
-        return new ShapeDeclaration(symbol, null, slotsList);
+        return new ShapeDeclaration(symbol, null, slotsList, new Yoakke.SynKit.Text.Range(indefiniteArticle.Range, slotsList.Slots.Last().Range));
     }
 
     [Rule($"assignment_expression: PutKeyword math_expression IntoKeyword {IdentifierReference}")]
@@ -473,7 +474,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule("shape_declaration_statement : shape_declaration")]
     private static ShapeDeclarationStatement MakeShapeDeclarationStatement(
         ShapeDeclaration declaration)
-        => new ShapeDeclarationStatement(declaration);
+        => new ShapeDeclarationStatement(declaration, declaration.Range);
 
     [Rule("expression_statement : assignment_expression")]
     [Rule("expression_statement : math_expression")]
