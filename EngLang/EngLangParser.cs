@@ -236,10 +236,10 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> token)
         => token.Kind switch
         {
-            EngLangTokenType.StringLiteral => new StringLiteralExpression(token.Text[1..(token.Text.Length - 1)].Replace("\"\"", "\"")),
+            EngLangTokenType.StringLiteral => new StringLiteralExpression(token.Text[1..(token.Text.Length - 1)].Replace("\"\"", "\""), token.Range),
             EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text)),
-            EngLangTokenType.NullLiteral => new NullLiteralExpression(),
-            EngLangTokenType.HexLiteral => new ByteArrayLiteralExpression(ConvertHexToByteArray(token.Text[0] == '$' ? token.Text[1..] : token.Text[2..])),
+            EngLangTokenType.NullLiteral => new NullLiteralExpression(token.Range),
+            EngLangTokenType.HexLiteral => new ByteArrayLiteralExpression(ConvertHexToByteArray(token.Text[0] == '$' ? token.Text[1..] : token.Text[2..]), token.Range),
             _ => throw new InvalidOperationException()
         };
     private static byte[] ConvertHexToByteArray(string hexString)
