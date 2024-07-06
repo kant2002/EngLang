@@ -124,7 +124,10 @@ class SentenceCollector
                 }
                 break;
             case InvalidStatement invalidStatement:
-                yield return GetText(invalidStatement.Tokens.First(), invalidStatement.Tokens.Last());
+                yield return GetText(invalidStatement.Range);
+                break;
+            default:
+                yield return GetText(s.Range);
                 break;
         }
     }
