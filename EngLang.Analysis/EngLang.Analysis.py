@@ -12,12 +12,13 @@ stanza.download('en', logging_level='WARN')
 stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
 
 
-process_spacy = False
+process_spacy = True
 process_nltk = False
 process_stanza = True
 print_sentence_tree = False
 detect_grammar = False
 print_tagged_tokens = True
+print_nltk_tokens = False
 
 @Language.component("custom_sentence_boundaries")
 def set_custom_boundaries(doc):
@@ -78,24 +79,33 @@ def tokenize_sentence(sentence: str):
     return nltk.word_tokenize(sentence)
 
 def analyse_sentence_spacy(sentence: str):
-    print('Processing using Spacy')
+    #print('Processing using Spacy')
     doc = nlp(sentence)
     #print ([(token.text, token.pos_) for token in doc])
     assert doc.has_annotation("SENT_START")
     tagged_tokens: list[tuple[str, str]] = []
     for sent in doc.sents:
-        print(sent.text)
+        #print(sent.text)
         if print_sentence_tree:
             nltk_spacy_tree(sent).pretty_print()
-        sent_tokens = [(token.text, token.tag_) for token in sent]
-        tagged_tokens.append(sent_tokens)
+        if (str(sent) != "\n"):
+            sent_tokens = [(token.text, token.tag_) for token in sent]
+            tagged_tokens.append(sent_tokens)
 
     # print tagged tokens
     if print_tagged_tokens:
-        print('[')
+        if len(tagged_tokens) > 1:
+            print('[')
         for l in tagged_tokens:
-            print('   ', l)
-        print(']')
+            if len(tagged_tokens) > 1:
+                print('   ', l)
+            else:
+                for tt in tagged_tokens[0]:
+                    if tt[0] != "\n":
+                        print('(', tt[1], ' ', tt[0], ')', sep="", end=" ")
+                print()
+        if len(tagged_tokens) > 1:
+            print(']')
 
     if detect_grammar:
         try:
@@ -114,7 +124,8 @@ def analyse_sentence_spacy(sentence: str):
         except:
             print("Cannot detect sentence", pos_tags)
 
-    dump_tokens_nltk(tagged_tokens)
+    if print_nltk_tokens:
+        dump_tokens_nltk(tagged_tokens)
 
 def normalize_token(token: str, pos: str):
     if (pos == '_SP'):
@@ -142,7 +153,6 @@ def analyse_sentence_nltk(sentence):
     dump_tokens_nltk(tagged_tokens)
 
 def analyse_sentence_stanza(sentence: str):
-    print(sentence)
     doc = stanza(sentence)
     for i, sent in enumerate(doc.sentences):
         # print(f'====== Sentence {i+1} tokens =======')
@@ -150,12 +160,15 @@ def analyse_sentence_stanza(sentence: str):
 
 
 def analyse_sentence(sentence):
+    print(sentence, end="")
     if process_nltk:
         analyse_sentence_nltk(sentence)
     if process_spacy:
         analyse_sentence_spacy(sentence)
     if process_stanza:
         analyse_sentence_stanza(sentence)
+
+    print()
 
 def sample():
     # input text

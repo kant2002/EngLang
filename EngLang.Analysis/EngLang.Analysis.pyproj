@@ -13,7 +13,7 @@
     <RootNamespace>EngLang.Analysis</RootNamespace>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>analyze --lines --filename C:\d\github\englang\EngLang.Parser\bin\Debug\net6.0\turtle.lines</CommandLineArguments>
+    <CommandLineArguments>analyze --lines --filename C:\d\github\englang\EngLang.Parser\bin\Debug\net8.0\turtle.lines</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <TestFramework>Pytest</TestFramework>
   </PropertyGroup>
