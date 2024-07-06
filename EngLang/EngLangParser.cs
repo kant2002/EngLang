@@ -785,20 +785,28 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) identifierTokens,
-        (IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens, (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) identifierTokens)? saveResultsGroup,
+        (IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) OutParameters)? outParameter,
         CommentLabel? comment)
     {
         string labelName = string.Join(" ",
             new[] { firstToken }
             .Union(otherInitialTokens)
             .Union(identifierTokens.InnerText)
-            .Union(saveResultsGroup is null ? Array.Empty<IToken<EngLangTokenType>>() : new[] { saveResultsGroup.Value.intoToken })
-            .Union(saveResultsGroup?.otherInitialTokens ?? Array.Empty<IToken<EngLangTokenType>>())
-            .Union(saveResultsGroup is null ? Array.Empty<IToken<EngLangTokenType>>() : saveResultsGroup.Value.identifierTokens.InnerText)
+            .Union(outParameter is null ? Array.Empty<IToken<EngLangTokenType>>() : new[] { outParameter.Value.intoToken })
+            .Union(outParameter?.OtherWords ?? Array.Empty<IToken<EngLangTokenType>>())
+            .Union(outParameter is null ? Array.Empty<IToken<EngLangTokenType>>() : outParameter.Value.OutParameters.InnerText)
             .Select(i => i.Text));
+        var last = comment is not null
+            ? comment.Range.End
+            : outParameter is not null
+                ? (outParameter.Value.OutParameters.Identifiers.IdentifierReferences.Count > 0 ? outParameter.Value.OutParameters.Identifiers.IdentifierReferences.Last().Range.End : outParameter.Value.OutParameters.InnerText.Count() > 0 ? outParameter.Value.OutParameters.InnerText.Last().Range.End : outParameter.Value.OtherWords.Last().Range.End)
+                : identifierTokens.Identifiers.IdentifierReferences.Count > 0 ? identifierTokens.Identifiers.IdentifierReferences.Last().Range.End : identifierTokens.InnerText.Count() > 0
+                    ? identifierTokens.InnerText.Last().Range.End
+                    : otherInitialTokens.Count > 0 ? otherInitialTokens.Last().Range.End : firstToken.Range.End;
+        var range = new Yoakke.SynKit.Text.Range(firstToken.Range.Start, last);
         return new InvocationStatement(
             labelName + (comment is null ? "" : " " + comment.Text),
-            identifierTokens.Identifiers.IdentifierReferences.Union(saveResultsGroup?.identifierTokens.Identifiers.IdentifierReferences ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null);
+            identifierTokens.Identifiers.IdentifierReferences.Union(outParameter?.OutParameters.Identifiers.IdentifierReferences ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null, range);
     }
 
     public static SyntaxNode Parse(string sourceCode)
