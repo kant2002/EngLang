@@ -98,8 +98,7 @@ class SentenceCollector
     {
         if (CollectMarkers)
         {
-            foreach (var marker in p.Label!.Markers)
-                yield return marker;
+            yield return GetText(p.Label!.Range);
         }
 
         if (CollectSentences)
@@ -121,7 +120,7 @@ class SentenceCollector
                 break;
             case InvocationStatement invocationStatement:
                 {
-                    yield return invocationStatement.Marker;
+                    yield return GetText(invocationStatement.Range);
                 }
                 break;
             case InvalidStatement invalidStatement:
