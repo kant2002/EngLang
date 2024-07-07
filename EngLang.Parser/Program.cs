@@ -4,6 +4,7 @@ using Mosaik.Core;
 using static System.Console;
 using System.Text.RegularExpressions;
 using Yoakke.SynKit.Text;
+using System.Xml.Serialization;
 
 
 #if SPACY
@@ -36,18 +37,48 @@ if (!parsedArgs.IsSuccess)
 }
 else
 {
-    var file = parsedArgs.Result!.LinesFile;
-    if (file is not null)
+    var linesFile = parsedArgs.Result!.LinesFile;
+    if (linesFile is not null)
     {
-        var lines = await CollectSentences(file);
+        var lines = await CollectSentences(linesFile);
         foreach (var line in lines)
         {
             await Out.WriteLineAsync(line);
         }
     }
-    else
+
+    var nlpFile = parsedArgs.Result!.NlpFile;
+    if (nlpFile is not null)
+    {
+        var lines = File.ReadAllLines(nlpFile);
+        var data = lines.Chunk(4).ToList();
+        foreach (var item in data)
+        {
+            ValidateSentence(sentence: item[0], spacy: item[1], stanza: item[2]);
+        }
+    }
+
+    if (linesFile is null && nlpFile is null)
     {
         await ProcessSpacy(samples);
+    }
+}
+
+void ValidateSentence(string sentence, string spacy, string stanza)
+{
+    var spacyParts = SplitNlpText(spacy);
+    var stanzaParts = SplitNlpText(stanza);
+    if (spacyParts.Length != stanzaParts.Length)
+    {
+        Console.WriteLine($"Sentence '{sentence}' has different block length");
+        Console.WriteLine(spacy);
+        Console.WriteLine(stanza);
+    }
+
+    string[] SplitNlpText(string text)
+    {
+        var parts = text.Split(") (");
+        return parts;
     }
 }
 
@@ -193,9 +224,14 @@ class TextAnalyzer
     }
 }
 
+// CommandLine attributes are very good API, I would like stick with it.
 partial class CommandLineArguments
 {
+    [CommandLine.Value(0)]
     public string? LinesFile { get; set; }
+
+    [CommandLine.Option("nlp")]
+    public string? NlpFile { get; set; }
 }
 
 file partial class CommandLineArguments
@@ -205,10 +241,31 @@ file partial class CommandLineArguments
         var result = new CommandLineArguments();
         var success = true;
         var _LinesFileParsed = false;
+        var _LinesFileHasError = false;
+        var _NlpFileParsed = false;
+        var _NlpFileHasError = false;
         int position = 0;
         string? currentElement;
 
         currentElement = args.ElementAtOrDefault(position);
+        if (currentElement == "--nlp" /*long name*/)
+        {
+            position++;
+            currentElement = args.ElementAtOrDefault(position);
+            if (currentElement is null || currentElement.StartsWith("-"))
+            {
+                _NlpFileHasError = true;
+                _NlpFileParsed = true;
+            }
+            else
+            {
+                result.NlpFile = currentElement;
+                _NlpFileParsed = true;
+                position++;
+            }
+        }
+
+        currentElement = args.ElementAtOrDefault(position + 0);
         if (currentElement != null)
         {
             result.LinesFile = currentElement;
@@ -216,6 +273,7 @@ file partial class CommandLineArguments
         }
 
         // Put validation here.
+        success = !_NlpFileHasError && !_LinesFileHasError;
         return new(result, success);
     }
 
