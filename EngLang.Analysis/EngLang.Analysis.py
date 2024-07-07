@@ -78,6 +78,43 @@ def nltk_spacy_tree(sent):
 def tokenize_sentence(sentence: str):
     return nltk.word_tokenize(sentence)
 
+def normalize_spacy_pos(pos: str):
+    spacy_names = {
+        'VB': 'VERB',
+        'NN': 'NOUN',
+        'NNS': 'NOUN',
+        'JJ': 'ADJ',
+        'HYPH': 'PUNCT',
+        'DT': 'DET',
+        ':': 'PUNCT',
+        ',': 'PUNCT',
+        'XX': 'PUNCT',
+        '-LRB-': 'PUNCT',
+        '-RRB-': 'PUNCT',
+        'CD': 'NUM',
+        'PRN': 'PRON',
+        'PRP': 'PRON',
+    }
+    if pos in spacy_names:
+        return spacy_names[pos]
+    return pos
+
+def combine_punc_spacy(tokens: list[tuple[str,str]]):
+    ndx = 0
+    while (ndx < len(tokens)):
+        current = tokens[ndx]
+        if ndx < len(tokens)-2:
+            tt = tokens[ndx+1]
+            if tt[0] == "-":
+                second = tokens[ndx+2]
+                yield (current[0]+tt[0]+second[0],current[1])
+                ndx = ndx + 2
+            else:
+                yield current
+        else:
+            yield current
+        ndx = ndx +1
+
 def analyse_sentence_spacy(sentence: str):
     #print('Processing using Spacy')
     doc = nlp(sentence)
@@ -94,18 +131,20 @@ def analyse_sentence_spacy(sentence: str):
 
     # print tagged tokens
     if print_tagged_tokens:
-        if len(tagged_tokens) > 1:
-            print('[')
+        #if len(tagged_tokens) > 1:
+        #    print('[')
         for l in tagged_tokens:
-            if len(tagged_tokens) > 1:
-                print('   ', l)
-            else:
-                for tt in tagged_tokens[0]:
-                    if tt[0] != "\n":
-                        print('(', tt[1], ' ', tt[0], ')', sep="", end=" ")
+            #if len(tagged_tokens) > 1:
+            #    print('   ', l)
+            #else:
+                for token_sent in tagged_tokens:
+                    for tt in combine_punc_spacy(token_sent):
+                        if tt[0] != "\n" and tt[1] != "_SP":
+                            pos_name = normalize_spacy_pos(tt[1])
+                            print('(', pos_name, ' ', tt[0], ')', sep="", end=" ")
                 print()
-        if len(tagged_tokens) > 1:
-            print(']')
+        #if len(tagged_tokens) > 1:
+        #    print(']')
 
     if detect_grammar:
         try:
