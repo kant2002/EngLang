@@ -29,17 +29,26 @@ var samples = new[]
     "add 42 to a value; subtract 42 from a value; multiply a value by 42; divide a value by 42. ",
 };
 
-if (args.Length > 0)
+var parsedArgs = CommandLineArguments.Parse(args);
+if (!parsedArgs.IsSuccess)
 {
-    var lines = await CollectSentences(args[0]);
-    foreach (var line in lines)
-    {
-        await Out.WriteLineAsync(line);
-    }
+    CommandLineArguments.PrintHelp();
 }
 else
 {
-    await ProcessSpacy(samples);
+    var file = parsedArgs.Result!.LinesFile;
+    if (file is not null)
+    {
+        var lines = await CollectSentences(file);
+        foreach (var line in lines)
+        {
+            await Out.WriteLineAsync(line);
+        }
+    }
+    else
+    {
+        await ProcessSpacy(samples);
+    }
 }
 
 async Task<string[]> CollectSentences(string fileName)
@@ -182,4 +191,38 @@ class TextAnalyzer
     {
         return doc.Value.AsSpan().Slice(tokenData.LowerBound, 1 + tokenData.UpperBound - tokenData.LowerBound);
     }
+}
+
+partial class CommandLineArguments
+{
+    public string? LinesFile { get; set; }
+}
+
+file partial class CommandLineArguments
+{
+    public static ParseResult Parse(string[] args)
+    {
+        var result = new CommandLineArguments();
+        var success = true;
+        var _LinesFileParsed = false;
+        int position = 0;
+        string? currentElement;
+
+        currentElement = args.ElementAtOrDefault(position);
+        if (currentElement != null)
+        {
+            result.LinesFile = currentElement;
+            _LinesFileParsed = true;
+        }
+
+        // Put validation here.
+        return new(result, success);
+    }
+
+    public static void PrintHelp()
+    {
+        Console.WriteLine("EngLang.Parser");
+    }
+
+    public record ParseResult(CommandLineArguments? Result, bool IsSuccess);
 }
