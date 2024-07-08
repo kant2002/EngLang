@@ -51,10 +51,21 @@ else
     if (nlpFile is not null)
     {
         var lines = File.ReadAllLines(nlpFile);
-        var data = lines.Chunk(4).ToList();
+        var data = lines.Aggregate(new List<List<string>>() { new List<string>() }, (prev, currentItem) =>
+        {
+            if (currentItem == "")
+            {
+                prev.Add(new List<string>());
+                return prev;
+            }
+
+            prev[prev.Count - 1].Add(currentItem);
+            return prev;
+        });
+        //var data = lines.Chunk(4).ToList();
         foreach (var item in data)
         {
-            ValidateSentence(sentence: item[0], spacy: item[1], stanza: item[2]);
+            ValidateSentence(sentence: item[0], spacy: item[1], stanza: item.Last());
         }
     }
 
