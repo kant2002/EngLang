@@ -78,14 +78,16 @@ def nltk_spacy_tree(sent):
 def tokenize_sentence(sentence: str):
     return nltk.word_tokenize(sentence)
 
-def normalize_spacy_pos(pos: str):
+def normalize_spacy_pos(pos: str, text: str):
     spacy_names = {
-        'VB': 'VERB',
         'NN': 'NOUN',
         'NNS': 'NOUN',
+        'NNP': 'NOUN',
         'JJ': 'ADJ',
+        'RB': 'ADV',
         'HYPH': 'PUNCT',
         'DT': 'DET',
+        'WDT': 'DET',
         ':': 'PUNCT',
         ',': 'PUNCT',
         'XX': 'PUNCT',
@@ -94,9 +96,29 @@ def normalize_spacy_pos(pos: str):
         'CD': 'NUM',
         'PRN': 'PRON',
         'PRP': 'PRON',
+        'TO': 'PART',
+        'POS': 'PART',
+        'VB': 'VERB',
+        'VBP': 'VERB',
+        'VBN': 'VERB',
+        'VBD': 'VERB',
+        'VBG': 'VERB',
+        'CC': 'CCONJ',
+        'VBZ': 'AUX',
     }
+
+    if pos == "IN":
+       if text in ["if", "without"]:
+           return "SCONJ"
+       else:
+           return "ADP"
+
+    if text == "'re":
+        return "AUX"
+
     if pos in spacy_names:
         return spacy_names[pos]
+    
     return pos
 
 def combine_punc_spacy(tokens: list[tuple[str,str]]):
@@ -162,7 +184,7 @@ def analyse_sentence_spacy(sentence: str):
                 for token_sent in tagged_tokens:
                     for tt in combine_punc_spacy(token_sent):
                         if tt[0] != "\n" and tt[1] != "_SP":
-                            pos_name = normalize_spacy_pos(tt[1])
+                            pos_name = normalize_spacy_pos(tt[1], tt[0])
                             print('(', pos_name, ' ', tt[0], ')', sep="", end=" ")
                 print()
         #if len(tagged_tokens) > 1:
