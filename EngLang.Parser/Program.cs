@@ -85,6 +85,21 @@ void ValidateSentence(string sentence, string spacy, string stanza)
         Console.WriteLine(spacy);
         Console.WriteLine(stanza);
     }
+    else
+    {
+        bool isInvalid = spacyParts.Length != stanzaParts.Length;
+        for (int i = 0; i < spacyParts.Length; i++)
+        {
+            var spacyPart = spacyParts[i];
+            var stanzaPart = stanzaParts[i];
+            if (spacyPart.Trim() != stanzaPart.Trim())
+            {
+                isInvalid = true;
+                Console.WriteLine($"Different parts '{spacyPart}' and '{stanzaPart}' in sentence '{sentence}'");
+                break;
+            }
+        }
+    }
 
     string[] SplitNlpText(string text)
     {
