@@ -115,6 +115,28 @@ def combine_punc_spacy(tokens: list[tuple[str,str]]):
             yield current
         ndx = ndx +1
 
+def combine_punc_stanza(tokens: list[any]):
+    ndx = 0
+    while (ndx < len(tokens)):
+        current = tokens[ndx]
+        if ndx < len(tokens)-2 and tokens[ndx+1].text == "-":
+            tt = tokens[ndx+1]
+            second = tokens[ndx+2]
+            yield type('obj', (object,), {'text' : current.text+tt.text+second.text, 'upos': current.upos})
+            #yield (current.text+tt.text+second.text,current.upos)
+            ndx = ndx + 2
+        elif ndx < len(tokens)-1 and (current.text.endswith("-") or tokens[ndx+1].text.startswith("-")):
+            tt = tokens[ndx+1]
+            yield type('obj', (object,), {'text' : current.text+tt.text, 'upos': current.upos})
+            ndx = ndx + 1
+        elif ndx < len(tokens)-1 and current.upos == "NUM" and tokens[ndx+1].upos == "NUM":
+            tt = tokens[ndx+1]
+            yield type('obj', (object,), {'text' : current.text+tt.text, 'upos': current.upos})
+            ndx = ndx + 1
+        else:
+            yield current
+        ndx = ndx +1
+
 def analyse_sentence_spacy(sentence: str):
     #print('Processing using Spacy')
     doc = nlp(sentence)
@@ -195,7 +217,7 @@ def analyse_sentence_stanza(sentence: str):
     doc = stanza(sentence)
     for i, sent in enumerate(doc.sentences):
         # print(f'====== Sentence {i+1} tokens =======')
-        print(*[f'({token.upos} {token.text})' for token in sent.words], sep=' ')
+        print(*[f'({token.upos} {token.text})' for token in combine_punc_stanza(sent.words)], sep=' ')
 
 
 def analyse_sentence(sentence):
