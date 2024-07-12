@@ -65,7 +65,7 @@ else
         //var data = lines.Chunk(4).ToList();
         foreach (var item in data)
         {
-            ValidateSentence(sentence: item[0], spacy: item[1], stanza: item.Last());
+            ValidateSentence(sentence: item[0], spacy: item[1], stanza: item.Last(), Console.Out, new StringWriter());
         }
     }
 
@@ -75,15 +75,15 @@ else
     }
 }
 
-void ValidateSentence(string sentence, string spacy, string stanza)
+void ValidateSentence(string sentence, string spacy, string stanza, TextWriter success, TextWriter error)
 {
     var spacyParts = SplitNlpText(spacy);
     var stanzaParts = SplitNlpText(stanza);
     if (spacyParts.Length != stanzaParts.Length)
     {
-        Console.WriteLine($"Sentence '{sentence}' has different block length");
-        Console.WriteLine(spacy);
-        Console.WriteLine(stanza);
+        error.WriteLine($"Sentence '{sentence}' has different block length");
+        error.WriteLine(spacy);
+        error.WriteLine(stanza);
     }
     else
     {
@@ -95,9 +95,14 @@ void ValidateSentence(string sentence, string spacy, string stanza)
             if (spacyPart.Trim() != stanzaPart.Trim())
             {
                 isInvalid = true;
-                Console.WriteLine($"Different parts '{spacyPart}' and '{stanzaPart}' in sentence '{sentence}'");
+                error.WriteLine($"Different parts '{spacyPart}' and '{stanzaPart}' in sentence '{sentence}'");
                 break;
             }
+        }
+
+        if (!isInvalid)
+        {
+            success.WriteLine(sentence.Trim());
         }
     }
 
