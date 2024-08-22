@@ -246,9 +246,9 @@ To calculate area from a width and a height ->
     [InlineData("To calculate area from a width and a height: result is 1.", "calculate area from and")]
     [InlineData("To calculate area from a width and a height-> result is 1.", "calculate area from and")]
     [InlineData("calculate area from a width and a height-> result is 1.", "calculate area from and")]
-    //[InlineData("define calculate area from a width and a height as result is 1.", "calculate area from and")]
-    //[InlineData("Define calculate area from a width and a height as result is 1.", "calculate area from and")]
-    //[InlineData("define factorial of a number as result is 1.", "factorial of")]
+    [InlineData("define calculate area from a width and a height as result is 1.", "calculate area from and")]
+    [InlineData("Define calculate area from a width and a height as result is 1.", "calculate area from and")]
+    [InlineData("define factorial of a number as result is 1.", "factorial of")]
     //[InlineData("define the factorial of a number as result is 1.", "the factorial of")]
     [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
     //[InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
@@ -272,6 +272,25 @@ To calculate area from a width and a height ->
         Assert.Equal(marker, labeledStatement.Markers.First());
         var resultStatement = Assert.IsType<ResultStatement>(statement);
         Assert.Equal(1, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
+    }
+
+    [Theory]
+    [InlineData("to put a number into number:", "put into number")]
+    [InlineData("To calculate area from a width and a height: result is 1.", "calculate area from and")]
+    [InlineData("To calculate area from a width and a height-> result is 1.", "calculate area from and")]
+    [InlineData("define calculate area from a width and a height as result is 1.", "calculate area from and")]
+    [InlineData("Define calculate area from a width and a height as result is 1.", "calculate area from and")]
+    [InlineData("define factorial of a number as result is 1.", "factorial of")]
+    //[InlineData("define the factorial of a number as result is 1.", "the factorial of")]
+    [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
+    //[InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
+    public void Labels(string sentence, string marker)
+    {
+        var lexer = new EngLangLexer(sentence);
+        var parser = new EngLangParser(lexer);
+        var parseResult = parser.ParseInvokableLabelAliases().Ok.Value;
+
+        Assert.Equal(marker, parseResult.Markers.First());
     }
 
     [Theory]

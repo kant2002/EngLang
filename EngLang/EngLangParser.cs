@@ -697,6 +697,11 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<(IdentifierReference, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
         => (identifierReferences.SelectMany(_ => _.Item2).ToImmutableList(), identifierReferences.Select(_ => _.Item1).ToImmutableList());
 
+    [Rule($"parameter_references_list_strict : ({ParameterReference} extended_def_label_word_strict*)*")]
+    private static (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) MakeParameterReferencesListStrict(
+        IReadOnlyList<(IdentifierReference, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
+        => MakeParameterReferencesList(identifierReferences);
+
     [Rule($"slot_declaration : {TypeIdentifierReference} ('is' {IdentifierReference})?")]
     [Rule($"slot_declaration : {TypeIdentifierReference} ('at' {IdentifierReference})?")]
     private static SlotDeclaration MakeSlotDeclaration(
@@ -727,24 +732,33 @@ public partial class EngLangParser : IEngLangParser
     private static IToken<EngLangTokenType> MakeLabelWord(IToken<EngLangTokenType> marker)
         => marker;
 
-    [Rule($"extended_label_word : label_word")]
-    [Rule($"extended_label_word : IfKeyword")]
-    [Rule($"extended_label_word : IsKeyword")]
-    [Rule($"extended_label_word : HasKeyword")]
-    [Rule($"extended_label_word : AreKeyword")]
-    [Rule($"extended_label_word : FunctionBodyOrAsKeyword")]
-    //[Rule($"extended_label_word : IntoKeyword")]
-    // [Rule($"extended_label_word : DefiniteArticleKeyword")]
-    [Rule($"extended_label_word : NullLiteral")]
-    [Rule($"extended_label_word : 'given'")]
-    [Rule($"extended_label_word : FromKeyword")]
-    [Rule($"extended_label_word : ToKeyword")]
+    [Rule($"extended_label_word_strict : label_word")]
+    [Rule($"extended_label_word_strict : IfKeyword")]
+    [Rule($"extended_label_word_strict : IsKeyword")]
+    [Rule($"extended_label_word_strict : HasKeyword")]
+    [Rule($"extended_label_word_strict : AreKeyword")]
+    //[Rule($"extended_label_word_strict : IntoKeyword")]
+    // [Rule($"extended_label_word_strict : DefiniteArticleKeyword")]
+    [Rule($"extended_label_word_strict : NullLiteral")]
+    [Rule($"extended_label_word_strict : 'given'")]
+    [Rule($"extended_label_word_strict : FromKeyword")]
+    [Rule($"extended_label_word_strict : ToKeyword")]
+    private static IToken<EngLangTokenType> MakeExtendedLabelWordStrict(IToken<EngLangTokenType> marker)
+        => marker;
+
+    [Rule($"extended_label_word : extended_label_word_strict")]
+    [Rule($"extended_def_label_word : FunctionBodyOrAsKeyword")]
     private static IToken<EngLangTokenType> MakeExtendedLabelWord(IToken<EngLangTokenType> marker)
         => marker;
 
     [Rule($"extended_def_label_word : extended_label_word")]
     [Rule($"extended_def_label_word : DefiniteArticleKeyword")]
     private static IToken<EngLangTokenType> MakeDefinitionLabelWord(IToken<EngLangTokenType> marker)
+        => marker;
+
+    [Rule($"extended_def_label_word_strict : extended_label_word_strict")]
+    [Rule($"extended_def_label_word_strict : DefiniteArticleKeyword")]
+    private static IToken<EngLangTokenType> MakeDefinitionLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
 
     [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | IntLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword)* ')'")]
@@ -755,6 +769,17 @@ public partial class EngLangParser : IEngLangParser
     {
         string labelName = string.Join(" ", names.Select(token => token.Text));
         return new CommentLabel($"({labelName})", new(toToken.Range.Start, colonToken.Range.End));
+    }
+
+    [Rule($"invokable_label_definition_strict : label_word extended_def_label_word_strict* parameter_references_list_strict (IntoKeyword extended_def_label_word_strict* parameter_references_list_strict)? comment_label?")]
+    private static InvokableLabel MakeInvokableLabelStrict(
+        IToken<EngLangTokenType> firstToken,
+        IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
+        (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
+        (IToken<EngLangTokenType> intoToken, IEnumerable<IToken<EngLangTokenType>> OtherWords, (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters)? outParameter,
+        CommentLabel? comment)
+    {
+        return MakeInvokableLabel(firstToken, otherInitialTokens, identifierTokens, outParameter, comment);
     }
 
     [Rule($"invokable_label_definition : label_word extended_def_label_word* parameter_references_list (IntoKeyword extended_def_label_word* parameter_references_list)? comment_label?")]
@@ -804,8 +829,8 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"prefixed_invokable_label : ToKeyword invokable_label_definition")]
-    [Rule($"prefixed_invokable_label : 'define' invokable_label_definition")]
-    [Rule($"prefixed_invokable_label : 'Define' invokable_label_definition")]
+    [Rule($"prefixed_invokable_label : 'define' invokable_label_definition_strict")]
+    [Rule($"prefixed_invokable_label : 'Define' invokable_label_definition_strict")]
     private static InvokableLabel MakePrefixedInvokableLabel(
         IToken<EngLangTokenType> toToken,
         InvokableLabel label) => label;
