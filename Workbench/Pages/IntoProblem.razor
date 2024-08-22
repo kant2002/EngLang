@@ -1,0 +1,55 @@
+@page "/intoproblem"
+<PageTitle>Into Problem</PageTitle>
+
+<h1>Into Problem</h1>
+
+<p>
+    I was ridiculed on Twitter about issue with factorial sample. Yeah, that's true and appear very sloppy. I apologize for that.
+</p>
+<p>
+    In my defence I can say, that this really working some time ago. What everybody can see, is my sloppines and lazynes which comes from working in solitude.
+    No denial that this is bad for promotion of such sensetive idea. I cannot fix this quickly, because it would be quite involed. but I can give explanation.
+</p>
+
+<p>My initial idea was to get code </p>
+<pre>
+To Calculate factorial of a number: if a number is 0 then result is 1.
+if a number is 1 then result is 1.
+let a previous number is a number minus 1.
+calculate factorial of a previous number into a previous factorial.
+result is a previous factorial multiply a number.
+</pre>
+and transform it into following code
+<pre>
+void Calculate_factorial_of(number)
+{
+    if (number == 0) {
+        return 1;
+    }
+    if (number == 1) {
+        return 1;
+    }
+    previous_number = number - 1;
+    previous_factorial = calculate_factorial_of_into(previous_number);
+    return previous_factorial * number;
+}
+</pre>
+
+Then I start thinking that maybe instead of special casing INTO handling as save variable, I can provide otherrides, for whose who need it.
+
+<pre>
+To calculate factorial of a number into a storage:
+... put your statements here
+</pre>
+
+And that which was forced me to change how I parse code. Previously I have AST like that
+<pre>
+InvocationStatement(Marker, Parameters, ResultIdentifier)
+</pre>
+where <code>Marker=calculate factorial of</code> and <code>Parameters=a number</code> and <code>ResultIdentifier=a storage</code>.
+Now I change that to <code>Marker=calculate factorial of into</code> and <code>Parameters=a number,a storage</code> and <code>ResultIdentifier=NULL</code>.
+
+That's exaclue the same as visible now. When I make that change I forget, or more honestly was lazy, to create additional processing state, and create tests for that.
+
+The more I add cases the more cracks, appears on the surface. In a sense I retreating back to CompLang way of parsers, instead of NLP way of processing. I should not do that.
+You may see that on Functions page, where older samples now broken. Again, probably it's time to roll my sleeves, and fix all of that crap, which I was lazy to do.
