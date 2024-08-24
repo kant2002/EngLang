@@ -712,14 +712,35 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<(IdentifierReference, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
         => MakeParameterReferencesList(identifierReferences);
 
-    [Rule($"slot_declaration : {TypeIdentifierReference} ('is' {IdentifierReference})?")]
-    [Rule($"slot_declaration : {TypeIdentifierReference} ('at' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {TypeIdentifierReference} (NamedLiteral {LongIdentifier})? ('is' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {TypeIdentifierReference} (NamedLiteral {LongIdentifier})? ('at' {IdentifierReference})?")]
     private static SlotDeclaration MakeSlotDeclaration(
         TypeIdentifierReference identifierReferences,
+        (IToken<EngLangTokenType>, IReadOnlyList<SymbolName> SlotName)? nameOverride,
         (IToken<EngLangTokenType>, IdentifierReference AliasFor)? alias)
     {
-        var range = alias is null ? identifierReferences.Range : new Yoakke.SynKit.Text.Range(identifierReferences.Range, alias.Value.AliasFor.Range);
-        return new SlotDeclaration(identifierReferences.Name, identifierReferences.IsCollection, alias?.AliasFor?.Name.Name, range);
+        var range = alias is null
+            ? nameOverride is null
+                ? identifierReferences.Range
+                : new Yoakke.SynKit.Text.Range(identifierReferences.Range, nameOverride.Value.SlotName.Last().Range)
+            : new Yoakke.SynKit.Text.Range(identifierReferences.Range, alias.Value.AliasFor.Range);
+        string name;
+        if (nameOverride != null)
+        {
+            name = string.Join(" ", nameOverride.Value.SlotName.Select(_ => _.Name));
+        }
+        else
+        {
+            name = identifierReferences.Name;
+        }
+
+        return new SlotDeclaration(
+            name,
+            identifierReferences.Name,
+            identifierReferences.IsCollection,
+            null,
+            alias?.AliasFor?.Name.Name,
+            range);
     }
 
     [Rule($"comma_identifier_references_list : (slot_declaration (CommaKeyword slot_declaration)*)")]

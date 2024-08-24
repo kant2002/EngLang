@@ -117,6 +117,32 @@ a pen has
     }
 
     [Theory]
+    [InlineData("""
+a pen has
+    a width,
+    a number named size.
+""")]
+    public void ShapeDeclarationWithSlotsAndNames(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
+        var shapeDeclaration = shapeStatement.Declaration;
+        Assert.Equal("pen", shapeDeclaration.Name.Name);
+        Assert.Null(shapeDeclaration.BaseShapeName);
+        Assert.NotNull(shapeDeclaration.WellKnownSlots);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].TypeName);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[0].AliasFor);
+
+        Assert.Equal("size", shapeDeclaration.WellKnownSlots.Slots[1].Name);
+        Assert.Equal("number", shapeDeclaration.WellKnownSlots.Slots[1].TypeName);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
+    }
+
+    [Theory]
     [InlineData("a rectangle of a sprite.")]
     [InlineData("a sprite's rectangle.")]
     public void PosessionDeclaration(string sentence)

@@ -31,6 +31,7 @@ public enum EngLangTokenType
     [Regex("(if|If)")] IfKeyword,
     [Token("is")] IsKeyword,
     [Token("at")] AtKeyword,
+    [Token("called")] CalledKeyword,
     [Regex("(to|To)")] ToKeyword,
     [Token("as")] FunctionBodyOrAsKeyword,
     [Token("on")] OnKeyword,
@@ -46,6 +47,7 @@ public enum EngLangTokenType
     [Regex(",")] CommaKeyword,
     [Regex("from")] FromKeyword,
     [Regex("(null|nil)")] NullLiteral,
+    [Regex("named")] NamedLiteral,
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
     //[Regex(Regexes.Identifier)]

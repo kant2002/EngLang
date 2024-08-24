@@ -220,13 +220,22 @@ a rectangle is a shape with
     and a height.
 ```
 
-We can have aliases for the shape slots.
+We can have aliases for the shape slots. Similar to C unions.
 
 ```
 a pen has
     a color,
     a width,
     a size at the width.
+```
+
+In case we need to have two properties of same type, let's name them.
+
+```
+a pen has
+    a color,
+    a width,
+    a number named width.
 ```
 
 ## Arrays or lists
