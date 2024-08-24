@@ -26,6 +26,11 @@ public partial class EngLangParser : IEngLangParser
     {
         return identifierParts.Select(_ => new SymbolName(_.Text, _.Range)).ToList();
     }
+    [Rule($"{LongIdentifier} : 'A'")]
+    private static IReadOnlyList<SymbolName> MakeA(IToken<EngLangTokenType> token)
+    {
+        return [new SymbolName(token.Text, token.Range)];
+    }
 
     [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     [Rule($"{IdentifierReference} : DefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]

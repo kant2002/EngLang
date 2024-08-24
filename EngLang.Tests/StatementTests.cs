@@ -251,7 +251,7 @@ To calculate area from a width and a height ->
     [InlineData("define factorial of a number as result is 1.", "factorial of")]
     //[InlineData("define the factorial of a number as result is 1.", "the factorial of")]
     [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
-    //[InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
+    [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
     [InlineData("To calculate the area of a rectangle (multiplication): result is 1.", "calculate the area of (multiplication)")]
     [InlineData("To calculate the area of a rectangle (multiplication - trivial): result is 1.", "calculate the area of (multiplication - trivial)")]
     [InlineData("to apply some parameters: result is 1.", "apply")]
@@ -281,9 +281,9 @@ To calculate area from a width and a height ->
     [InlineData("define calculate area from a width and a height as result is 1.", "calculate area from and")]
     [InlineData("Define calculate area from a width and a height as result is 1.", "calculate area from and")]
     [InlineData("define factorial of a number as result is 1.", "factorial of")]
-    //[InlineData("define the factorial of a number as result is 1.", "the factorial of")]
+    [InlineData("define the factorial of a number as result is 1.", "the factorial of")]
     [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
-    //[InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
+    [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
     public void Labels(string sentence, string marker)
     {
         var lexer = new EngLangLexer(sentence);
