@@ -37,14 +37,51 @@ if (!parsedArgs.IsSuccess)
 }
 else
 {
-    var linesFile = parsedArgs.Result!.LinesFile;
+    var result = parsedArgs.Result!;
+    var linesFile = result.LinesFile;
     if (linesFile is not null)
     {
-        var lines = await CollectSentences(linesFile);
-        foreach (var line in lines)
+        var writer = Out;
+        await DumpLines(linesFile, writer);
+    }
+
+    var processingDirectory = result.ProcessingDirectory;
+    if (processingDirectory is not null)
+    {
+        if (result.OutputDirectory is null)
         {
-            await Out.WriteLineAsync(line);
+            Error.WriteLine("The output directory is missing");
+            return;
         }
+
+        Directory.CreateDirectory(result.OutputDirectory);
+        int success = 0;
+        int totalFiles = 0;
+        foreach (var file in Directory.GetFiles(processingDirectory, "*.", result.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+        {
+            var baseFile = Path.GetRelativePath(processingDirectory, file) + ".lines";
+            var outputFile = Path.Combine(result.OutputDirectory, baseFile);
+            var currentOutputDirectory = Path.GetDirectoryName(outputFile);
+            if (currentOutputDirectory is not null)
+            {
+                Directory.CreateDirectory(currentOutputDirectory);
+            }
+
+            try
+            {
+                using var writer = new StreamWriter(File.OpenWrite(outputFile));
+                await DumpLines(file, writer);
+                success++;
+            }
+            catch (Exception ex)
+            {
+                await Error.WriteLineAsync($"During processing of file '{baseFile}' error happens: {ex.Message}");
+            }
+
+            totalFiles++;
+        }
+
+        await Out.WriteLineAsync($"Total files {totalFiles} processed. Successul: {success}");
     }
 
     var nlpFile = parsedArgs.Result!.NlpFile;
@@ -69,9 +106,18 @@ else
         }
     }
 
-    if (linesFile is null && nlpFile is null)
+    if (linesFile is null && processingDirectory is null && nlpFile is null)
     {
         await ProcessSpacy(samples);
+    }
+}
+
+static async Task DumpLines(string linesFile, TextWriter writer)
+{
+    var lines = await CollectSentences(linesFile);
+    foreach (var line in lines)
+    {
+        await writer.WriteLineAsync(line);
     }
 }
 
@@ -113,9 +159,9 @@ void ValidateSentence(string sentence, string spacy, string stanza, TextWriter s
     }
 }
 
-async Task<string[]> CollectSentences(string fileName)
+static async Task<string[]> CollectSentences(string fileName)
 {
-    var text = await File.ReadAllTextAsync(args[0]);
+    var text = await File.ReadAllTextAsync(fileName);
     var collector = new SentenceCollector(text)
     {
         CollectMarkers = true,
@@ -263,6 +309,15 @@ partial class CommandLineArguments
 
     [CommandLine.Option("nlp")]
     public string? NlpFile { get; set; }
+
+    [CommandLine.Option("directory")]
+    public string? ProcessingDirectory { get; set; }
+
+    [CommandLine.Option('r')]
+    public bool Recursive { get; set; }
+
+    [CommandLine.Option("out")]
+    public string? OutputDirectory { get; set; }
 }
 
 file partial class CommandLineArguments
@@ -275,25 +330,90 @@ file partial class CommandLineArguments
         var _LinesFileHasError = false;
         var _NlpFileParsed = false;
         var _NlpFileHasError = false;
+        var _ProcessingDirectoryParsed = false;
+        var _ProcessingDirectoryHasError = false;
+        var _OutputDirectoryParsed = false;
+        var _OutputDirectoryHasError = false;
+        var _RecursiveParsed = false;
+        var _RecursiveHasError = false;
         int position = 0;
         string? currentElement;
 
         currentElement = args.ElementAtOrDefault(position);
-        if (currentElement == "--nlp" /*long name*/)
+        while (currentElement is not null && currentElement.StartsWith("-"))
         {
-            position++;
-            currentElement = args.ElementAtOrDefault(position);
-            if (currentElement is null || currentElement.StartsWith("-"))
+            if (currentElement == "--nlp" /*long name*/)
             {
-                _NlpFileHasError = true;
-                _NlpFileParsed = true;
-            }
-            else
-            {
-                result.NlpFile = currentElement;
-                _NlpFileParsed = true;
                 position++;
+                currentElement = args.ElementAtOrDefault(position);
+                if (currentElement is null || currentElement.StartsWith("-"))
+                {
+                    _NlpFileHasError = true;
+                    _NlpFileParsed = true;
+                }
+                else
+                {
+                    result.NlpFile = currentElement;
+                    _NlpFileParsed = true;
+                    position++;
+                    currentElement = args.ElementAtOrDefault(position);
+                }
+
+                continue;
             }
+
+            if (currentElement == "--directory" /*long name*/)
+            {
+                position++;
+                currentElement = args.ElementAtOrDefault(position);
+                if (currentElement is null || currentElement.StartsWith("-"))
+                {
+                    _ProcessingDirectoryHasError = true;
+                    _ProcessingDirectoryParsed = true;
+                }
+                else
+                {
+                    result.ProcessingDirectory = currentElement;
+                    _ProcessingDirectoryParsed = true;
+                    position++;
+                    currentElement = args.ElementAtOrDefault(position);
+                }
+
+                continue;
+            }
+
+            if (currentElement == "--out" /*long name*/)
+            {
+                position++;
+                currentElement = args.ElementAtOrDefault(position);
+                if (currentElement is null || currentElement.StartsWith("-"))
+                {
+                    _OutputDirectoryHasError = true;
+                    _OutputDirectoryParsed = true;
+                }
+                else
+                {
+                    result.OutputDirectory = currentElement;
+                    _OutputDirectoryParsed = true;
+                    position++;
+                    currentElement = args.ElementAtOrDefault(position);
+                }
+
+                continue;
+            }
+
+            if (currentElement == "-r" /*short*/)
+            {
+                result.Recursive = true;
+                _RecursiveParsed = true;
+                position++;
+                currentElement = args.ElementAtOrDefault(position);
+
+                continue;
+            }
+
+            // Unknown parameter.
+            break;
         }
 
         currentElement = args.ElementAtOrDefault(position + 0);
@@ -304,7 +424,11 @@ file partial class CommandLineArguments
         }
 
         // Put validation here.
-        success = !_NlpFileHasError && !_LinesFileHasError;
+        success = !_NlpFileHasError
+            && !_ProcessingDirectoryHasError
+            && !_OutputDirectoryHasError
+            && !_RecursiveHasError
+            && !_LinesFileHasError;
         return new(result, success);
     }
 
