@@ -21,7 +21,7 @@ public enum EngLangTokenType
     [Token(".")] DotKeyword,
     [Regex("->")] FunctionBodyKeyword,
 
-    [Regex("(add|subtract|multiply|multiplied|divide|divided|plus|minus|-|\\+|/|\\*)")] MathOperationKeyword,
+    [Regex("(add|subtract|multiply|times|multiplied|divide|divided|plus|minus|-|\\+|/|\\*)")] MathOperationKeyword,
 
     [Regex("(smaller|bigger|less|greater|most|least)")] LogicalOperationKeyword,
 
@@ -31,7 +31,6 @@ public enum EngLangTokenType
     [Regex("(if|If)")] IfKeyword,
     [Token("is")] IsKeyword,
     [Token("at")] AtKeyword,
-    [Token("called")] CalledKeyword,
     [Regex("(to|To)")] ToKeyword,
     [Token("as")] FunctionBodyOrAsKeyword,
     [Token("on")] OnKeyword,
@@ -47,7 +46,7 @@ public enum EngLangTokenType
     [Regex(",")] CommaKeyword,
     [Regex("from")] FromKeyword,
     [Regex("(null|nil)")] NullLiteral,
-    [Regex("named")] NamedLiteral,
+    [Regex("(named)")] NamedKeyword,
 
     //[Regex("(\\?!\\band\\b)([A-Za-z_][A-Za-z0-9_]+)(\\?<!\\band\\b)")] Identifier,
     //[Regex(Regexes.Identifier)]

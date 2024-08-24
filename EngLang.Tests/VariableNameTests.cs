@@ -174,6 +174,17 @@ public class VariableNameTests
     }
 
     [Theory]
+    [InlineData("a test named value.")]
+    public void AssignmentVariableStatement(string sentence)
+    {
+        var lexer = new EngLangLexer(sentence);
+        var parser = new EngLangParser(lexer);
+        var parseResult = parser.ParseIdentifierReference().Ok.Value;
+
+        Assert.Equal("value", parseResult.Name.Name);
+    }
+
+    [Theory]
     [InlineData("put 40 into a value. \\ 123")]
     [InlineData("put 40 into a value. \\ your's")]
     [InlineData("put 40 into a value [super value].")]

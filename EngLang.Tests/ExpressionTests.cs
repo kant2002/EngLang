@@ -108,6 +108,7 @@ public class ExpressionTests
     [InlineData("a value divided by a dummy.", MathOperator.Divide)]
     [InlineData("a value multiply by a dummy.", MathOperator.Multiply)]
     [InlineData("a value multiply a dummy.", MathOperator.Multiply)]
+    [InlineData("a value times a dummy.", MathOperator.Multiply)]
     [InlineData("a value multiplied by a dummy.", MathOperator.Multiply)]
     [InlineData("a value minus a dummy.", MathOperator.Minus)]
     [InlineData("a value plus a dummy.", MathOperator.Plus)]

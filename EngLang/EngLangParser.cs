@@ -26,6 +26,7 @@ public partial class EngLangParser : IEngLangParser
     {
         return identifierParts.Select(_ => new SymbolName(_.Text, _.Range)).ToList();
     }
+
     [Rule($"{LongIdentifier} : 'A'")]
     private static IReadOnlyList<SymbolName> MakeA(IToken<EngLangTokenType> token)
     {
@@ -76,8 +77,10 @@ public partial class EngLangParser : IEngLangParser
                 currentIdentifier.Append(cleaned);
                 last = identifierPart.Range.End;
                 var reverseParentRange = parentReference is not null && parentReference.Range.End < start;
+                var identifierName = new SymbolName(currentIdentifier.ToString(), new(start, last));
                 parentReference = new IdentifierReference(
-                    new SymbolName(currentIdentifier.ToString(), new(start, last)),
+                    identifierName,
+                    identifierName,
                     parentReference,
                     parentReference is null ? new(start, last) : reverseParentRange ? new(parentReference.Range.Start, last) : new(start, parentReference.Range.End));
                 currentIdentifier = new();
@@ -86,10 +89,28 @@ public partial class EngLangParser : IEngLangParser
         }
 
         var identifier = currentIdentifier.ToString();
+        var name = new SymbolName(identifier, new(start, last));
         return new IdentifierReference(
-            new SymbolName(identifier, new(start, last)),
+            name,
+            name,
             parentReference,
             parentReference is null ? new(articleKeyword.Range.Start, last) : new(articleKeyword.Range.Start, last > parentReference.Range.End ? last : parentReference.Range.End));
+    }
+
+
+    [Rule($"{IdentifierReference} : {IdentifierReference} (NamedKeyword {LongIdentifier})")]
+    private static IdentifierReference MakeNamedIdentifierReference(IdentifierReference identifier, (IToken<EngLangTokenType> token, IReadOnlyList<SymbolName> newName)? nameOverride)
+    {
+        if (nameOverride == null) return identifier;
+
+        var newName = nameOverride.Value.newName;
+        var identifierName = string.Join(" ", newName.Select(_ => _.Name));
+        var lastRange = newName.Last().Range;
+        return new IdentifierReference(
+            new SymbolName(identifierName, new Yoakke.SynKit.Text.Range(newName.First().Range, lastRange)),
+            identifier.Name,
+            identifier.Owner,
+            new Yoakke.SynKit.Text.Range(identifier.Range, lastRange));
     }
 
     [Rule($"{TypeIdentifierReference} : IndefiniteArticleKeyword {LongIdentifier}")]
@@ -109,7 +130,7 @@ public partial class EngLangParser : IEngLangParser
         var symbol = new SymbolName(
             string.Join(" ", identifiersList.Select(_ => _.Name)),
             new (identifiersList.First().Range.Start, identifiersList.Last().Range.End));
-        return new IdentifierReference(symbol, null, symbol.Range);
+        return new IdentifierReference(symbol, symbol, null, symbol.Range);
     }
 
     [Rule($"{ParameterReference} : 'some' {LongIdentifier}")]
@@ -120,7 +141,7 @@ public partial class EngLangParser : IEngLangParser
         var symbol = new SymbolName(
             string.Join(" ", identifiersList.Select(_ => _.Name)),
             new(identifiersList.First().Range.Start, identifiersList.Last().Range.End));
-        return new IdentifierReference(symbol, null, symbol.Range);
+        return new IdentifierReference(symbol, symbol, null, symbol.Range);
     }
 
     [Rule($"{TypeIdentifierReference} : 'some' {LongIdentifier}")]
@@ -141,7 +162,7 @@ public partial class EngLangParser : IEngLangParser
         var symbol = new SymbolName(
             string.Join(" ", names.Select(_ => _.Name)),
             new(names.First().Range.Start, names.Last().Range.End));
-        IdentifierReference identifier = new IdentifierReference(symbol, null, symbol.Range);
+        IdentifierReference identifier = new IdentifierReference(symbol, symbol, null, symbol.Range);
         var range = new Yoakke.SynKit.Text.Range(target.Range, names.Last().Range);
         return new PosessiveExpression(identifier, target, range);
     }
@@ -169,6 +190,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"addition_expression : primitive_expression 'minus' primitive_expression")]
     [Rule($"addition_expression : primitive_expression '-' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'multiply' primitive_expression")]
+    [Rule($"addition_expression : primitive_expression 'times' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'multiplied' primitive_expression")]
     [Rule($"addition_expression : primitive_expression '*' primitive_expression")]
     [Rule($"addition_expression : primitive_expression 'divide' primitive_expression")]
@@ -205,6 +227,7 @@ public partial class EngLangParser : IEngLangParser
         "-" => MathOperator.Minus,
         "multiply" => MathOperator.Multiply,
         "multiplied" => MathOperator.Multiply,
+        "times" => MathOperator.Multiply,
         "*" => MathOperator.Multiply,
         "divide" => MathOperator.Divide,
         "divided" => MathOperator.Divide,
@@ -272,6 +295,16 @@ public partial class EngLangParser : IEngLangParser
             EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text), token.Range),
             EngLangTokenType.NullLiteral => new NullLiteralExpression(token.Range),
             EngLangTokenType.HexLiteral => new ByteArrayLiteralExpression(ConvertHexToByteArray(token.Text[0] == '$' ? token.Text[1..] : token.Text[2..]), token.Range),
+            _ => throw new InvalidOperationException()
+        };
+
+    [Rule("literal_expression : IntLiteral 'inch'")]
+    private static Expression MakeInchIdentifierReference(
+        IToken<EngLangTokenType> token,
+        IToken<EngLangTokenType> inchToken)
+        => token.Kind switch
+        {
+            EngLangTokenType.IntLiteral => new InchLiteralExpression(int.Parse(token.Text), token.Range),
             _ => throw new InvalidOperationException()
         };
     private static byte[] ConvertHexToByteArray(string hexString)
@@ -712,8 +745,8 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<(IdentifierReference, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
         => MakeParameterReferencesList(identifierReferences);
 
-    [Rule($"slot_declaration : {TypeIdentifierReference} (NamedLiteral {LongIdentifier})? ('is' {IdentifierReference})?")]
-    [Rule($"slot_declaration : {TypeIdentifierReference} (NamedLiteral {LongIdentifier})? ('at' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {TypeIdentifierReference} (NamedKeyword {LongIdentifier})? ('is' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {TypeIdentifierReference} (NamedKeyword {LongIdentifier})? ('at' {IdentifierReference})?")]
     private static SlotDeclaration MakeSlotDeclaration(
         TypeIdentifierReference identifierReferences,
         (IToken<EngLangTokenType>, IReadOnlyList<SymbolName> SlotName)? nameOverride,

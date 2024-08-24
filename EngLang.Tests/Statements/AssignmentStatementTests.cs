@@ -21,6 +21,9 @@ public class AssignmentStatementTests
     [Theory]
     [InlineData("put a data into a value.")]
     [InlineData("put a data in a value.")]
+    [InlineData("put a data in a test named value.")]
+    [InlineData("put a data times another data in a test named value.")]
+    [InlineData("put the data times 13 inch in a data named value.")]
     public void AssignmentVariableStatement(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
