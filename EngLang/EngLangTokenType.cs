@@ -17,6 +17,7 @@ public enum EngLangTokenType
     [Token("the")] DefiniteArticleKeyword,
 
     [Token(";")] SemicolonKeyword,
+    [Token("...")] EllipsisKeyword,
     [Token(".")] DotKeyword,
     [Regex("->")] FunctionBodyKeyword,
 
@@ -53,6 +54,7 @@ public enum EngLangTokenType
     [Regex(Regexes.IntLiteral)] IntLiteral,
     [Regex("(0x|$)[0-9A-Fa-f]+")] HexLiteral,
     [Regex("\"((\"\")|[^\\r\\n\"])*\"")] StringLiteral,
-    [Regex("-?[0-9]+°(-?[0-9]+’)?(-?[0-9.]+”)?(-?[0-9.]+cas)?")] TemperatureLiteral,
+    [Regex("-?[0-9]+(°|\xb0)(-?[0-9]+’)?(-?[0-9.]+”)?(-?[0-9.]+cas)?")] TemperatureLiteral,
+    //[Regex("-?[0-9]+°(-?[0-9]+’)?(-?[0-9.]+”)?(-?[0-9.]+cas)?")] TemperatureLiteral,
     [Regex("('s|')")] PosessiveKeyword,
 }

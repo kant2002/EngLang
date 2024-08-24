@@ -424,7 +424,11 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
-        => new InvalidStatement(tokens.ToImmutableArray(), new Yoakke.SynKit.Text.Range(tokens.First().Range, tokens.Last().Range));
+    {
+        var statementTokens = tokens.Union([dotToken]).ToImmutableArray();
+        return new InvalidStatement(statementTokens, new Yoakke.SynKit.Text.Range(statementTokens.First().Range, statementTokens.Last().Range));
+    }
+
     [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|FromKeyword|ToKeyword|PosessiveKeyword)*")]
     private static Statement MakeStatement222(
         IEnumerable<IToken<EngLangTokenType>> tokens)
@@ -509,7 +513,8 @@ public partial class EngLangParser : IEngLangParser
             return blockStatement;
         }
 
-        return new BlockStatement(statements.ToImmutableList(), new Yoakke.SynKit.Text.Range(statements.First().Range, statements.Last().Range));
+        var validStatements = statements.Where(_ => _ is not InvalidStatement invalidStatement || invalidStatement.Tokens.Length > 0).ToImmutableList();
+        return new BlockStatement(validStatements, new Yoakke.SynKit.Text.Range(validStatements[0].Range, validStatements.Last().Range));
     }
 
     [Rule("variable_declaration_statement : variable_declaration")]
@@ -766,7 +771,7 @@ public partial class EngLangParser : IEngLangParser
     private static IToken<EngLangTokenType> MakeDefinitionLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
 
-    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | IntLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword)* ')'")]
+    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | IntLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | AreKeyword)* ')'")]
     private static CommentLabel MakeCommentLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> names,
