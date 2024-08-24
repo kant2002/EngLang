@@ -752,7 +752,7 @@ public partial class EngLangParser : IEngLangParser
         => marker;
 
     [Rule($"extended_label_word : extended_label_word_strict")]
-    [Rule($"extended_def_label_word : FunctionBodyOrAsKeyword")]
+    [Rule($"extended_label_word : FunctionBodyOrAsKeyword")]
     private static IToken<EngLangTokenType> MakeExtendedLabelWord(IToken<EngLangTokenType> marker)
         => marker;
 
@@ -777,7 +777,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"invokable_label_definition_strict : label_word extended_def_label_word_strict* parameter_references_list_strict (IntoKeyword extended_def_label_word_strict* parameter_references_list_strict)? comment_label?")]
-    private static InvokableLabel MakeInvokableLabelStrict(
+    private static InvokableLabelDefinition MakeInvokableLabelStrict(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
@@ -788,7 +788,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"invokable_label_definition : label_word extended_def_label_word* parameter_references_list (IntoKeyword extended_def_label_word* parameter_references_list)? comment_label?")]
-    private static InvokableLabel MakeInvokableLabel(
+    private static InvokableLabelDefinition MakeInvokableLabel(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
@@ -812,11 +812,11 @@ public partial class EngLangParser : IEngLangParser
                     ? identifierTokens.InnerText.Last().Range.End
                     : otherInitialTokens.Count > 0 ? otherInitialTokens.Last().Range.End : firstToken.Range.End;
         var range = new Yoakke.SynKit.Text.Range(firstToken.Range.Start, last);
-        return new InvokableLabel(new[] { labelWithComment }, identifierTokens.Parameters.Union(outParameter?.OutParameters.Parameters ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null, range);
+        return new InvokableLabelDefinition(labelWithComment, identifierTokens.Parameters.Union(outParameter?.OutParameters.Parameters ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null, range);
     }
 
     [Rule($"invokable_label_definition : label_word extended_def_label_word* parameter_references_list IntoKeyword {LongIdentifier} comment_label?")]
-    private static InvokableLabel MakeInvokableLabel(
+    private static InvokableLabelDefinition MakeInvokableLabel(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
@@ -830,28 +830,28 @@ public partial class EngLangParser : IEngLangParser
             ? comment.Range.End
             : outParameter.Last().Range.End;
         var range = new Yoakke.SynKit.Text.Range(firstToken.Range.Start, last);
-        return new InvokableLabel(new[] { labelWithComment }, identifierTokens.Parameters.ToArray(), null, range);
+        return new InvokableLabelDefinition(labelWithComment, identifierTokens.Parameters.ToArray(), null, range);
     }
 
     [Rule($"prefixed_invokable_label : ToKeyword invokable_label_definition")]
     [Rule($"prefixed_invokable_label : 'define' invokable_label_definition_strict")]
     [Rule($"prefixed_invokable_label : 'Define' invokable_label_definition_strict")]
-    private static InvokableLabel MakePrefixedInvokableLabel(
+    private static InvokableLabelDefinition MakePrefixedInvokableLabel(
         IToken<EngLangTokenType> toToken,
-        InvokableLabel label) => label;
+    InvokableLabelDefinition label) => new InvokableLabelDefinition(label.Marker, label.Parameters, label.ResultIdentifier, new Yoakke.SynKit.Text.Range(toToken.Range.Start, label.Range.End));
 
     [Rule($"invokable_label_aliases : (prefixed_invokable_label (';' prefixed_invokable_label)*)")]
     private static InvokableLabel MakeInvokableLabelAliases(
-        Punctuated<InvokableLabel, IToken<EngLangTokenType>> labels)
+        Punctuated<InvokableLabelDefinition, IToken<EngLangTokenType>> labels)
     {
         var primaryLabel = labels.Values.First();
         if (labels.Count == 1)
         {
-            return primaryLabel;
+            return new InvokableLabel([primaryLabel.Marker], primaryLabel.Parameters, primaryLabel.ResultIdentifier, primaryLabel.Range);
         }
 
         var range = new Yoakke.SynKit.Text.Range(primaryLabel.Range.Start, labels.Values.Last().Range.End);
-        return new InvokableLabel(labels.Values.SelectMany(_ => _.Markers).ToArray(), primaryLabel.Parameters, primaryLabel.ResultIdentifier, range);
+        return new InvokableLabel(labels.Values.Select(_ => _.Marker).ToArray(), primaryLabel.Parameters, primaryLabel.ResultIdentifier, range);
     }
 
 
@@ -860,12 +860,12 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"invokable_label : invokable_label_aliases 'as'")]
     private static InvokableLabel MakeInvokableLabel(
         InvokableLabel label,
-        IToken<EngLangTokenType> colonToken) => label;
+        IToken<EngLangTokenType> colonToken) => new InvokableLabel(label.Markers, label.Parameters, label.ResultIdentifier, new Yoakke.SynKit.Text.Range(label.Range.Start, colonToken.Range.End));
 
     [Rule($"invokable_label : invokable_label_definition '->'")]
     private static InvokableLabel MakeTrivialInvokableLabel(
-        InvokableLabel label,
-        IToken<EngLangTokenType> asToken) => label;
+        InvokableLabelDefinition label,
+        IToken<EngLangTokenType> asToken) => new InvokableLabel([label.Marker], label.Parameters, label.ResultIdentifier, new Yoakke.SynKit.Text.Range(label.Range.Start, asToken.Range.End));
 
     [Rule($"labeled_statement_simple : invokable_label block_statement")]
     private static LabeledStatement MakeSimpleLabeledStatement(
