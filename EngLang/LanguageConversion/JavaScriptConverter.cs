@@ -221,7 +221,7 @@ public class JavaScriptConverter : ILanguageConverter
                 builder.CloseBraces();
                 break;
             case InvocationStatement invocationStatement:
-                var invocationParameterString = string.Join(", ", invocationStatement.Parameters.Select(_ => ConvertToIdentifier(_.Name)));
+                var invocationParameterString = string.Join(", ", invocationStatement.Parameters.Select(Convert));
                 var invocationStatementText = $"{ConvertToIdentifier(invocationStatement.Marker)}({invocationParameterString});";
                 if (invocationStatement.ResultIdentifier != null)
                 {

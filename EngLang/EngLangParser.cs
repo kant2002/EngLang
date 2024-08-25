@@ -33,6 +33,13 @@ public partial class EngLangParser : IEngLangParser
         return [new SymbolName(token.Text, token.Range)];
     }
 
+    [Rule($"{LongIdentifier} : 'null' {Identifier}+")]
+    [Rule($"{LongIdentifier} : LogicalOperationKeyword {Identifier}+")]
+    private static IReadOnlyList<SymbolName> MakeNUllSomethingIdentifier(IToken<EngLangTokenType> token, IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
+    {
+        return new[] { new SymbolName(token.Text, token.Range) }.Union(identifierParts.Select(_ => new SymbolName(_.Text, _.Range))).ToList();
+    }
+
     [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     [Rule($"{IdentifierReference} : DefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     [Rule($"{IdentifierReference} : 'some' {LongIdentifier} ('of' {IdentifierReference})?")]
@@ -176,12 +183,15 @@ public partial class EngLangParser : IEngLangParser
     [Rule("math_expression : addition_expression")]
     private static Expression MakeMathExpression(Expression e) => e;
 
+    [Rule("inplace_expression : inplace_addition_expression")]
+    [Rule("inplace_expression : inplace_subtract_expression")]
+    [Rule("inplace_expression : inplace_multiply_expression")]
+    [Rule("inplace_expression : inplace_divide_expression")]
+    private static Expression MakeInplaceExpression(Expression e) => e;
+
     [Rule("expression : math_expression")]
     [Rule("expression : assignment_expression")]
-    [Rule("expression : inplace_addition_expression")]
-    [Rule("expression : inplace_subtract_expression")]
-    [Rule("expression : inplace_multiply_expression")]
-    [Rule("expression : inplace_divide_expression")]
+    [Rule("expression : inplace_expression")]
     [Rule("expression : logical_expression")]
     private static Expression MakeExpression(Expression e) => e;
 
@@ -287,6 +297,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule("literal_expression : IntLiteral")]
     [Rule("literal_expression : NullLiteral")]
     [Rule("literal_expression : HexLiteral")]
+    [Rule("literal_expression : RatioLiteral")]
     private static Expression MakeIdentifierReference(
         IToken<EngLangTokenType> token)
         => token.Kind switch
@@ -294,6 +305,7 @@ public partial class EngLangParser : IEngLangParser
             EngLangTokenType.StringLiteral => new StringLiteralExpression(token.Text[1..(token.Text.Length - 1)].Replace("\"\"", "\""), token.Range),
             EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text), token.Range),
             EngLangTokenType.NullLiteral => new NullLiteralExpression(token.Range),
+            EngLangTokenType.RatioLiteral => new RatioLiteralExpression(int.Parse(token.Text.Split('/')[0]), int.Parse(token.Text.Split('/')[1]), token.Range),
             EngLangTokenType.HexLiteral => new ByteArrayLiteralExpression(ConvertHexToByteArray(token.Text[0] == '$' ? token.Text[1..] : token.Text[2..]), token.Range),
             _ => throw new InvalidOperationException()
         };
@@ -307,6 +319,7 @@ public partial class EngLangParser : IEngLangParser
             EngLangTokenType.IntLiteral => new InchLiteralExpression(int.Parse(token.Text), token.Range),
             _ => throw new InvalidOperationException()
         };
+
     private static byte[] ConvertHexToByteArray(string hexString)
     {
         return Enumerable.Range(0, hexString.Length)
@@ -324,7 +337,15 @@ public partial class EngLangParser : IEngLangParser
         {
             if (expression is IntLiteralExpression intLiteralExpression)
             {
-                return new IntLiteralExpression(intLiteralExpression.Value, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
+                return new IntLiteralExpression(-intLiteralExpression.Value, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
+            }
+            if (expression is InchLiteralExpression inchLiteralExpression)
+            {
+                return new InchLiteralExpression(-inchLiteralExpression.Value, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
+            }
+            if (expression is RatioLiteralExpression ratioLiteralExpression)
+            {
+                return new RatioLiteralExpression(-ratioLiteralExpression.Numerator, ratioLiteralExpression.Denominator, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
             }
         }
 
@@ -397,6 +418,17 @@ public partial class EngLangParser : IEngLangParser
         return new AssignmentExpression(identifierReference, expression, range);
     }
 
+    //[Rule($"assignment_expression: inplace_expression ResultingKeyword {IdentifierReference}")]
+    [Rule($"assignment_expression: inplace_expression IntoKeyword {IdentifierReference}")]
+    private static AssignmentExpression MakeAssignmentExpressionResulting(
+        Expression expression,
+        IToken<EngLangTokenType> intoToken,
+        IdentifierReference identifierReference)
+    {
+        var range = new Yoakke.SynKit.Text.Range(expression.Range, identifierReference.Range);
+        return new AssignmentExpression(identifierReference, expression, range);
+    }
+
     [Rule($"assignment_expression: 'let' {IdentifierReference} 'is' math_expression ")]
     [Rule($"assignment_expression: 'let' {IdentifierReference} EqualKeyword math_expression ")]
     private static AssignmentExpression MakeAlternateAssignmentExpression(
@@ -453,7 +485,7 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeStatement(
         Statement statement)
         => statement;
-    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|OnKeyword|SomeKeyword|AtKeyword|FromKeyword|ToKeyword|PosessiveKeyword|'/'|'('|')')* '.'")]
+    [Rule("statementxx : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|RatioLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|OnKeyword|SomeKeyword|AtKeyword|FromKeyword|ToKeyword|PosessiveKeyword|'/'|'('|')')* '.'")]
     private static Statement MakeStatement111(
         IEnumerable<IToken<EngLangTokenType>> tokens,
         IToken<EngLangTokenType> dotToken)
@@ -462,7 +494,7 @@ public partial class EngLangParser : IEngLangParser
         return new InvalidStatement(statementTokens, new Yoakke.SynKit.Text.Range(statementTokens.First().Range, statementTokens.Last().Range));
     }
 
-    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|FromKeyword|ToKeyword|PosessiveKeyword)*")]
+    [Rule("statementyy : (Identifier|EqualKeyword|PutKeyword|LetKeyword|IfKeyword|IsKeyword|IntoKeyword|ByKeyword|AndKeyword|WithKeyword|OfKeyword|IntLiteral|RatioLiteral|StringLiteral|NullLiteral|HexLiteral|ThenKeyword|IsKeyword|HasKeyword|IndefiniteArticleKeyword|DefiniteArticleKeyword|FunctionBodyOrAsKeyword|MathOperationKeyword|LogicalOperationKeyword|FromKeyword|ToKeyword|PosessiveKeyword)*")]
     private static Statement MakeStatement222(
         IEnumerable<IToken<EngLangTokenType>> tokens)
     {
@@ -658,7 +690,7 @@ public partial class EngLangParser : IEngLangParser
         return new LogicalExpression(GetLogicalOperator(operatorToken), varExpression, literalExpression, range);
     }
 
-    [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|WithKeyword|'of'|{Identifier}|IntoKeyword|AndKeyword|IntLiteral|AreKeyword|FunctionBodyOrAsKeyword|HexLiteral|StringLiteral|'/'|LogicalOperationKeyword|MathOperationKeyword|ByKeyword|NullLiteral|FromKeyword|ToKeyword|')'|'(')*")]
+    [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|WithKeyword|'of'|{Identifier}|IntoKeyword|AndKeyword|IntLiteral|RatioLiteral|HexLiteral|StringLiteral|'/'|AreKeyword|FunctionBodyOrAsKeyword|LogicalOperationKeyword|MathOperationKeyword|ByKeyword|NullLiteral|FromKeyword|ToKeyword|')'|'(')*")]
     private static LogicalExpression MakeInvalidLogicalExpression(
         IReadOnlyList<IToken<EngLangTokenType>> someTokens)
     {
@@ -730,10 +762,27 @@ public partial class EngLangParser : IEngLangParser
         return new BlockStatement(stmts, new Yoakke.SynKit.Text.Range(stmts.First().Range, stmts.Last().Range));
     }
 
-    [Rule($"identifier_references_list : ({IdentifierReference} extended_label_word?)*")]
-    private static (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) MakeIdentifierReferencesList(
-        IReadOnlyList<(IdentifierReference, IToken<EngLangTokenType>?)> identifierReferences)
-        => (identifierReferences.Where(_ => _.Item2 is not null).Select(_ => _.Item2!), new IdentifierReferencesList(identifierReferences.Select(_ => _.Item1).ToImmutableList()));
+    [Rule($"parameter_expression : {IdentifierReference}")]
+    [Rule($"parameter_expression : literal_expression")]
+    public Expression MakeParameterExpression(SyntaxNode node)
+    {
+        return node switch
+        {
+            IdentifierReference ir => new VariableExpression(ir, ir.Range),
+            IntLiteralExpression expr => expr,
+            RatioLiteralExpression expr => expr,
+            NullLiteralExpression expr => expr,
+            InchLiteralExpression expr => expr,
+            StringLiteralExpression expr => expr,
+            ByteArrayLiteralExpression expr => expr,
+            _ => throw new InvalidOperationException(),
+        };
+    }
+
+    [Rule($"identifier_references_list : (primitive_expression extended_label_word?)*")]
+    private static (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) MakeIdentifierReferencesList(
+        IReadOnlyList<(Expression, IToken<EngLangTokenType>?)> identifierReferences)
+        => (identifierReferences.Where(_ => _.Item2 is not null).Select(_ => _.Item2!), new ExpressionList(identifierReferences.Select(_ => _.Item1).ToImmutableList<Expression>()));
 
     [Rule($"parameter_references_list : ({ParameterReference} extended_def_label_word*)*")]
     private static (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) MakeParameterReferencesList(
@@ -792,6 +841,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"label_word : EqualKeyword")]
     [Rule($"label_word : WithKeyword")]
     [Rule($"label_word : PutKeyword")]
+    [Rule($"label_word : NamedKeyword")]
     //[Rule($"label_word : DefiniteArticleKeyword")]
     private static IToken<EngLangTokenType> MakeLabelWord(IToken<EngLangTokenType> marker)
         => marker;
@@ -804,9 +854,9 @@ public partial class EngLangParser : IEngLangParser
     //[Rule($"extended_label_word_strict : IntoKeyword")]
     // [Rule($"extended_label_word_strict : DefiniteArticleKeyword")]
     [Rule($"extended_label_word_strict : NullLiteral")]
-    [Rule($"extended_label_word_strict : 'given'")]
-    [Rule($"extended_label_word_strict : FromKeyword")]
     [Rule($"extended_label_word_strict : ToKeyword")]
+    [Rule($"extended_label_word_strict : FromKeyword")]
+    [Rule($"extended_label_word : FunctionBodyOrAsKeyword")]
     private static IToken<EngLangTokenType> MakeExtendedLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
 
@@ -825,7 +875,7 @@ public partial class EngLangParser : IEngLangParser
     private static IToken<EngLangTokenType> MakeDefinitionLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
 
-    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | IntLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | AreKeyword)* ')'")]
+    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | AreKeyword)* ')'")]
     private static CommentLabel MakeCommentLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> names,
@@ -951,8 +1001,8 @@ public partial class EngLangParser : IEngLangParser
     private static Statement MakeInvocationStatement(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
-        (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) identifierTokens,
-        (IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, IdentifierReferencesList Identifiers) OutParameters)? outParameter,
+        (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) identifierTokens,
+        (IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) OutParameters)? outParameter,
         CommentLabel? comment)
     {
         string labelName = string.Join(" ",
@@ -973,7 +1023,7 @@ public partial class EngLangParser : IEngLangParser
         var range = new Yoakke.SynKit.Text.Range(firstToken.Range.Start, last);
         return new InvocationStatement(
             labelName + (comment is null ? "" : " " + comment.Text),
-            identifierTokens.Identifiers.IdentifierReferences.Union(outParameter?.OutParameters.Identifiers.IdentifierReferences ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null, range);
+            identifierTokens.Identifiers.IdentifierReferences.Union(outParameter?.OutParameters.Identifiers.IdentifierReferences ?? ImmutableList<Expression>.Empty).ToArray(), null, range);
     }
 
     public static SyntaxNode Parse(string sourceCode)

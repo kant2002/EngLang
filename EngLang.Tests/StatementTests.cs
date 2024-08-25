@@ -284,6 +284,7 @@ To calculate area from a width and a height ->
     //[InlineData("define the factorial of a number as result is 1.", "the factorial of")]
     [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
     [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
+    [InlineData("to add a quora to a terminal: result is 1.", "add to")]
     public void InvokableLabelAliases(string sentence, string marker)
     {
         var lexer = new EngLangLexer(sentence);
@@ -308,12 +309,28 @@ To calculate area from a width and a height ->
         Assert.Equal(marker, invocationStatement.Marker);
 
         Assert.Equal(2, invocationStatement.Parameters.Length);
-        Assert.Equal("previous number", invocationStatement.Parameters[0].Name.Name);
-        Assert.Equal("previous factorial", invocationStatement.Parameters[1].Name.Name);
+        Assert.Equal("previous number", Assert.IsType<VariableExpression>(invocationStatement.Parameters[0]).Identifier.Name.Name);
+        Assert.Equal("previous factorial", Assert.IsType<VariableExpression>(invocationStatement.Parameters[1]).Identifier.Name.Name);
         //var parameter = Assert.Single(invocationStatement.Parameters);
         //Assert.Equal("previous number", parameter.Name);
         //
         //Assert.Equal("previous factorial", invocationStatement.ResultIdentifier.Name);
+    }
+
+    [Theory]
+    [InlineData("calculate factorial of a previous number into a previous factorial.", "calculate factorial of into")]
+    [InlineData("make a value given\r\n 1 and 2.", "make given and")]
+    [InlineData("make a value given\r\n 1.", "make given")]
+    [InlineData("make a value given\r\n -1.", "make given")]
+    [InlineData("make a value given\r\n a data.", "make given")]
+    [InlineData("make a value given\r\n \"some string\".", "make given")]
+    public void ParseInvocationStatement(string sentence, string marker)
+    {
+        var lexer = new EngLangLexer(sentence);
+        var parser = new EngLangParser(lexer);
+        var parseResult = (InvocationStatement)parser.ParseStatement().Ok.Value;
+
+        Assert.Equal(marker, parseResult.Marker);
     }
 
     [Theory]

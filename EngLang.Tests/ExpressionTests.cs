@@ -207,6 +207,33 @@ public class ExpressionTests
         Assert.Equal(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 }, intLiteralExpression.Value);
     }
 
+    [Fact]
+    public void InchLiteral()
+    {
+        var sentence = "42 inch";
+
+        var parser = new EngLangParser(new EngLangLexer(sentence));
+        var parseResult = parser.ParseExpression();
+
+        Assert.True(parseResult.IsOk);
+        var intLiteralExpression = Assert.IsType<InchLiteralExpression>(parseResult.Ok.Value);
+        Assert.Equal(42, intLiteralExpression.Value);
+    }
+
+    [Fact]
+    public void RatioLiteral()
+    {
+        var sentence = "42/22";
+
+        var parser = new EngLangParser(new EngLangLexer(sentence));
+        var parseResult = parser.ParseExpression();
+
+        Assert.True(parseResult.IsOk);
+        var intLiteralExpression = Assert.IsType<RatioLiteralExpression>(parseResult.Ok.Value);
+        Assert.Equal(42, intLiteralExpression.Numerator);
+        Assert.Equal(22, intLiteralExpression.Denominator);
+    }
+
     [Theory]
     [InlineData("a terminal's color")]
     [InlineData("a color of a terminal")]

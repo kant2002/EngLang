@@ -24,6 +24,8 @@ public class AssignmentStatementTests
     [InlineData("put a data in a test named value.")]
     [InlineData("put a data times another data in a test named value.")]
     [InlineData("put the data times 13 inch in a data named value.")]
+    [InlineData("multiply the data by 13 returning a value.")]
+    [InlineData("multiply the data by 13 returning a block named value.")]
     public void AssignmentVariableStatement(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
