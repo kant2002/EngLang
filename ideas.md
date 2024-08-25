@@ -181,3 +181,18 @@ That mean, each operation before execution match with last placed item in the co
 
 I'm not sure, but I think we usually operate in langauge only 2 and 3 items in the context. Otherwise it become messy. I do not sure how
 that corresponds to STM size, probably this is other mechanism in place.
+
+# Adjective in mulitple contexs
+
+Since adjectives works to modify nouns, so adj + noun is essentially new identifier. 
+When we have word which can act as adverb or adjective, like `greater` then parser should be smart enough to switch contexts.
+
+For example
+
+```
+the human hight greater than the human width.
+```
+and
+```
+the greater value.
+```
