@@ -104,7 +104,6 @@ public partial class EngLangParser : IEngLangParser
             parentReference is null ? new(articleKeyword.Range.Start, last) : new(articleKeyword.Range.Start, last > parentReference.Range.End ? last : parentReference.Range.End));
     }
 
-
     [Rule($"{IdentifierReference} : {IdentifierReference} (NamedKeyword {LongIdentifier})")]
     private static IdentifierReference MakeNamedIdentifierReference(IdentifierReference identifier, (IToken<EngLangTokenType> token, IReadOnlyList<SymbolName> newName)? nameOverride)
     {
@@ -149,6 +148,21 @@ public partial class EngLangParser : IEngLangParser
             string.Join(" ", identifiersList.Select(_ => _.Name)),
             new(identifiersList.First().Range.Start, identifiersList.Last().Range.End));
         return new IdentifierReference(symbol, symbol, null, symbol.Range);
+    }
+
+    [Rule($"{ParameterReference} : {ParameterReference} (NamedKeyword {LongIdentifier})")]
+    private static IdentifierReference MakeNamedParameterReference(IdentifierReference identifier, (IToken<EngLangTokenType> token, IReadOnlyList<SymbolName> newName)? nameOverride)
+    {
+        if (nameOverride == null) return identifier;
+
+        var newName = nameOverride.Value.newName;
+        var identifierName = string.Join(" ", newName.Select(_ => _.Name));
+        var lastRange = newName.Last().Range;
+        return new IdentifierReference(
+            new SymbolName(identifierName, new Yoakke.SynKit.Text.Range(newName.First().Range, lastRange)),
+            identifier.Name,
+            identifier.Owner,
+            new Yoakke.SynKit.Text.Range(identifier.Range, lastRange));
     }
 
     [Rule($"{TypeIdentifierReference} : 'some' {LongIdentifier}")]
@@ -824,6 +838,37 @@ public partial class EngLangParser : IEngLangParser
             alias?.AliasFor?.Name.Name,
             range);
     }
+    [Rule($"slot_declaration : IntLiteral {LongIdentifier} (NamedKeyword {LongIdentifier})? ('at' {IdentifierReference})?")]
+    private static SlotDeclaration MakeSlotDeclaration(
+        IToken<EngLangTokenType> sizeToken,
+        IReadOnlyList<SymbolName> identifierReferences,
+        (IToken<EngLangTokenType>, IReadOnlyList<SymbolName> SlotName)? nameOverride,
+        (IToken<EngLangTokenType>, IdentifierReference AliasFor)? alias)
+    {
+        var range = alias is null
+            ? nameOverride is null
+                ? new Yoakke.SynKit.Text.Range(sizeToken.Range, identifierReferences.Last().Range)
+                : new Yoakke.SynKit.Text.Range(sizeToken.Range, nameOverride.Value.SlotName.Last().Range)
+            : new Yoakke.SynKit.Text.Range(sizeToken.Range, alias.Value.AliasFor.Range);
+        string name;
+        string typeName = string.Join(" ", identifierReferences.Select(_ => _.Name));
+        if (nameOverride != null)
+        {
+            name = string.Join(" ", nameOverride.Value.SlotName.Select(_ => _.Name));
+        }
+        else
+        {
+            name = typeName;
+        }
+
+        return new SlotDeclaration(
+            name,
+            typeName,
+            true,
+            int.Parse(sizeToken.Text),
+            alias?.AliasFor?.Name.Name,
+            range);
+    }
 
     [Rule($"comma_identifier_references_list : (slot_declaration (CommaKeyword slot_declaration)*)")]
     private static SlotDeclarationsList MakeCommaDelimitedIdentifierReferencesList(
@@ -885,43 +930,54 @@ public partial class EngLangParser : IEngLangParser
         return new CommentLabel($"({labelName})", new(toToken.Range.Start, colonToken.Range.End));
     }
 
-    [Rule($"invokable_label_definition_strict : label_word extended_def_label_word_strict* parameter_references_list_strict (IntoKeyword extended_def_label_word_strict* parameter_references_list_strict)? comment_label?")]
+    [Rule($"invokable_label_saving_section : IntoKeyword extended_def_label_word_strict* parameter_references_list_strict")]
+    private static (IToken<EngLangTokenType> intoToken, IEnumerable<IToken<EngLangTokenType>> OtherWords, (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters) MakeInvokableLabelSavingSection(
+        IToken<EngLangTokenType> intoToken, IEnumerable<IToken<EngLangTokenType>> OtherWords, (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters)
+    {
+        return (intoToken, OtherWords, OutParameters);
+    }
+
+    [Rule($"invokable_label_definition_strict : label_word extended_def_label_word_strict* parameter_references_list_strict invokable_label_saving_section* comment_label?")]
     private static InvokableLabelDefinition MakeInvokableLabelStrict(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
-        (IToken<EngLangTokenType> intoToken, IEnumerable<IToken<EngLangTokenType>> OtherWords, (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters)? outParameter,
+        IReadOnlyList<(IToken<EngLangTokenType> intoToken, IEnumerable<IToken<EngLangTokenType>> OtherWords, (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters)> outParameter,
         CommentLabel? comment)
     {
         return MakeInvokableLabel(firstToken, otherInitialTokens, identifierTokens, outParameter, comment);
     }
 
-    [Rule($"invokable_label_definition : label_word extended_def_label_word* parameter_references_list (IntoKeyword extended_def_label_word* parameter_references_list)? comment_label?")]
+    [Rule($"invokable_label_definition : label_word extended_def_label_word* parameter_references_list invokable_label_saving_section* comment_label?")]
     private static InvokableLabelDefinition MakeInvokableLabel(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) identifierTokens,
-        (IToken<EngLangTokenType> intoToken, IEnumerable<IToken<EngLangTokenType>> OtherWords, (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters)? outParameter,
+        IReadOnlyList<(IToken<EngLangTokenType> intoToken, IEnumerable<IToken<EngLangTokenType>> OtherWords, (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) OutParameters)> outParameter,
         CommentLabel? comment)
     {
         string labelName = string.Join(" ",
             new[] { firstToken }
             .Union(otherInitialTokens)
             .Union(identifierTokens.InnerText)
-            .Union(outParameter is null ? Array.Empty<IToken<EngLangTokenType>>() : new[] { outParameter.Value.intoToken })
-            .Union(outParameter?.OtherWords ?? Array.Empty<IToken<EngLangTokenType>>())
-            .Union(outParameter?.OutParameters.InnerText ?? ImmutableList<IToken<EngLangTokenType>>.Empty)
+            .Union(outParameter.Select(_ => _.intoToken))
+            .Union(outParameter.SelectMany(_ => _.OtherWords))
+            .Union(outParameter.SelectMany(_ => _.OutParameters.InnerText))
             .Select(i => i.Text));
         string labelWithComment = labelName + (comment is null ? "" : " " + comment.Text);
         var last = comment is not null
             ? comment.Range.End
-            : outParameter is not null
-                ? (outParameter.Value.OutParameters.Parameters.Count > 0 ? outParameter.Value.OutParameters.Parameters.Last().Range.End : outParameter.Value.OutParameters.InnerText.Count > 0 ? outParameter.Value.OutParameters.InnerText.Last().Range.End : outParameter.Value.OtherWords.Last().Range.End)
+            : outParameter.Count > 0
+                ? (outParameter.Last().OutParameters.Parameters.Count > 0 ? outParameter.Last().OutParameters.Parameters.Last().Range.End : outParameter.Last().OutParameters.InnerText.Count > 0 ? outParameter.Last().OutParameters.InnerText.Last().Range.End : outParameter.Last().OtherWords.Last().Range.End)
                 : identifierTokens.Parameters.Count > 0 ? identifierTokens.Parameters.Last().Range.End : identifierTokens.InnerText.Count > 0
                     ? identifierTokens.InnerText.Last().Range.End
                     : otherInitialTokens.Count > 0 ? otherInitialTokens.Last().Range.End : firstToken.Range.End;
         var range = new Yoakke.SynKit.Text.Range(firstToken.Range.Start, last);
-        return new InvokableLabelDefinition(labelWithComment, identifierTokens.Parameters.Union(outParameter?.OutParameters.Parameters ?? ImmutableList<IdentifierReference>.Empty).ToArray(), null, range);
+        return new InvokableLabelDefinition(
+            labelWithComment,
+            identifierTokens.Parameters.Union(outParameter.SelectMany(_ => _.OutParameters.Parameters) ?? []).ToArray(),
+            null,
+            range);
     }
 
     [Rule($"invokable_label_definition : label_word extended_def_label_word* parameter_references_list IntoKeyword {LongIdentifier} comment_label?")]
@@ -997,33 +1053,43 @@ public partial class EngLangParser : IEngLangParser
         return new LabeledStatement(invokableLabel, invokableLabel.Parameters, new BlockStatement(ImmutableList<Statement>.Empty, default), invokableLabel.Range);
     }
 
-    [Rule($"invocation_statement : label_word extended_label_word* identifier_references_list (IntoKeyword extended_label_word* identifier_references_list)? comment_label?")]
+    [Rule($"invocation_statement_saving_section : IntoKeyword extended_label_word* identifier_references_list")]
+    private static (IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) OutParameters) MakeInvokableStatementSavingSection(
+        IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) OutParameters)
+    {
+        return (intoToken, OtherWords, OutParameters);
+    }
+
+    [Rule($"invocation_statement : label_word extended_label_word* identifier_references_list invocation_statement_saving_section* comment_label?")]
     private static Statement MakeInvocationStatement(
         IToken<EngLangTokenType> firstToken,
         IReadOnlyList<IToken<EngLangTokenType>> otherInitialTokens,
         (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) identifierTokens,
-        (IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) OutParameters)? outParameter,
+        IReadOnlyList<(IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) OutParameters)> outParameter,
         CommentLabel? comment)
     {
         string labelName = string.Join(" ",
             new[] { firstToken }
             .Union(otherInitialTokens)
             .Union(identifierTokens.InnerText)
-            .Union(outParameter is null ? Array.Empty<IToken<EngLangTokenType>>() : new[] { outParameter.Value.intoToken })
-            .Union(outParameter?.OtherWords ?? Array.Empty<IToken<EngLangTokenType>>())
-            .Union(outParameter is null ? Array.Empty<IToken<EngLangTokenType>>() : outParameter.Value.OutParameters.InnerText)
+            .Union(outParameter.Select(_ => _.intoToken))
+            .Union(outParameter.SelectMany(_ => _.OtherWords))
+            .Union(outParameter.SelectMany(_ => _.OutParameters.InnerText))
             .Select(i => i.Text));
         var last = comment is not null
             ? comment.Range.End
-            : outParameter is not null
-                ? (outParameter.Value.OutParameters.Identifiers.IdentifierReferences.Count > 0 ? outParameter.Value.OutParameters.Identifiers.IdentifierReferences.Last().Range.End : outParameter.Value.OutParameters.InnerText.Count() > 0 ? outParameter.Value.OutParameters.InnerText.Last().Range.End : outParameter.Value.OtherWords.Last().Range.End)
+            : outParameter.Count > 0
+                ? (outParameter.Last().OutParameters.Identifiers.IdentifierReferences.Count > 0
+                    ? outParameter.Last().OutParameters.Identifiers.IdentifierReferences.Last().Range.End
+                    : outParameter.Last().OutParameters.InnerText.Count() > 0
+                        ? outParameter.Last().OutParameters.InnerText.Last().Range.End : outParameter.Last().OtherWords.Last().Range.End)
                 : identifierTokens.Identifiers.IdentifierReferences.Count > 0 ? identifierTokens.Identifiers.IdentifierReferences.Last().Range.End : identifierTokens.InnerText.Count() > 0
                     ? identifierTokens.InnerText.Last().Range.End
                     : otherInitialTokens.Count > 0 ? otherInitialTokens.Last().Range.End : firstToken.Range.End;
         var range = new Yoakke.SynKit.Text.Range(firstToken.Range.Start, last);
         return new InvocationStatement(
             labelName + (comment is null ? "" : " " + comment.Text),
-            identifierTokens.Identifiers.IdentifierReferences.Union(outParameter?.OutParameters.Identifiers.IdentifierReferences ?? ImmutableList<Expression>.Empty).ToArray(), null, range);
+            identifierTokens.Identifiers.IdentifierReferences.Union(outParameter.SelectMany(_ => _.OutParameters.Identifiers.IdentifierReferences)).ToArray(), null, range);
     }
 
     public static SyntaxNode Parse(string sourceCode)

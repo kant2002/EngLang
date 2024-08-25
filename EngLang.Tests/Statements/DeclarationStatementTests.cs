@@ -139,6 +139,34 @@ a pen has
 
         Assert.Equal("size", shapeDeclaration.WellKnownSlots.Slots[1].Name);
         Assert.Equal("number", shapeDeclaration.WellKnownSlots.Slots[1].TypeName);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].CollectionSize);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
+    }
+
+    [Theory]
+    [InlineData("""
+a pen has
+    a width,
+    16 bytes named name.
+""")]
+    public void ShapeDeclarationWithByteArray(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
+        var shapeDeclaration = shapeStatement.Declaration;
+        Assert.Equal("pen", shapeDeclaration.Name.Name);
+        Assert.Null(shapeDeclaration.BaseShapeName);
+        Assert.NotNull(shapeDeclaration.WellKnownSlots);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].TypeName);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[0].AliasFor);
+
+        Assert.Equal("name", shapeDeclaration.WellKnownSlots.Slots[1].Name);
+        Assert.Equal("bytes", shapeDeclaration.WellKnownSlots.Slots[1].TypeName);
+        Assert.Equal(16, shapeDeclaration.WellKnownSlots.Slots[1].CollectionSize);
         Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
     }
 

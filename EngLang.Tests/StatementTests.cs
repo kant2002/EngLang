@@ -284,7 +284,9 @@ To calculate area from a width and a height ->
     //[InlineData("define the factorial of a number as result is 1.", "the factorial of")]
     [InlineData("To calculate the area of a rectangle: result is 1.", "calculate the area of")]
     [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
-    [InlineData("to add a quora to a terminal: result is 1.", "add to")]
+    [InlineData("to add a thing to a stack: result is 1.", "add to")]
+    [InlineData("to count items in a list returning a count: result is 1.", "count items in returning")]
+    [InlineData("to count items in a list returning a count named length: result is 1.", "count items in returning")]
     public void InvokableLabelAliases(string sentence, string marker)
     {
         var lexer = new EngLangLexer(sentence);
@@ -298,6 +300,8 @@ To calculate area from a width and a height ->
     [InlineData("calculate factorial of a previous number into a previous factorial.", "calculate factorial of into")]
     [InlineData("calculate factorial of a previous number into a previous factorial (recursion).", "calculate factorial of into (recursion)")]
     //[InlineData("calculate factorial of the previous number in the previous factorial (recursion).", "calculate factorial of in (recursion)")]
+    [InlineData("calculate factorial of a previous number into a value named previous factorial (recursion).", "calculate factorial of into (recursion)")]
+    [InlineData("count commands in the previous number returning a count called previous factorial.", "count commands in returning")]
     public void LabeledStatementInvocation(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);
