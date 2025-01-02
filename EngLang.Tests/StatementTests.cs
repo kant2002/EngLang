@@ -254,6 +254,7 @@ To calculate area from a width and a height ->
     [InlineData("Define add and multiply of an A and a B and a C as result is 1.", "add and multiply of and and")]
     [InlineData("To calculate the area of a rectangle (multiplication): result is 1.", "calculate the area of (multiplication)")]
     [InlineData("To calculate the area of a rectangle (multiplication - trivial): result is 1.", "calculate the area of (multiplication - trivial)")]
+    [InlineData("To calculate the area of a rectangle (multiplication - preceding s, single-quote): result is 1.", "calculate the area of (multiplication - preceding s , single-quote)")]
     [InlineData("To calculate the area of a rectangle (then again): result is 1.", "calculate the area of (then again)")]
     [InlineData("to apply some parameters: result is 1.", "apply")]
     [InlineData("to do something with some parameters: result is 1.", "do something with")]
@@ -303,6 +304,7 @@ To calculate area from a width and a height ->
     //[InlineData("calculate factorial of the previous number in the previous factorial (recursion).", "calculate factorial of in (recursion)")]
     [InlineData("calculate factorial of a previous number into a value named previous factorial (recursion).", "calculate factorial of into (recursion)")]
     [InlineData("calculate factorial of a previous number into a value named previous factorial (then again).", "calculate factorial of into (then again)")]
+    [InlineData("calculate factorial of a previous number into a value named previous factorial (then again, and again).", "calculate factorial of into (then again , and again)")]
     [InlineData("count commands in the previous number returning a count called previous factorial.", "count commands in returning")]
     public void LabeledStatementInvocation(string sentence, string marker)
     {
