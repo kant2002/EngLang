@@ -21,7 +21,7 @@ public partial class EngLangParser : IEngLangParser
     private const string LongIdentifier = "long_identifier";
     private const string Identifier = "Identifier";
 
-    [Rule($"{LongIdentifier} : {Identifier}+")]
+    [Rule($"{LongIdentifier} : ({Identifier} | 'if')+")]
     private static IReadOnlyList<SymbolName> MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
     {
         return identifierParts.Select(_ => new SymbolName(_.Text, _.Range)).ToList();

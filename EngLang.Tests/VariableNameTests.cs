@@ -49,6 +49,7 @@ public class VariableNameTests
     [InlineData("a zero-indexed", "zero-indexed")]
     [InlineData("a i/o", "i/o")]
     [InlineData("a things' first", "first")]
+    [InlineData("a if block", "if block")]
     public void VariableNameCanHaveDash(string sentence, string expectedVariableName)
     {
         var parseResult = EngLangParser.Parse(sentence);
