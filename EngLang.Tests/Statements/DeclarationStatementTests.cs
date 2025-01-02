@@ -122,6 +122,11 @@ a pen has
     a width,
     a number named size.
 """)]
+    [InlineData("""
+the pen has
+    a width,
+    a number named size.
+""")]
     public void ShapeDeclarationWithSlotsAndNames(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);

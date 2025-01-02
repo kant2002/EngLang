@@ -409,6 +409,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'has' shape_slot_list")]
+    [Rule($"shape_declaration: DefiniteArticleKeyword {LongIdentifier} 'has' shape_slot_list")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
         IReadOnlyList<SymbolName> identifier,
