@@ -54,7 +54,7 @@ public enum EngLangTokenType
     //[Regex(Regexes.Identifier)]
     [Regex("[A-Za-z_]([A-Za-z0-9_\\-/':]*[A-Za-z0-9_']|[A-Za-z0-9_']?)#?")]
     Identifier,
-    [Regex(Regexes.IntLiteral)] IntLiteral,
+    [Regex("[-+]?[0-9]+")] IntLiteral,
     [Regex($"{Regexes.IntLiteral}/{Regexes.IntLiteral}")] RatioLiteral,
     [Regex("(0x|$)[0-9A-Fa-f]+")] HexLiteral,
     [Regex("\"((\"\")|[^\\r\\n\"])*\"")] StringLiteral,

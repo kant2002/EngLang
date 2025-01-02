@@ -1,4 +1,4 @@
-﻿Grammar
+Grammar
 =======
 
 Reserved words
@@ -34,5 +34,10 @@ Math expressions
 ```
 add 20 to a value
 multiply a value by 42
+```
 
+Conditional execution
+```
+if `function call`, `operations_list`.
+if `function call` then `operations_list`.
 ```

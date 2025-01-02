@@ -345,7 +345,7 @@ To calculate area from a width and a height ->
     [InlineData("if.")]
     [InlineData("if number.")]
     //[InlineData("if number is 0 then result is 1.")]
-    [InlineData("result is a number times factorial of a number minus one.")]
+    //[InlineData("result is a number times factorial of a number minus one.")] // this is invocation expression now.
     public void InvalidStatement(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);

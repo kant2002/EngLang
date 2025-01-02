@@ -619,7 +619,7 @@ public partial class EngLangParser : IEngLangParser
         => new ExpressionStatement(expression, expression.Range);
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are') primitive_expression")]
-    private static LogicalExpression MakeLogicalExpression(
+    private static Expression MakeLogicalExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         Expression literalExpression)
@@ -629,7 +629,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are') 'not' constant_expression")]
-    private static LogicalExpression MakeNegativeLogicalExpression(
+    private static Expression MakeNegativeLogicalExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         IToken<EngLangTokenType> notToken,
@@ -640,7 +640,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"logical_expression : {IdentifierReference} LogicalOperationKeyword 'than' primitive_expression")]
-    private static LogicalExpression MakeLogicalThanExpression(
+    private static Expression MakeLogicalThanExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> operatorToken,
         IToken<EngLangTokenType> thanToken,
@@ -652,7 +652,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are') LogicalOperationKeyword 'than' primitive_expression")]
-    private static LogicalExpression MakeLogicalThanExpression(
+    private static Expression MakeLogicalThanExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         IToken<EngLangTokenType> operatorToken,
@@ -665,7 +665,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"logical_expression : {IdentifierReference} 'at' LogicalOperationKeyword primitive_expression")]
-    private static LogicalExpression MakeLogicalAtExpression(
+    private static Expression MakeLogicalAtExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> atToken,
         IToken<EngLangTokenType> operatorToken,
@@ -677,7 +677,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are') 'at' LogicalOperationKeyword primitive_expression")]
-    private static LogicalExpression MakeLogicalIsAtExpression(
+    private static Expression MakeLogicalIsAtExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         IToken<EngLangTokenType> atToken,
@@ -690,7 +690,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"logical_expression : {IdentifierReference} ('is'|'are')? LogicalOperationKeyword 'than' 'or' 'equal' 'to'? primitive_expression ")]
-    private static LogicalExpression MakeLogicalThanExpression(
+    private static Expression MakeLogicalThanExpression(
         IdentifierReference identifierReference,
         IToken<EngLangTokenType> isToken,
         IToken<EngLangTokenType> operatorToken,
@@ -705,8 +705,11 @@ public partial class EngLangParser : IEngLangParser
         return new LogicalExpression(GetLogicalOperator(operatorToken), varExpression, literalExpression, range);
     }
 
+    [Rule($"logical_expression : invocation_expression")]
+    private static Expression MakeInvalidLogicalExpression(Expression expression) => expression;
+
     [Rule($"logical_expression : (IndefiniteArticleKeyword|DefiniteArticleKeyword|IsKeyword|AtKeyword|OnKeyword|WithKeyword|'of'|{Identifier}|IntoKeyword|AndKeyword|IntLiteral|RatioLiteral|HexLiteral|StringLiteral|'/'|AreKeyword|FunctionBodyOrAsKeyword|LogicalOperationKeyword|MathOperationKeyword|ByKeyword|NullLiteral|FromKeyword|ToKeyword|')'|'(')*")]
-    private static LogicalExpression MakeInvalidLogicalExpression(
+    private static Expression MakeInvalidLogicalExpression(
         IReadOnlyList<IToken<EngLangTokenType>> someTokens)
     {
         var range = someTokens.Count == 0 ? default : new Yoakke.SynKit.Text.Range(someTokens.First().Range, someTokens.Last().Range);
@@ -743,7 +746,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"if_statement : IfKeyword logical_expression CommaKeyword block_statement")]
     private static IfStatement MakeIfEqualsStatement(
         IToken<EngLangTokenType> ifToken,
-        LogicalExpression testExpression,
+        Expression testExpression,
         IToken<EngLangTokenType> thenToken,
         Statement statement)
         => new IfStatement(testExpression, statement, new Yoakke.SynKit.Text.Range(ifToken.Range, statement.Range));
@@ -794,10 +797,10 @@ public partial class EngLangParser : IEngLangParser
         };
     }
 
-    [Rule($"identifier_references_list : (primitive_expression extended_label_word?)*")]
+    [Rule($"identifier_references_list : (primitive_expression extended_label_word*)*")]
     private static (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) MakeIdentifierReferencesList(
-        IReadOnlyList<(Expression, IToken<EngLangTokenType>?)> identifierReferences)
-        => (identifierReferences.Where(_ => _.Item2 is not null).Select(_ => _.Item2!), new ExpressionList(identifierReferences.Select(_ => _.Item1).ToImmutableList<Expression>()));
+        IReadOnlyList<(Expression, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
+        => (identifierReferences.SelectMany(_ => _.Item2), new ExpressionList(identifierReferences.Select(_ => _.Item1).ToImmutableList<Expression>()));
 
     [Rule($"parameter_references_list : ({ParameterReference} extended_def_label_word*)*")]
     private static (ImmutableList<IToken<EngLangTokenType>> InnerText, ImmutableList<IdentifierReference> Parameters) MakeParameterReferencesList(
@@ -902,6 +905,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"extended_label_word_strict : NullLiteral")]
     [Rule($"extended_label_word_strict : ToKeyword")]
     [Rule($"extended_label_word_strict : FromKeyword")]
+    //[Rule($"extended_label_word_strict : ThenKeyword")]
     [Rule($"extended_label_word : FunctionBodyOrAsKeyword")]
     private static IToken<EngLangTokenType> MakeExtendedLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
@@ -921,7 +925,7 @@ public partial class EngLangParser : IEngLangParser
     private static IToken<EngLangTokenType> MakeDefinitionLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
 
-    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | ',' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | ThenKeyword | IfKeyword | AreKeyword)* ')'")]
+    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | ',' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | ThenKeyword | IfKeyword | AreKeyword | SomeKeyword)* ')'")]
     private static CommentLabel MakeCommentLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> names,
@@ -1059,6 +1063,28 @@ public partial class EngLangParser : IEngLangParser
         IToken<EngLangTokenType> intoToken, IReadOnlyList<IToken<EngLangTokenType>> OtherWords, (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) OutParameters)
     {
         return (intoToken, OtherWords, OutParameters);
+    }
+
+    [Rule($"invocation_expression : identifier_references_list comment_label?")]
+    private static InvocationExpression MakeInvocationExpression(
+        (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) identifierTokens,
+        CommentLabel? comment)
+    {
+        string labelName = string.Join(" ",
+            identifierTokens.InnerText
+            .Select(i => i.Text));
+        var last = comment is not null
+            ? comment.Range.End
+            : identifierTokens.Identifiers.IdentifierReferences.Count > 0
+                ? identifierTokens.Identifiers.IdentifierReferences.Last().Range.End
+                : identifierTokens.InnerText.Count() > 0
+                    ? identifierTokens.InnerText.Last().Range.End
+                    : default;
+        var range = new Yoakke.SynKit.Text.Range(identifierTokens.Identifiers.IdentifierReferences.Count > 0 ? identifierTokens.Identifiers.IdentifierReferences.Last().Range.Start : default, last);
+        return new InvocationExpression(
+            labelName + (comment is null ? "" : " " + comment.Text),
+            identifierTokens.Identifiers.IdentifierReferences.ToArray(),
+            range);
     }
 
     [Rule($"invocation_statement : label_word extended_label_word* identifier_references_list invocation_statement_saving_section* comment_label?")]

@@ -144,7 +144,7 @@ public class ExpressionTests
         var parseResult = parser.ParseLogicalExpression();
         Assert.True(parseResult.IsOk);
 
-        var additionExpression = parseResult.Ok.Value;
+        var additionExpression = (LogicalExpression)parseResult.Ok.Value;
         Assert.Equal(logicalOperator, additionExpression.Operator);
         var addend = Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand);
         Assert.Equal(42, addend.Value);

@@ -147,6 +147,9 @@ Maybe `then` can be used for chaining operations
 add 20 to a value then multiply a value by 42.
 ```
 
+Upon thinking about it more. Let's pretend that `if` executes single function, and then executes another statement if result is true/positive.
+That allow generalize constructions like `XXX is YYY` to any form of invocation of expression.
+
 ### Arithmetic
 
 It seems to be that math operations carried in usual language is quite interesting.

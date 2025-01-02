@@ -87,7 +87,7 @@ public class IfTests
         Assert.Equal("exit", Assert.IsType<InvocationStatement>(ifStatement.Then).Marker);
     }
 
-    [Fact]
+    [Fact(Skip = "We have a way to express complex expressions as conditions using InvocationExpression")]
     public void IfStatementWithInvalidExpression()
     {
         var sentence = "if a number is invalid then exit.";
@@ -119,5 +119,21 @@ public class IfTests
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
         Assert.Equal("exit", Assert.IsType<InvocationStatement>(ifStatement.Then).Marker);
+    }
+
+
+    [Theory]
+    [InlineData("if a code is 5 (some comment), exit.", "is (some comment)")]
+    [InlineData("if a code is bad (some comment), exit.", "is bad (some comment)")]
+    public void LabeledIfStatement(string sentence, string marker)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+
+        var ifStatement = Assert.IsType<IfStatement>(statement);
+        var invocationExpression = Assert.IsType<InvocationExpression>(ifStatement.Condition);
+        Assert.Equal(marker, invocationExpression.Marker);
     }
 }
