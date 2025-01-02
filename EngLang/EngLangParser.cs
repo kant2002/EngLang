@@ -317,7 +317,7 @@ public partial class EngLangParser : IEngLangParser
         => token.Kind switch
         {
             EngLangTokenType.StringLiteral => new StringLiteralExpression(token.Text[1..(token.Text.Length - 1)].Replace("\"\"", "\""), token.Range),
-            EngLangTokenType.IntLiteral => new IntLiteralExpression(int.Parse(token.Text), token.Range),
+            EngLangTokenType.IntLiteral => new IntLiteralExpression(long.Parse(token.Text), token.Range),
             EngLangTokenType.NullLiteral => new NullLiteralExpression(token.Range),
             EngLangTokenType.RatioLiteral => new RatioLiteralExpression(int.Parse(token.Text.Split('/')[0]), int.Parse(token.Text.Split('/')[1]), token.Range),
             EngLangTokenType.HexLiteral => new ByteArrayLiteralExpression(ConvertHexToByteArray(token.Text[0] == '$' ? token.Text[1..] : token.Text[2..]), token.Range),
