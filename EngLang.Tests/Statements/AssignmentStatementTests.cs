@@ -84,6 +84,23 @@ public class AssignmentStatementTests
         Assert.Equal(10, Assert.IsType<IntLiteralExpression>(additionExpression.SecondOperand).Value);
     }
 
+    [Fact]
+    public void StringCombinationDuringAssignment()
+    {
+        var sentence = "put a string then \"=\" in a value.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var assignmentStatement = Assert.IsType<ExpressionStatement>(statement);
+        var assignmentExpression = Assert.IsType<AssignmentExpression>(assignmentStatement.Expression);
+        Assert.Equal("value", assignmentExpression.Variable.Name.Name);
+        var additionExpression = Assert.IsType<MathExpression>(assignmentExpression.Expression);
+        Assert.Equal("string", Assert.IsType<VariableExpression>(additionExpression.FirstOperand).Identifier.Name.Name);
+        Assert.Equal("=", Assert.IsType<StringLiteralExpression>(additionExpression.SecondOperand).Value);
+    }
+
     [Theory]
     [InlineData("let a value equal 20.")]
     [InlineData("let a value equals 20.")]

@@ -6,4 +6,5 @@ public enum MathOperator
     Minus,
     Multiply,
     Divide,
+    Concat,
 }

@@ -195,6 +195,8 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule("math_expression : primitive_expression")]
     [Rule("math_expression : addition_expression")]
+    [Rule("math_expression : concatentation_expression")]
+    [Rule("concatentation_expression : primitive_expression")]
     private static Expression MakeMathExpression(Expression e) => e;
 
     [Rule("inplace_expression : inplace_addition_expression")]
@@ -208,6 +210,16 @@ public partial class EngLangParser : IEngLangParser
     [Rule("expression : inplace_expression")]
     [Rule("expression : logical_expression")]
     private static Expression MakeExpression(Expression e) => e;
+
+    [Rule($"concatentation_expression : concatentation_expression ThenKeyword primitive_expression")]
+    private static Expression MakeConcatentationExpression(
+        Expression firstExpression,
+        IToken<EngLangTokenType> mathToken,
+        Expression secondExpression)
+    {
+        var range = new Yoakke.SynKit.Text.Range(firstExpression.Range, secondExpression.Range);
+        return new MathExpression(ToMathOperator(mathToken), firstExpression, secondExpression, range);
+    }
 
     [Rule($"addition_expression : primitive_expression 'plus' primitive_expression")]
     [Rule($"addition_expression : primitive_expression '+' primitive_expression")]
@@ -256,6 +268,7 @@ public partial class EngLangParser : IEngLangParser
         "divide" => MathOperator.Divide,
         "divided" => MathOperator.Divide,
         "/" => MathOperator.Divide,
+        "then" => MathOperator.Concat,
         _ => throw new InvalidOperationException($"Unexpected token {token} for math expression"),
     };
 

@@ -184,6 +184,13 @@ put 10 into a value.
 append "value" to an error message
 ```
 
+also we can chain string values together using `then` operator.
+```
+puth "value" then "another value" into a message.
+```
+
+which will place two string one after another into a message variable.
+
 ### Accessing properties
 
 When speaking about object properties we usually use `of`
