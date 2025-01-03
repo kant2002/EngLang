@@ -394,6 +394,7 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
     [Rule($"shape_declaration: SomeKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
+    [Rule($"shape_declaration: DefiniteArticleKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
     private static ShapeDeclaration MakeShapeDeclaration(
         IToken<EngLangTokenType> indefiniteArticle,
         IReadOnlyList<SymbolName> identifier,
@@ -929,7 +930,7 @@ public partial class EngLangParser : IEngLangParser
     private static IToken<EngLangTokenType> MakeDefinitionLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
 
-    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | ',' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | ThenKeyword | IfKeyword | AreKeyword | SomeKeyword | NamedKeyword)* ')'")]
+    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | ',' | ';' | '.' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | ThenKeyword | IfKeyword | AreKeyword | SomeKeyword | NamedKeyword)* ')'")]
     private static CommentLabel MakeCommentLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> names,

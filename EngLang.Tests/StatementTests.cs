@@ -305,6 +305,8 @@ To calculate area from a width and a height ->
     [InlineData("calculate factorial of a previous number into a value named previous factorial (recursion).", "calculate factorial of into (recursion)")]
     [InlineData("calculate factorial of a previous number into a value named previous factorial (then again).", "calculate factorial of into (then again)")]
     [InlineData("calculate factorial of a previous number into a value named previous factorial (then again, and again).", "calculate factorial of into (then again , and again)")]
+    [InlineData("calculate factorial of a previous number into a value named previous factorial (then again; and again).", "calculate factorial of into (then again ; and again)")]
+    [InlineData("calculate factorial of a previous number into a value named previous factorial (parse .png).", "calculate factorial of into (parse . png)")]
     [InlineData("count commands in the previous number returning a count called previous factorial.", "count commands in returning")]
     public void LabeledStatementInvocation(string sentence, string marker)
     {

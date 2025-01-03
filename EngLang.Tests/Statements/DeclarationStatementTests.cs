@@ -31,6 +31,9 @@ an rectangle is a shape with a width and a height.
     [InlineData("""
 An rectangle is a shape with a width and a height.
 """)]
+    [InlineData("""
+the rectangle is a shape with a width and a height.
+""")]
     public void ShapeDeclarationWithSlots(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
@@ -97,6 +100,11 @@ a pen has
     [InlineData("""
 a pen has
     a width and
+    a size at the width.
+""")]
+    [InlineData("""
+a pen has
+    a width or
     a size at the width.
 """)]
     [InlineData("""
