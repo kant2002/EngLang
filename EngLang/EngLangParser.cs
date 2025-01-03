@@ -379,18 +379,21 @@ public partial class EngLangParser : IEngLangParser
         return new VariableDeclaration(string.Join(' ', identifier.Select(_ => _.Name)), typeReference, x?.literalExpression, range);
     }
 
-    [Rule($"shape_slot_list: (comma_identifier_references_list (AndKeyword comma_identifier_references_list)*)")]
+    //[Rule($"shape_slot_list: comma_identifier_references_list")]
+    //private static SlotDeclarationsList MakeShapeSlotList(SlotDeclarationsList list) => list;
+
+    [Rule($"shape_slot_list: (comma_identifier_references_list ((','? AndKeyword) comma_identifier_references_list)*)")]
     private static SlotDeclarationsList MakeShapeSlotList(
-        Punctuated<SlotDeclarationsList, IToken<EngLangTokenType>> slots)
+        Punctuated<SlotDeclarationsList, (IToken<EngLangTokenType>?, IToken<EngLangTokenType>)> slots)
         => new SlotDeclarationsList(slots.Values.SelectMany(_ => _.Slots).ToImmutableList());
 
-    [Rule($"shape_slot_list: comma_identifier_references_list ',' AndKeyword comma_identifier_references_list")]
-    private static SlotDeclarationsList MakeShapeSlotList(
-        SlotDeclarationsList first,
-        IToken<EngLangTokenType> comma,
-        IToken<EngLangTokenType> and,
-        SlotDeclarationsList second)
-        => new SlotDeclarationsList(first.Slots.Union(second.Slots).ToImmutableList());
+    //[Rule($"shape_slot_list: shape_slot_list ',' AndKeyword shape_slot_list")]
+    //private static SlotDeclarationsList MakeShapeSlotList(
+    //    SlotDeclarationsList first,
+    //    IToken<EngLangTokenType> comma,
+    //    IToken<EngLangTokenType> and,
+    //    SlotDeclarationsList second)
+    //    => new SlotDeclarationsList(first.Slots.Union(second.Slots).ToImmutableList());
 
     [Rule($"shape_declaration: IndefiniteArticleKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]
     [Rule($"shape_declaration: SomeKeyword {LongIdentifier} 'is' {TypeIdentifierReference} ('with' shape_slot_list)?")]

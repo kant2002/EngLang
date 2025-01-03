@@ -48,6 +48,7 @@ public class VariableNameTests
     [Theory]
     [InlineData("a zero-indexed", "zero-indexed")]
     [InlineData("a i/o", "i/o")]
+    [InlineData("a 3-way", "3-way")]
     [InlineData("a things' first", "first")]
     [InlineData("a if block", "if block")]
     public void VariableNameCanHaveDash(string sentence, string expectedVariableName)
