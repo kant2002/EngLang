@@ -1123,19 +1123,19 @@ public partial class EngLangParser : IEngLangParser
             identifierTokens.Identifiers.IdentifierReferences.Union(outParameter.SelectMany(_ => _.OutParameters.Identifiers.IdentifierReferences)).ToArray(), null, range);
     }
 
-    public static SyntaxNode Parse(string sourceCode)
+    public static SyntaxNode Parse(string sourceCode, string? compilationContext = null)
     {
         if (!sourceCode.Contains('.') && !sourceCode.Contains(':'))
         {
             // Fallback to expression parsing.
-            return ParseNode(sourceCode);
+            return ParseNode(sourceCode, compilationContext);
         }
 
-        return ParseParagraphList(sourceCode);
+        return ParseParagraphList(sourceCode, compilationContext);
 
     }
 
-    private static ParagraphList ParseParagraphList(string sourceCode)
+    private static ParagraphList ParseParagraphList(string sourceCode, string? compilationContext = null)
     {
         var lexer = new EngLangLexer(sourceCode);
         var parser = new EngLangParser(lexer);
@@ -1144,17 +1144,17 @@ public partial class EngLangParser : IEngLangParser
         {
             if (!lexer.IsEnd)
             {
-                throw new Exception($"Parser error. Do not reach end of file. Currently at position {lexer.Position}, next lexema is {lexer.Next()}");
+                throw new Exception($"Parser error. Do not reach end of file. Currently at position {lexer.Position}, next lexema is {lexer.Next()}{(compilationContext is not null ? $"in the {compilationContext}" : "")}");
             }
 
             var blockStatement = blockStatementResult.Ok.Value;
             return blockStatement;
         }
 
-        throw new Exception($"Parser error. Got {blockStatementResult.Error.Got} at position {blockStatementResult.Error.Position}");
+        throw new Exception($"Parser error. Got {blockStatementResult.Error.Got} at position {blockStatementResult.Error.Position}{(compilationContext is not null ? $"in the {compilationContext}" : "")}");
     }
 
-    private static SyntaxNode ParseNode(string sourceCode)
+    private static SyntaxNode ParseNode(string sourceCode, string? compilationContext = null)
     {
         var parser = new EngLangParser(new EngLangLexer(sourceCode));
         var parts = sourceCode.Split(new[] { ' ', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries);
@@ -1169,7 +1169,7 @@ public partial class EngLangParser : IEngLangParser
                     return variableReference;
                 }
 
-                throw new Exception($"Parser error. Got {variableReferenceResult.Error.Got} at position {variableReferenceResult.Error.Position}");
+                throw new Exception($"Parser error. Got {variableReferenceResult.Error.Got} at position {variableReferenceResult.Error.Position}{(compilationContext is not null ? $"in the {compilationContext}" : "")}");
             case "the":
             case "some":
                 var variableDeclarationResult = parser.ParseVariableDeclaration();
@@ -1179,7 +1179,7 @@ public partial class EngLangParser : IEngLangParser
                     return variableDeclaration;
                 }
 
-                throw new Exception($"Parser error. Got {variableDeclarationResult.Error.Got} at position {variableDeclarationResult.Error.Position}");
+                throw new Exception($"Parser error. Got {variableDeclarationResult.Error.Got} at position {variableDeclarationResult.Error.Position}{(compilationContext is not null ? $"in the {compilationContext}" : "")}");
             case "add":
             case "subtract":
             case "multiply":
@@ -1191,9 +1191,9 @@ public partial class EngLangParser : IEngLangParser
                     return assignmentExpressionResult.Ok.Value;
                 }
 
-                throw new Exception($"Parser error. Got {assignmentExpressionResult.Error.Got} at position {assignmentExpressionResult.Error.Position}");
+                throw new Exception($"Parser error. Got {assignmentExpressionResult.Error.Got} at position {assignmentExpressionResult.Error.Position}{(compilationContext is not null ? $"in the {compilationContext}" : "")}");
             default:
-                throw new NotImplementedException($"Cannot parse expression starting from `{parts[0]}`");
+                throw new NotImplementedException($"Cannot parse expression starting from `{parts[0]}{(compilationContext is not null ? $"in the {compilationContext}" : "")}`");
         }
     }
 }

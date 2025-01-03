@@ -162,7 +162,7 @@ void ValidateSentence(string sentence, string spacy, string stanza, TextWriter s
 static async Task<string[]> CollectSentences(string fileName)
 {
     var text = await File.ReadAllTextAsync(fileName);
-    var collector = new SentenceCollector(text)
+    var collector = new SentenceCollector(text, fileName)
     {
         CollectMarkers = true,
         CollectSentences = true,
@@ -191,11 +191,13 @@ async Task ProcessSpacy(string[] samples)
 class SentenceCollector
 {
     private readonly string text;
+    private readonly string fileName;
     private readonly int[] linePositions;
 
-    public SentenceCollector(string text)
+    public SentenceCollector(string text, string fileName)
     {
         this.text = text;
+        this.fileName = fileName;
         this.linePositions = new[] { 0 }.Union(Regex.Matches(text, "(\r\n|\n|\r)").OfType<Match>().Select(_ => _.Index + _.ValueSpan.Length)).ToArray();
     }
 
@@ -205,7 +207,7 @@ class SentenceCollector
 
     public string[] Collect()
     {
-        var parser = (ParagraphList)EngLangParser.Parse(text);
+        var parser = (ParagraphList)EngLangParser.Parse(text, this.fileName);
         var paragraphWithLabels = parser.Paragraphs.Where(p => p.Label is not null);
         var markers = paragraphWithLabels.SelectMany(CollectSentencesFromParagraph);
         return markers.OrderBy(_ => _).Distinct().ToArray();
