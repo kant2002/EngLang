@@ -125,6 +125,7 @@ public class IfTests
     [Theory]
     [InlineData("if a code is 5 (some comment), exit.", "is (some comment)")]
     [InlineData("if a code is bad (some comment), exit.", "is bad (some comment)")]
+    [InlineData("if a code is \"called\" (called comment), exit.", "is (called comment)")]
     public void LabeledIfStatement(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);

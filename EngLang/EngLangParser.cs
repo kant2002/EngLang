@@ -379,12 +379,12 @@ public partial class EngLangParser : IEngLangParser
         return new VariableDeclaration(string.Join(' ', identifier.Select(_ => _.Name)), typeReference, x?.literalExpression, range);
     }
 
-    [Rule($"shape_slot_list: (comma_identifier_references_list ('and' comma_identifier_references_list)*)")]
+    [Rule($"shape_slot_list: (comma_identifier_references_list (AndKeyword comma_identifier_references_list)*)")]
     private static SlotDeclarationsList MakeShapeSlotList(
         Punctuated<SlotDeclarationsList, IToken<EngLangTokenType>> slots)
         => new SlotDeclarationsList(slots.Values.SelectMany(_ => _.Slots).ToImmutableList());
 
-    [Rule($"shape_slot_list: comma_identifier_references_list ',' 'and' comma_identifier_references_list")]
+    [Rule($"shape_slot_list: comma_identifier_references_list ',' AndKeyword comma_identifier_references_list")]
     private static SlotDeclarationsList MakeShapeSlotList(
         SlotDeclarationsList first,
         IToken<EngLangTokenType> comma,
@@ -812,10 +812,11 @@ public partial class EngLangParser : IEngLangParser
         IReadOnlyList<(IdentifierReference, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
         => MakeParameterReferencesList(identifierReferences);
 
-    [Rule($"slot_declaration : {TypeIdentifierReference} (NamedKeyword {LongIdentifier})? ('is' {IdentifierReference})?")]
-    [Rule($"slot_declaration : {TypeIdentifierReference} (NamedKeyword {LongIdentifier})? ('at' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {TypeIdentifierReference} comment_label? (NamedKeyword {LongIdentifier})? ('is' {IdentifierReference})?")]
+    [Rule($"slot_declaration : {TypeIdentifierReference} comment_label? (NamedKeyword {LongIdentifier})? ('at' {IdentifierReference})?")]
     private static SlotDeclaration MakeSlotDeclaration(
         TypeIdentifierReference identifierReferences,
+        CommentLabel? comment,
         (IToken<EngLangTokenType>, IReadOnlyList<SymbolName> SlotName)? nameOverride,
         (IToken<EngLangTokenType>, IdentifierReference AliasFor)? alias)
     {
@@ -837,15 +838,17 @@ public partial class EngLangParser : IEngLangParser
         return new SlotDeclaration(
             name,
             identifierReferences.Name,
+            comment,
             identifierReferences.IsCollection,
             null,
             alias?.AliasFor?.Name.Name,
             range);
     }
-    [Rule($"slot_declaration : IntLiteral {LongIdentifier} (NamedKeyword {LongIdentifier})? ('at' {IdentifierReference})?")]
+    [Rule($"slot_declaration : IntLiteral {LongIdentifier} comment_label? (NamedKeyword {LongIdentifier})? ('at' {IdentifierReference})?")]
     private static SlotDeclaration MakeSlotDeclaration(
         IToken<EngLangTokenType> sizeToken,
         IReadOnlyList<SymbolName> identifierReferences,
+        CommentLabel? comment,
         (IToken<EngLangTokenType>, IReadOnlyList<SymbolName> SlotName)? nameOverride,
         (IToken<EngLangTokenType>, IdentifierReference AliasFor)? alias)
     {
@@ -868,6 +871,7 @@ public partial class EngLangParser : IEngLangParser
         return new SlotDeclaration(
             name,
             typeName,
+            comment,
             true,
             int.Parse(sizeToken.Text),
             alias?.AliasFor?.Name.Name,
@@ -925,7 +929,7 @@ public partial class EngLangParser : IEngLangParser
     private static IToken<EngLangTokenType> MakeDefinitionLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
 
-    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | ',' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | ThenKeyword | IfKeyword | AreKeyword | SomeKeyword)* ')'")]
+    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | ',' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | ThenKeyword | IfKeyword | AreKeyword | SomeKeyword | NamedKeyword)* ')'")]
     private static CommentLabel MakeCommentLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> names,

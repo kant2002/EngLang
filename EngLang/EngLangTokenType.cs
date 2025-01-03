@@ -40,7 +40,7 @@ public enum EngLangTokenType
     //[Regex("(in|into)")] IntoKeyword,
     [Regex("(in|into|resulting|returning)")] IntoKeyword,
     [Token("by")] ByKeyword,
-    [Token("and")] AndKeyword,
+    [Regex("(and|or)")] AndKeyword,
     [Token("with")] WithKeyword,
     [Token("of")] OfKeyword,
     [Regex("then")] ThenKeyword,

@@ -99,6 +99,11 @@ a pen has
     a width and
     a size at the width.
 """)]
+    [InlineData("""
+a pen has
+    a width or
+    a size at the width.
+""")]
     public void ShapeDeclarationWithSlotsAndAlias(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
@@ -173,6 +178,33 @@ a pen has
         Assert.Equal("bytes", shapeDeclaration.WellKnownSlots.Slots[1].TypeName);
         Assert.Equal(16, shapeDeclaration.WellKnownSlots.Slots[1].CollectionSize);
         Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
+    }
+
+    [Theory]
+    [InlineData("""
+a pen has
+    a width,
+    a height (the comment).
+""")]
+    public void ShapeDeclarationWithComment(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
+        var shapeDeclaration = shapeStatement.Declaration;
+        Assert.Equal("pen", shapeDeclaration.Name.Name);
+        Assert.Null(shapeDeclaration.BaseShapeName);
+        Assert.NotNull(shapeDeclaration.WellKnownSlots);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].TypeName);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[0].Comment);
+
+        Assert.Equal("height", shapeDeclaration.WellKnownSlots.Slots[1].Name);
+        Assert.Equal("height", shapeDeclaration.WellKnownSlots.Slots[1].TypeName);
+        Assert.NotNull(shapeDeclaration.WellKnownSlots.Slots[1].Comment);
+        Assert.Equal("(the comment)", shapeDeclaration.WellKnownSlots.Slots[1].Comment.Text);
     }
 
     [Theory]
