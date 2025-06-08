@@ -207,6 +207,7 @@ class SentenceCollector
 
     public string[] Collect()
     {
+        Console.WriteLine($"Processing file {this.fileName}");  
         var parser = (ParagraphList)EngLangParser.Parse(text, this.fileName);
         var paragraphWithLabels = parser.Paragraphs.Where(p => p.Label is not null);
         var markers = paragraphWithLabels.SelectMany(CollectSentencesFromParagraph);
