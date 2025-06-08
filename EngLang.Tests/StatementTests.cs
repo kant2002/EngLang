@@ -263,6 +263,7 @@ To calculate area from a width and a height ->
     [InlineData("to place items in some places: result is 1.", "place items in")]
     [InlineData("to put a number into another number: result is 1.", "put into")]
     [InlineData("to put a number into number: result is 1.", "put into number")]
+    [InlineData("to roll a dice some times: result is 1.", "roll")]
     public void LabeledWithParameterStatement(string sentence, string marker)
     {
         var parseResult = EngLangParser.Parse(sentence);
@@ -289,13 +290,16 @@ To calculate area from a width and a height ->
     [InlineData("to add a thing to a stack: result is 1.", "add to")]
     [InlineData("to count items in a list returning a count: result is 1.", "count items in returning")]
     [InlineData("to count items in a list returning a count named length: result is 1.", "count items in returning")]
+    [InlineData("to null terminate a string: result is 1.", "null terminate")]
+    [InlineData("to roll a dice some times: result is 1.", "roll")]
     public void InvokableLabelAliases(string sentence, string marker)
     {
         var lexer = new EngLangLexer(sentence);
         var parser = new EngLangParser(lexer);
-        var parseResult = parser.ParseInvokableLabelAliases().Ok.Value;
+        var parseResult = parser.ParseInvokableLabelAliases();
+        var invocableLabelAlias = parseResult.Ok.Value;
 
-        Assert.Equal(marker, parseResult.Markers.First());
+        Assert.Equal(marker, invocableLabelAlias.Markers.First());
     }
 
     [Theory]

@@ -126,8 +126,9 @@ public class IfTests
     [InlineData("if a code is 5 (some comment), exit.", "is (some comment)")]
     [InlineData("if a code is bad (some comment), exit.", "is bad (some comment)")]
     [InlineData("if a code is \"called\" (called comment), exit.", "is (called comment)")]
+    [InlineData("if a code then a second code is better than a test code, exit.", "is better than")]
     public void LabeledIfStatement(string sentence, string marker)
-    {
+    {       
         var parseResult = EngLangParser.Parse(sentence);
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);

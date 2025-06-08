@@ -28,6 +28,7 @@ public partial class EngLangParser : IEngLangParser
     }
 
     [Rule($"{LongIdentifier} : 'A'")]
+    [Rule($"{LongIdentifier} : 'times'")]
     private static IReadOnlyList<SymbolName> MakeA(IToken<EngLangTokenType> token)
     {
         return [new SymbolName(token.Text, token.Range)];
@@ -814,7 +815,7 @@ public partial class EngLangParser : IEngLangParser
         };
     }
 
-    [Rule($"identifier_references_list : (primitive_expression extended_label_word*)*")]
+    [Rule($"identifier_references_list : (concatentation_expression extended_label_word*)*")]
     private static (IEnumerable<IToken<EngLangTokenType>> InnerText, ExpressionList Identifiers) MakeIdentifierReferencesList(
         IReadOnlyList<(Expression, IReadOnlyList<IToken<EngLangTokenType>>)> identifierReferences)
         => (identifierReferences.SelectMany(_ => _.Item2), new ExpressionList(identifierReferences.Select(_ => _.Item1).ToImmutableList<Expression>()));
@@ -912,6 +913,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"label_word : WithKeyword")]
     [Rule($"label_word : PutKeyword")]
     [Rule($"label_word : NamedKeyword")]
+    [Rule($"label_word : NullLiteral")]
     //[Rule($"label_word : DefiniteArticleKeyword")]
     private static IToken<EngLangTokenType> MakeLabelWord(IToken<EngLangTokenType> marker)
         => marker;
@@ -923,7 +925,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule($"extended_label_word_strict : AreKeyword")]
     //[Rule($"extended_label_word_strict : IntoKeyword")]
     // [Rule($"extended_label_word_strict : DefiniteArticleKeyword")]
-    [Rule($"extended_label_word_strict : NullLiteral")]
+    //[Rule($"extended_label_word_strict : NullLiteral")]
     [Rule($"extended_label_word_strict : ToKeyword")]
     [Rule($"extended_label_word_strict : FromKeyword")]
     //[Rule($"extended_label_word_strict : ThenKeyword")]
@@ -946,7 +948,7 @@ public partial class EngLangParser : IEngLangParser
     private static IToken<EngLangTokenType> MakeDefinitionLabelWordStrict(IToken<EngLangTokenType> marker)
         => marker;
 
-    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | ',' | ';' | '.' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | ThenKeyword | IfKeyword | AreKeyword | SomeKeyword | NamedKeyword)* ')'")]
+    [Rule($"comment_label : '(' ({Identifier} | '-' | '/' | ',' | ';' | '.' | IntLiteral | RatioLiteral | StringLiteral | WithKeyword | DefiniteArticleKeyword | IndefiniteArticleKeyword | IntoKeyword | FunctionBodyOrAsKeyword | MathOperationKeyword | ByKeyword | OfKeyword | HasKeyword | AndKeyword | IsKeyword | PutKeyword | TemperatureLiteral | EqualKeyword | NullLiteral | FromKeyword | OnKeyword | ToKeyword | EllipsisKeyword | AtKeyword | LogicalOperationKeyword | ThenKeyword | IfKeyword | AreKeyword | SomeKeyword | NamedKeyword)* ')'")]
     private static CommentLabel MakeCommentLabel(
         IToken<EngLangTokenType> toToken,
         IReadOnlyList<IToken<EngLangTokenType>> names,
