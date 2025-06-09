@@ -9,8 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Catalyst" Version="1.0.44557" />
-        <PackageReference Include="Catalyst.Spacy" Version="1.0.44557" />
+        <PackageReference Include="Catalyst" Version="1.0.54164" />
+        <PackageReference Include="Catalyst.Spacy" Version="1.0.54164" />
         <PackageReference Include="Catalyst.Models.English" Version="1.0.30952" />
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
     </ItemGroup>
