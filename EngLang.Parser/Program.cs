@@ -117,7 +117,7 @@ static async Task DumpLines(string linesFile, TextWriter writer)
     var lines = await CollectSentences(linesFile);
     foreach (var line in lines)
     {
-        await writer.WriteLineAsync(line);
+        await writer.WriteLineAsync(line.ReplaceLineEndings(" "));
     }
 }
 
