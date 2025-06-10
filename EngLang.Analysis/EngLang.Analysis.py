@@ -14,7 +14,7 @@ stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
 
 process_spacy = True
 process_nltk = False
-process_stanza = True
+process_stanza = False
 print_sentence_tree = False
 detect_grammar = False
 print_tagged_tokens = True
@@ -177,7 +177,7 @@ def analyse_sentence_spacy(sentence: str):
     if print_tagged_tokens:
         #if len(tagged_tokens) > 1:
         #    print('[')
-        for l in tagged_tokens:
+        #for l in tagged_tokens:
             #if len(tagged_tokens) > 1:
             #    print('   ', l)
             #else:
@@ -186,6 +186,12 @@ def analyse_sentence_spacy(sentence: str):
                         if tt[0] != "\n" and tt[1] != "_SP":
                             pos_name = normalize_spacy_pos(tt[1], tt[0])
                             print('(', pos_name, ' ', tt[0], ')', sep="", end=" ")
+                print()
+                for token_sent in tagged_tokens:
+                    for tt in combine_punc_spacy(token_sent):
+                        if tt[0] != "\n" and tt[1] != "_SP":
+                            pos_name = normalize_spacy_pos(tt[1], tt[0])
+                            print(pos_name, sep="", end=" ")
                 print()
         #if len(tagged_tokens) > 1:
         #    print(']')
@@ -240,6 +246,7 @@ def analyse_sentence_stanza(sentence: str):
     for i, sent in enumerate(doc.sentences):
         # print(f'====== Sentence {i+1} tokens =======')
         print(*[f'({token.upos} {token.text})' for token in combine_punc_stanza(sent.words)], sep=' ')
+        print(*[token.upos for token in combine_punc_stanza(sent.words)], sep=' ')
 
 
 def analyse_sentence(sentence):
@@ -464,6 +471,8 @@ arg_parser = argparse.ArgumentParser(
     epilog = 'Text at the bottom of help')
 arg_parser.add_argument('command', nargs='?', default = 'sample')
 arg_parser.add_argument('-f', '--filename')
+arg_parser.add_argument('-d', '--directory')
+#arg_parser.add_argument('-r', '--recursive')
 arg_parser.add_argument('-o', '--output', required = False)
 arg_parser.add_argument('--lines',
                     action='store_true') 
@@ -479,7 +488,19 @@ match args.command:
     case "analyze":
         filename = args.filename
         lines = args.lines
-        analyze_file(filename, lines)
+        directory = args.directory
+        if (filename):
+            analyze_file(filename, lines)
+        elif (directory):
+            import os
+            for root, dirs, files in os.walk(directory):
+                for file in files:
+                    if file.endswith('.lines'):
+                        full_path = os.path.join(root, file)
+                        print("Analyzing file:", full_path)
+                        analyze_file(full_path, lines)
+        else:
+            print("Please provide a filename or directory to analyze.")
     case "sentencize":
         filename = args.filename
         output_file = args.output if args.output else args.filename +'.sentence'
