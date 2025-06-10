@@ -68,6 +68,9 @@ let isAdjOrAdv (word: string) =
 let isNounNotAVerb word =
     word <> "times"
 
+let isPosessive (word: string) =
+    word = "'s" || word = "'"
+
 let detectVariables (s: (string * string) seq) =
     let rec remove acc rest =
         match rest with
@@ -511,11 +514,145 @@ let detectVariables (s: (string * string) seq) =
             :: ("PART", p3) :: ("NOUN", p4) :: ("NOUN", p5) :: xs when isNounNotAVerb p5 ->
             let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5}")
             remove (replacement :: acc) xs
-        // DET NOUN PART NOUN
+        // DET NOUN PART ADJ NOUN PART NOUN NOUN
         | ("DET", p1) :: ("NOUN", p2)
-            :: ("PART", p3) :: ("NOUN", p4) :: xs when isNounNotAVerb p4 ->
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) 
+            :: ("PART", p6) :: ("NOUN", p7) :: ("NOUN", p8):: xs when isNounNotAVerb p5 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7} {p8}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN PART NOUN PART NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) 
+            :: ("PART", p6) :: ("NOUN", p7) 
+            :: ("PART", p8) :: ("NOUN", p9):: xs when isNounNotAVerb p5 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7} {p8} {p9}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN PART NOUN PART ADJ
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) 
+            :: ("PART", p6) :: ("NOUN", p7) 
+            :: ("PART", p8) :: ("ADJ", p9):: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7} {p8} {p9}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN PART NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) 
+            :: ("PART", p6) :: ("NOUN", p7) :: xs when isNounNotAVerb p5 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN PART ADJ
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) 
+            :: ("PART", p6) :: ("ADJ", p7) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN PART VERB
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) 
+            :: ("PART", p6) :: ("VERB", p7) :: xs when isAdjOrVerb p7  ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN PART JJS NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) 
+            :: ("PART", p6) :: ("JJS", p7) :: ("NOUN", p8) :: xs  ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7} {p8}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) :: ("NOUN", p6) :: xs when isNounNotAVerb p6 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN VERB NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) :: ("VERB", p6) :: ("NOUN", p7) :: xs when isNounNotAVerb p7 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("NOUN", p5) :: xs when isNounNotAVerb p5 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ PART NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4)
+            :: ("PART", p5) :: ("NOUN", p6) :: xs when isNounNotAVerb p6 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ PART ADJ
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4)
+            :: ("PART", p5) :: ("ADJ", p6) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ PART SYM
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4)
+            :: ("PART", p5) :: ("SYM", p6) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ VERB NOUN PART NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("VERB", p5) :: ("NOUN", p6)
+            :: ("PART", p7) :: ("NOUN", p8) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7} {p8}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ VERB NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("VERB", p5) :: ("NOUN", p6) :: xs when isAdjOrVerb p5 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ ADJ NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("ADJ", p5) :: ("NOUN", p6) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ '' NOUN PART NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("''", p5) :: ("NOUN", p6)
+            :: ("PART", p7) :: ("NOUN", p8) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7} {p8}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ '' NOUN
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("''", p5) :: ("NOUN", p6) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ '' ADJ
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("''", p5) :: ("ADJ", p6) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ '' VERB
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: ("''", p5) :: ("VERB", p6) :: xs when isAdjOrVerb p6 ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART ADJ
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("ADJ", p4) :: xs when isPosessive p3 ->
             let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4}")
             remove (replacement :: acc) xs
+        // DET NOUN PART NOUN '' VERB
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("NOUN", p4) :: ("''", p5) :: ("VERB", p6) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART NOUN AUX '' ADV
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("NOUN", p4) :: ("AUX", p5) :: ("''", p6) :: ("ADV", p7) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7}")
+            remove (replacement :: acc) xs
+        // DET NOUN PART NOUN AUX '' ADJ
+        | ("DET", p1) :: ("NOUN", p2)
+            :: ("PART", p3) :: ("NOUN", p4) :: ("AUX", p5) :: ("''", p6) :: ("ADJ", p7) :: xs ->
+            let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4} {p5} {p6} {p7}")
+            remove (replacement :: acc) xs
+        //// DET NOUN PART NOUN
+        //| ("DET", p1) :: ("NOUN", p2)
+        //    :: ("PART", p3) :: ("NOUN", p4) :: xs when isNounNotAVerb p4 ->
+        //    let replacement = ("VARIABLE", $"{p1} {p2} {p3} {p4}")
+        //    remove (replacement :: acc) xs
         // DET NOUN NOUN
         | ("DET", p1) :: ("NOUN", p2) :: ("NOUN", p3) :: xs ->
             let replacement = ("VARIABLE", $"{p1} {p2} {p3}")
