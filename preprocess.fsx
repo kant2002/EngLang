@@ -1,5 +1,7 @@
 open System.IO
 
+let print_subsentences = true
+
 /// Parses the specified file and returns a list of tuples representing blocks.
 /// Each tuple: (sentence, parseLine, posLine)
 let parseFile (fileName: string) =
@@ -1308,9 +1310,21 @@ let blocks2 =
         let pos = p |> Seq.map fst |> String.concat " "
         (s, p, pos))
 
-let items =
+let collapse_variables p =
+    p
+    |> Seq.map (fun (pos, text) ->
+        match (pos, text) with
+        | ("VARIABLE", _) -> ("VARIABLE", "VARIABLE")
+        | ("NUM", _) -> ("NUM", "NUM")
+        | _ -> (pos, text))
+    |> Seq.toList
+
+let blocks3 =
     blocks2
-    |> Seq.map (fun (s, p, pos) -> (pos, p))
+    |> Seq.map (fun (s, p, pos) -> (pos, collapse_variables p))
+    |> Seq.distinct
+let items =
+    blocks3
     |> Seq.groupBy (fun (pos, p) -> pos)
     |> Seq.map (fun (key, items) ->
         let items = items |> Seq.map snd |> Seq.toArray |> Array.distinct
@@ -1318,6 +1332,8 @@ let items =
     |> Seq.sortByDescending (fun (key, qty, sentences) -> qty)
     |> Seq.toList
 
-items |> Seq.iter (fun (key, count, sentences) -> printfn "%d|%s|%A" count key sentences)
-//items |> Seq.iter (fun (key, count, sentences) -> printfn "%d|%s" count key)
-//printfn "Parsed %A blocks." items
+if print_subsentences then
+    items |> Seq.iter (fun (key, count, sentences) -> printfn "%d|%s|%A" count key sentences)
+else
+    items |> Seq.iter (fun (key, count, sentences) -> printfn "%d|%s" count key)
+
