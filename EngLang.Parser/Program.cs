@@ -5,6 +5,8 @@ using static System.Console;
 using System.Text.RegularExpressions;
 using Yoakke.SynKit.Text;
 using System.Xml.Serialization;
+using EngLang.LanguageConversion;
+
 
 
 #if SPACY
@@ -59,7 +61,9 @@ else
         int totalFiles = 0;
         foreach (var file in Directory.GetFiles(processingDirectory, "*.", result.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
         {
-            var baseFile = Path.GetRelativePath(processingDirectory, file) + ".lines";
+            var baseFile = result.TargetLanguage == "csharp"
+                ? Path.GetRelativePath(processingDirectory, file) + ".cs"
+                : Path.GetRelativePath(processingDirectory, file) + ".lines";
             var outputFile = Path.Combine(result.OutputDirectory, baseFile);
             var currentOutputDirectory = Path.GetDirectoryName(outputFile);
             if (currentOutputDirectory is not null)
@@ -70,7 +74,18 @@ else
             try
             {
                 using var writer = new StreamWriter(File.OpenWrite(outputFile));
-                await DumpLines(file, writer);
+                if (result.TargetLanguage == "csharp")
+                {
+                    var text = await File.ReadAllTextAsync(file);
+                    var paragraph = (ParagraphList)EngLangParser.Parse(text, file);
+                    var converter = new CSharpConverter();
+                    await writer.WriteAsync(converter.Convert(paragraph));
+                }
+                else
+                {
+                    await DumpLines(file, writer);
+                }
+
                 success++;
             }
             catch (Exception ex)
@@ -321,6 +336,9 @@ partial class CommandLineArguments
 
     [CommandLine.Option("out")]
     public string? OutputDirectory { get; set; }
+
+    [CommandLine.Option("lang")]
+    public string? TargetLanguage { get; set; }
 }
 
 file partial class CommandLineArguments
@@ -337,6 +355,8 @@ file partial class CommandLineArguments
         var _ProcessingDirectoryHasError = false;
         var _OutputDirectoryParsed = false;
         var _OutputDirectoryHasError = false;
+        var _TargetLanguageParsed = false;
+        var _TargetLanguageHasError = false;
         var _RecursiveParsed = false;
         var _RecursiveHasError = false;
         int position = 0;
@@ -398,6 +418,26 @@ file partial class CommandLineArguments
                 {
                     result.OutputDirectory = currentElement;
                     _OutputDirectoryParsed = true;
+                    position++;
+                    currentElement = args.ElementAtOrDefault(position);
+                }
+
+                continue;
+            }
+
+            if (currentElement == "--lang" /*long name*/)
+            {
+                position++;
+                currentElement = args.ElementAtOrDefault(position);
+                if (currentElement is null || currentElement.StartsWith("-"))
+                {
+                    _TargetLanguageHasError = true;
+                    _TargetLanguageParsed = true;
+                }
+                else
+                {
+                    result.TargetLanguage = currentElement;
+                    _TargetLanguageParsed = true;
                     position++;
                     currentElement = args.ElementAtOrDefault(position);
                 }
