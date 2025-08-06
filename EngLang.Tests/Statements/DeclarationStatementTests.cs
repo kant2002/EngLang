@@ -34,6 +34,12 @@ An rectangle is a shape with a width and a height.
     [InlineData("""
 the rectangle is a shape with a width and a height.
 """)]
+    [InlineData("""
+an rectangle is a shape with a width, a height.
+""")]
+    [InlineData("""
+an rectangle is a shape with a width, Some height.
+""")]
     public void ShapeDeclarationWithSlots(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
@@ -66,6 +72,29 @@ An rectangle has some widths, a height, and some fill colour.
 An rectangle has some widths, or a height and some fill colour.
 """)]
     public void ShapeDeclarationWithSlotsWithoutBase(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var shapeStatement = Assert.IsType<ShapeDeclarationStatement>(statement);
+        var shapeDeclaration = shapeStatement.Declaration;
+        Assert.Equal("rectangle", shapeDeclaration.Name.Name);
+        Assert.Null(shapeDeclaration.BaseShapeName);
+        Assert.NotNull(shapeDeclaration.WellKnownSlots);
+        Assert.Equal("width", shapeDeclaration.WellKnownSlots.Slots[0].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[0].AliasFor);
+        Assert.Equal("height", shapeDeclaration.WellKnownSlots.Slots[1].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
+        Assert.Equal("fill colour", shapeDeclaration.WellKnownSlots.Slots[2].Name);
+        Assert.Null(shapeDeclaration.WellKnownSlots.Slots[2].AliasFor);
+    }
+
+    [Theory]
+    [InlineData("""
+The rectangle has a width, a height, a fill colour.
+""")]
+    public void GlobalShapeDeclarationWithSlotsWithoutBase(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);
 

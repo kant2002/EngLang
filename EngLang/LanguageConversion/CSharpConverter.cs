@@ -109,6 +109,10 @@ public class CSharpConverter : ILanguageConverter
                 return intLiteralExpression.Value.ToString();
             case StringLiteralExpression stringLiteralExpression:
                 return $"\"{stringLiteralExpression.Value}\"";
+            case InchLiteralExpression inchLiteralExpression:
+                return $"{inchLiteralExpression.Value}";
+            case RatioLiteralExpression ratioLiteralExpression:
+                return $"{ratioLiteralExpression.Numerator} / {ratioLiteralExpression.Denominator}";
             case NullLiteralExpression nullLiteralExpression:
                 return $"null";
             case ByteArrayLiteralExpression byteArrayLiteralExpression:
@@ -133,6 +137,8 @@ public class CSharpConverter : ILanguageConverter
                 return $"{ConvertExpression(mathExpression.FirstOperand)} {Convert(mathExpression.Operator)} {ConvertExpression(mathExpression.SecondOperand)}";
             case PosessiveExpression posessiveExpression:
                 return $"{ConvertExpression(posessiveExpression.Owner)}.{ConvertIdentifierReference(posessiveExpression.Identifier)}";
+            case InvocationExpression invocationExpression:
+                return $"{invocationExpression.Marker}({string.Join(", ", invocationExpression.Parameters.Select(_ => ConvertExpression(_)))})";
             default:
                 throw new NotImplementedException($"Expression of type {expression.GetType()} is not supported");
         }
@@ -160,6 +166,7 @@ public class CSharpConverter : ILanguageConverter
             MathOperator.Minus => "-",
             MathOperator.Multiply => "*",
             MathOperator.Divide => "/",
+            MathOperator.Concat => "+",
             _ => throw new NotImplementedException($"Operator {@operator} does not supported"),
         };
     }
@@ -263,6 +270,12 @@ public class CSharpConverter : ILanguageConverter
 
     private static string ConvertToIdentifier(string name)
     {
-        return name.Replace(' ', '_').Replace('-', '_').Replace('(', '_').Replace(')', '_');
+        string[] reservedWords = ["byte", "string"];
+        if (reservedWords.Contains(name))
+        {
+            return "@" + name;
+        }
+
+        return name.Replace(' ', '_').Replace('-', '_').Replace('(', '_').Replace(')', '_').Replace('\'', '_');
     }
 }

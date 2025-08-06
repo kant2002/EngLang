@@ -13,8 +13,8 @@ public enum EngLangTokenType
     [Ignore][Regex("\\[[^\\]]*\\]")] InlineComment,
 
     [Regex("(a|an|An|A|Another|another)")] IndefiniteArticleKeyword,
-    [Token("some")] SomeKeyword,
-    [Token("the")] DefiniteArticleKeyword,
+    [Regex("(some|Some)")] SomeKeyword,
+    [Regex("(the|The)")] DefiniteArticleKeyword,
 
     [Token(";")] SemicolonKeyword,
     [Token("...")] EllipsisKeyword,
@@ -40,7 +40,7 @@ public enum EngLangTokenType
     //[Regex("(in|into)")] IntoKeyword,
     [Regex("(in|into|resulting|returning)")] IntoKeyword,
     [Token("by")] ByKeyword,
-    [Regex("(and|or)")] AndKeyword,
+    [Regex("(and|And|or)")] AndKeyword,
     [Token("with")] WithKeyword,
     [Token("of")] OfKeyword,
     [Regex("then")] ThenKeyword,

@@ -43,7 +43,7 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     [Rule($"{IdentifierReference} : DefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
-    [Rule($"{IdentifierReference} : 'some' {LongIdentifier} ('of' {IdentifierReference})?")]
+    [Rule($"{IdentifierReference} : SomeKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     private static IdentifierReference MakeIdentifierReference(
         IToken<EngLangTokenType> articleKeyword,
         IReadOnlyList<SymbolName> identifiersList,
@@ -140,7 +140,7 @@ public partial class EngLangParser : IEngLangParser
         return new IdentifierReference(symbol, symbol, null, symbol.Range);
     }
 
-    [Rule($"{ParameterReference} : 'some' {LongIdentifier}")]
+    [Rule($"{ParameterReference} : SomeKeyword {LongIdentifier}")]
     private static IdentifierReference MakeParameterArrayReference(
         IToken<EngLangTokenType> indefiniteArticleKeyword,
         IReadOnlyList<SymbolName> identifiersList)
@@ -166,7 +166,7 @@ public partial class EngLangParser : IEngLangParser
             new Yoakke.SynKit.Text.Range(identifier.Range, lastRange));
     }
 
-    [Rule($"{TypeIdentifierReference} : 'some' {LongIdentifier}")]
+    [Rule($"{TypeIdentifierReference} : SomeKeyword {LongIdentifier}")]
     private static TypeIdentifierReference MakeCollectionTypeIdentifierReference(
         IToken<EngLangTokenType> indefiniteArticleKeyword,
         IReadOnlyList<SymbolName> identifiersList)
