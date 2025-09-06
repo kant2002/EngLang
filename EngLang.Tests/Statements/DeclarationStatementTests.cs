@@ -300,4 +300,18 @@ a pen has
         Assert.Equal("tostring pointer", shapeDeclaration.WellKnownSlots.Slots[1].Name);
         Assert.Null(shapeDeclaration.WellKnownSlots.Slots[1].AliasFor);
     }
+
+    [Theory]
+    [InlineData("A data pointer is a pointer to a data.")]
+    public void PointerTypeDeclaration(string sentence)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var pointerDeclarationStatement = Assert.IsType<PointerDeclarationStatement>(statement);
+        Assert.Equal("data pointer", pointerDeclarationStatement.PointerType.Name.Name);
+        Assert.NotNull(pointerDeclarationStatement.BaseType);
+        Assert.Equal("data", pointerDeclarationStatement.BaseType.Name);
+    }
 }

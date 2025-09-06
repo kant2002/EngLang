@@ -231,6 +231,15 @@ public class JavaScriptConverter : ILanguageConverter
 
                 builder.AppendLine(invocationStatementText);
                 break;
+            case PointerDeclarationStatement pointerDeclarationStatement:
+                builder.AppendLine("public class " + ConvertIdentifierReference(pointerDeclarationStatement.PointerType) + " // pointer");
+                builder.OpenBraces();
+                builder.AppendLine("constructor(" + ConvertToIdentifier(pointerDeclarationStatement.BaseType.Name) + ")");
+                builder.OpenBraces();
+                builder.AppendLine("this." + ConvertToIdentifier(pointerDeclarationStatement.BaseType.Name) + " = " + ConvertToIdentifier(pointerDeclarationStatement.BaseType.Name) + ";");
+                builder.CloseBraces();
+                builder.CloseBraces();
+                break;
             case InvalidStatement invalidStatement:
                 var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));
                 builder.AppendLine("#error " + invalidStatementString);

@@ -34,6 +34,7 @@
         return node switch
         {
             IdentifierReference ir => typeName + "(" + ir.Name + ")",
+            TypeIdentifierReference ir => typeName + "(" + ir.Name + ")",
             IntLiteralExpression ile => typeName + "(" + ile.Value + ")",
             LabeledStatement ls => typeName + "(" + ls.Marker + ")(" + string.Join(", ", ls.Parameters.Select(GetNodeText)) + ")",
             LogicalExpression le => typeName + "(" + le.Operator + ")",
@@ -43,6 +44,7 @@
             InvokableLabel il => typeName + "(" + string.Join(", ", il.Markers) + ")",
             InvocationStatement ist => typeName + "(" + ist.Marker + ")",
             InvalidStatement invalidStatement => typeName + "(" + string.Join(" ", invalidStatement.Tokens.Select(t => t.Text)) + ")",
+            PointerDeclarationStatement pointerDeclarationStatement => GetNodeText(pointerDeclarationStatement.BaseType) + " -> " + GetNodeText(pointerDeclarationStatement.PointerType.Name),
             SymbolName sn => typeName + "(" + sn.Name + ")",
             _ => typeName,
         };
