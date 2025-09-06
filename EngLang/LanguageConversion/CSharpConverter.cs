@@ -146,6 +146,27 @@ public class CSharpConverter : ILanguageConverter
         }
     }
 
+    private string GetExpressionType(Expression expression)
+    {
+        switch (expression)
+        {
+            case IntLiteralExpression intLiteralExpression:
+                return "long";
+            case StringLiteralExpression stringLiteralExpression:
+                return "string";
+            case InchLiteralExpression inchLiteralExpression:
+                return "long";
+            case RatioLiteralExpression ratioLiteralExpression:
+                return "double";
+            case NullLiteralExpression nullLiteralExpression:
+                return $"object";
+            case ByteArrayLiteralExpression byteArrayLiteralExpression:
+                return $"byte[]";
+            default:
+                throw new NotImplementedException($"Expression of type {expression.GetType()} is not supported");
+        }
+    }
+
     private string Convert(LogicalOperator @operator)
     {
         return @operator switch
@@ -259,6 +280,12 @@ public class CSharpConverter : ILanguageConverter
             case PointerDeclarationStatement pointerDeclarationStatement:
                 builder.AppendLine("public class " + ConvertIdentifierReference(pointerDeclarationStatement.PointerType)
                     + "(" + Convert(pointerDeclarationStatement.BaseType) + " " + ConvertToIdentifier(pointerDeclarationStatement.BaseType.Name) + "); // pointer");
+                break;
+            case ConstantDeclarationStatement constantDeclarationStatement:
+                builder.AppendLine("public partial class constants");
+                builder.OpenBraces();
+                builder.AppendLine("public const " + GetExpressionType(constantDeclarationStatement.Value) + " " + ConvertIdentifierReference(constantDeclarationStatement.Identifier) + " = " + ConvertExpression(constantDeclarationStatement.Value) + ";");
+                builder.CloseBraces();
                 break;
             case InvalidStatement invalidStatement:
                 var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));

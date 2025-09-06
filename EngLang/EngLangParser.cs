@@ -16,10 +16,14 @@ using Yoakke.SynKit.Parser.Attributes;
 public partial class EngLangParser : IEngLangParser
 {
     private const string IdentifierReference = "identifier_reference";
+    private const string DefiniteIdentifierReference = "definite_identifier_reference";
+    private const string IndefiniteIdentifierReference = "definite_identifier_reference";
     private const string ParameterReference = "parameter_reference";
     private const string TypeIdentifierReference = "type_reference";
     private const string LongIdentifier = "long_identifier";
     private const string Identifier = "Identifier";
+    private const string ConstantDeclarationRule = "constant_declaration";
+    private const string PointerTypeDeclarationRule = "pointer_type_declaration_statement";
 
     [Rule($"{LongIdentifier} : ({Identifier} | 'if')+")]
     private static IReadOnlyList<SymbolName> MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
@@ -41,9 +45,9 @@ public partial class EngLangParser : IEngLangParser
         return new[] { new SymbolName(token.Text, token.Range) }.Union(identifierParts.Select(_ => new SymbolName(_.Text, _.Range))).ToList();
     }
 
-    [Rule($"{IdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
-    [Rule($"{IdentifierReference} : DefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
-    [Rule($"{IdentifierReference} : SomeKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
+    [Rule($"{IndefiniteIdentifierReference} : IndefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
+    [Rule($"{DefiniteIdentifierReference} : DefiniteArticleKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
+    [Rule($"{IndefiniteIdentifierReference} : SomeKeyword {LongIdentifier} ('of' {IdentifierReference})?")]
     private static IdentifierReference MakeIdentifierReference(
         IToken<EngLangTokenType> articleKeyword,
         IReadOnlyList<SymbolName> identifiersList,
@@ -104,6 +108,11 @@ public partial class EngLangParser : IEngLangParser
             parentReference,
             parentReference is null ? new(articleKeyword.Range.Start, last) : new(articleKeyword.Range.Start, last > parentReference.Range.End ? last : parentReference.Range.End));
     }
+
+    [Rule($"{IdentifierReference}: {IndefiniteIdentifierReference}")]
+    [Rule($"{IdentifierReference}: {DefiniteIdentifierReference}")]
+    [Rule($"{IdentifierReference}: {IndefiniteIdentifierReference}")]
+    private static IdentifierReference MakeIdentifierReference(IdentifierReference identifierReference) => identifierReference;
 
     [Rule($"{IdentifierReference} : {IdentifierReference} (NamedKeyword {LongIdentifier})")]
     private static IdentifierReference MakeNamedIdentifierReference(IdentifierReference identifier, (IToken<EngLangTokenType> token, IReadOnlyList<SymbolName> newName)? nameOverride)
@@ -174,7 +183,15 @@ public partial class EngLangParser : IEngLangParser
         var typeName = string.Join(" ", identifiersList.SkipLast(1).Select(_ => _.Name).Append(identifiersList[identifiersList.Count - 1].Name.Singularize()));
         return new TypeIdentifierReference(typeName, true, new Yoakke.SynKit.Text.Range(indefiniteArticleKeyword.Range, identifiersList.Last().Range));
     }
-    [Rule($"pointer_type_declaration_statement : {IdentifierReference} 'is' 'a' 'pointer' 'to' {TypeIdentifierReference}")]
+
+
+    [Rule($"{ConstantDeclarationRule} : {DefiniteIdentifierReference} 'is' constant_expression")]
+    private static ConstantDeclarationStatement MakeConstantDeclaration(IdentifierReference identifier, IToken<EngLangTokenType> _token, Expression value)
+    {
+        return new ConstantDeclarationStatement(identifier, value, new Yoakke.SynKit.Text.Range(identifier.Range, value.Range));
+    }
+
+    [Rule($"{PointerTypeDeclarationRule} : {IdentifierReference} 'is' 'a' 'pointer' 'to' {TypeIdentifierReference}")]
     private static PointerDeclarationStatement MakePointerDeclarationStatement(
         IdentifierReference pointerTypeName,
         IToken<EngLangTokenType> isKeyword,
@@ -508,7 +525,8 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule("simple_statement : expression_or_return_statement")]
     [Rule("simple_statement : variable_declaration_statement")]
-    [Rule("simple_statement : pointer_type_declaration_statement")]
+    [Rule($"simple_statement : {PointerTypeDeclarationRule}")]
+    [Rule($"simple_statement : {ConstantDeclarationRule}")]
     [Rule("simple_statement : if_statement")]
     [Rule("simple_statement : shape_declaration_statement")]
     [Rule("simple_statement : statementyy")]
