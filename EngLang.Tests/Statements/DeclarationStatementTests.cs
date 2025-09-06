@@ -371,4 +371,23 @@ a pen has
         Assert.Equal(5, literal.Numerator);
         Assert.Equal(2, literal.Denominator);
     }
+
+    [Fact]
+    public void TypedVariableWithInchConstantDeclaration2()
+    {
+        var sentence = "The apple is an fruit equal to 2 inches.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var variableStatement = Assert.IsType<VariableDeclarationStatement>(statement);
+        var variableDeclaration = variableStatement.Declaration;
+        Assert.Equal("apple", variableDeclaration.Name);
+        Assert.Equal("fruit", variableDeclaration.TypeName.Name);
+        Assert.NotNull(variableDeclaration.Expression);
+        var inchLiteral = Assert.IsType<InchLiteralExpression>(variableDeclaration.Expression);
+        var literal = Assert.IsType<IntLiteralExpression>(inchLiteral.Value);
+        Assert.Equal(2, literal.Value);
+    }
 }

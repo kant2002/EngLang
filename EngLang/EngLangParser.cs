@@ -369,6 +369,8 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule("literal_expression : IntLiteral 'inch'")]
     [Rule("literal_expression : RatioLiteral 'inch'")]
+    [Rule("literal_expression : IntLiteral 'inches'")]
+    [Rule("literal_expression : RatioLiteral 'inches'")]
     private static Expression MakeIntInchIdentifierReference(
         IToken<EngLangTokenType> token,
         IToken<EngLangTokenType> inchToken)
