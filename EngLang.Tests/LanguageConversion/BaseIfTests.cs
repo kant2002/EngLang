@@ -66,4 +66,19 @@ public abstract class BaseIfTests
     }
 
     protected abstract string GetExpectedResultInsideIfStatementCode();
+
+    [Fact]
+    public void ConvertIfWithFlagSetStatement()
+    {
+        var sentence = "if a flag is set then result is 42.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedIfWithFlagSetStatement();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedIfWithFlagSetStatement();
 }

@@ -18,4 +18,7 @@ public class CSharpConstantsTests : BaseConstantsTests
     public const string home_town = ""Kharkiv"";
 }
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetByteConstantDeclaration() => @"byte @byte = 65;
+".ReplaceLineEndings(NewLine);
 }

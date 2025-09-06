@@ -27,4 +27,9 @@ public class JavaScriptIfTests : BaseIfTests
     exit();
 }
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedIfWithFlagSetStatement() => @"if (is_set(flag)) {
+    return 42;
+}
+".ReplaceLineEndings(NewLine);
 }
