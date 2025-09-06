@@ -240,6 +240,9 @@ public class JavaScriptConverter : ILanguageConverter
                 builder.CloseBraces();
                 builder.CloseBraces();
                 break;
+            case ConstantDeclarationStatement constantDeclarationStatement:
+                builder.AppendLine("const " + ConvertIdentifierReference(constantDeclarationStatement.Identifier) + " = " + ConvertExpression(constantDeclarationStatement.Value) + ";");
+                break;
             case InvalidStatement invalidStatement:
                 var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));
                 builder.AppendLine("#error " + invalidStatementString);

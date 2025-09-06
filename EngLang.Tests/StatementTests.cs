@@ -415,4 +415,30 @@ To calculate area from a width and a height ->
         var paragraphs = Assert.IsType<ParagraphList>(parseResult).Paragraphs;
         Assert.Equal(markers, paragraphs.SelectMany(p => p.Label.Markers).ToArray());
     }
+
+    [Theory]
+    [InlineData("The hundred is 100.", "hundred", 100)]
+    public void IntegerConstantDeclarations(string sentence, string identifier, long expressionValue)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var resultStatement = Assert.IsType<ConstantDeclarationStatement>(statement);
+        Assert.Equal(identifier, resultStatement.Identifier.Name.Name);
+        Assert.Equal(expressionValue, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
+    }
+
+    [Theory]
+    [InlineData("The value is \"some string\".", "value", "some string")]
+    public void StringConstantDeclarations(string sentence, string identifier, string expressionValue)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var resultStatement = Assert.IsType<ConstantDeclarationStatement>(statement);
+        Assert.Equal(identifier, resultStatement.Identifier.Name.Name);
+        Assert.Equal(expressionValue, Assert.IsType<StringLiteralExpression>(resultStatement.Value).Value);
+    }
 }
