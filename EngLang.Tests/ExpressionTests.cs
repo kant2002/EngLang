@@ -216,8 +216,9 @@ public class ExpressionTests
         var parseResult = parser.ParseExpression();
 
         Assert.True(parseResult.IsOk);
-        var intLiteralExpression = Assert.IsType<InchLiteralExpression>(parseResult.Ok.Value);
-        Assert.Equal(42, intLiteralExpression.Value);
+        var inchLiteralExpression = Assert.IsType<InchLiteralExpression>(parseResult.Ok.Value);
+        var intLiteral = Assert.IsType<IntLiteralExpression>(inchLiteralExpression.Value);
+        Assert.Equal(42, intLiteral.Value);
     }
 
     [Fact]

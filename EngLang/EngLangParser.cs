@@ -355,7 +355,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule("literal_expression : NullLiteral")]
     [Rule("literal_expression : HexLiteral")]
     [Rule("literal_expression : RatioLiteral")]
-    private static Expression MakeIdentifierReference(
+    private static Expression MakeLiteralExpression(
         IToken<EngLangTokenType> token)
         => token.Kind switch
         {
@@ -368,12 +368,14 @@ public partial class EngLangParser : IEngLangParser
         };
 
     [Rule("literal_expression : IntLiteral 'inch'")]
-    private static Expression MakeInchIdentifierReference(
+    [Rule("literal_expression : RatioLiteral 'inch'")]
+    private static Expression MakeIntInchIdentifierReference(
         IToken<EngLangTokenType> token,
         IToken<EngLangTokenType> inchToken)
         => token.Kind switch
         {
-            EngLangTokenType.IntLiteral => new InchLiteralExpression(int.Parse(token.Text), token.Range),
+            EngLangTokenType.IntLiteral => new InchLiteralExpression(MakeLiteralExpression(token), new Yoakke.SynKit.Text.Range(token.Range, inchToken.Range)),
+            EngLangTokenType.RatioLiteral => new InchLiteralExpression(MakeLiteralExpression(token), new Yoakke.SynKit.Text.Range(token.Range, inchToken.Range)),
             _ => throw new InvalidOperationException()
         };
 
@@ -385,6 +387,24 @@ public partial class EngLangParser : IEngLangParser
                          .ToArray();
     }
 
+    private static Expression NegateConstantExpression(IToken<EngLangTokenType>? token, Expression expression)
+    {
+        if (expression is IntLiteralExpression intLiteralExpression)
+        {
+            return new IntLiteralExpression(-intLiteralExpression.Value, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
+        }
+        if (expression is InchLiteralExpression inchLiteralExpression)
+        {
+            return new InchLiteralExpression(NegateConstantExpression(token, inchLiteralExpression.Value), new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
+        }
+        if (expression is RatioLiteralExpression ratioLiteralExpression)
+        {
+            return new RatioLiteralExpression(-ratioLiteralExpression.Numerator, ratioLiteralExpression.Denominator, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
+        }
+
+        return expression;
+    }
+
     [Rule("constant_expression : ('+' | '-')? literal_expression")]
     private static Expression MakeConstantExpression(
         IToken<EngLangTokenType>? token,
@@ -392,18 +412,7 @@ public partial class EngLangParser : IEngLangParser
     {
         if (token?.Text == "-")
         {
-            if (expression is IntLiteralExpression intLiteralExpression)
-            {
-                return new IntLiteralExpression(-intLiteralExpression.Value, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
-            }
-            if (expression is InchLiteralExpression inchLiteralExpression)
-            {
-                return new InchLiteralExpression(-inchLiteralExpression.Value, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
-            }
-            if (expression is RatioLiteralExpression ratioLiteralExpression)
-            {
-                return new RatioLiteralExpression(-ratioLiteralExpression.Numerator, ratioLiteralExpression.Denominator, new Yoakke.SynKit.Text.Range(token.Range, expression.Range));
-            }
+            return NegateConstantExpression(token, expression);
         }
 
         Debug.Assert(token?.Text != "-", "negated expressions does not supported.");
