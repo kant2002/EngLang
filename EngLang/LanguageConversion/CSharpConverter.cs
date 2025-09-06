@@ -287,6 +287,12 @@ public class CSharpConverter : ILanguageConverter
                 builder.AppendLine("public const " + GetExpressionType(constantDeclarationStatement.Value) + " " + ConvertIdentifierReference(constantDeclarationStatement.Identifier) + " = " + ConvertExpression(constantDeclarationStatement.Value) + ";");
                 builder.CloseBraces();
                 break;
+            case UnitAliasDeclarationStatement constantDeclarationStatement:
+                builder.AppendLine("public partial class constants");
+                builder.OpenBraces();
+                builder.AppendLine("public const " + GetExpressionType(constantDeclarationStatement.Value) + " " + ConvertIdentifierReference(constantDeclarationStatement.Identifier) + " = " + ConvertExpression(constantDeclarationStatement.Value) + " * " + ConvertIdentifierReference(constantDeclarationStatement.BaseUnit) + ";");
+                builder.CloseBraces();
+                break;
             case InvalidStatement invalidStatement:
                 var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));
                 builder.AppendLine("#error " + invalidStatementString);
@@ -295,7 +301,7 @@ public class CSharpConverter : ILanguageConverter
                 ConvertParagraph(builder, paragraph);
                 break;
             default:
-                throw new NotImplementedException();
+                throw new NotImplementedException($"Statement of type {statement.GetType()} is not supported by converter");
         }
     }
 
