@@ -22,8 +22,8 @@ public abstract class BaseVariableTests
 
     protected abstract string GetExpectedVariable();
 
-    [Fact]
-    public void ConvertVariableWithStringLiteral()
+    [Fact(Skip = "Right now it's not clear to me should I have type string as reserved name, or not. For now it is, but previously it wasn't since it's nice for C# interop")]
+    public void ConvertVariableWithStringType()
     {
         var sentence = "the greetings is an string equal to \"Hello\"";
         var parseResult = EngLangParser.Parse(sentence);
@@ -31,11 +31,26 @@ public abstract class BaseVariableTests
 
         var result = converter.Convert(parseResult);
 
-        var expectedCode = GetExpectedVariableWithStringLiteral();
+        var expectedCode = GetExpectedVariableWithStringType();
         Assert.Equal(expectedCode, result);
     }
 
-    protected abstract string GetExpectedVariableWithStringLiteral();
+    protected abstract string GetExpectedVariableWithStringType();
+
+    [Fact]
+    public void ConvertVariableWithStringName()
+    {
+        var sentence = "the string is an charseq equal to \"Hello\"";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetExpectedVariableWithStringName();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetExpectedVariableWithStringName();
 
     [Fact]
     public void ConvertVariableWithIntLiteral()

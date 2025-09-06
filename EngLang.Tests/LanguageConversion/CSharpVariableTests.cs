@@ -10,7 +10,9 @@ public class CSharpVariableTests : BaseVariableTests
     protected override string GetExpectedVariable() => @"apple name;
 ".ReplaceLineEndings(NewLine);
 
-    protected override string GetExpectedVariableWithStringLiteral() => "string greetings = \"Hello\"";
+    protected override string GetExpectedVariableWithStringType() => "string greetings = \"Hello\"";
+
+    protected override string GetExpectedVariableWithStringName() => "charseq @string = \"Hello\"";
 
     protected override string GetExpectedVariableWithIntLiteral() => "number answer = 42";
 
