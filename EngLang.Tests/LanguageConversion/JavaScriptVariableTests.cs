@@ -10,7 +10,9 @@ public class JavaScriptVariableTests : BaseVariableTests
     protected override string GetExpectedVariable() => @"let name;
 ".ReplaceLineEndings(NewLine);
 
-    protected override string GetExpectedVariableWithStringLiteral() => "let greetings = \"Hello\"";
+    protected override string GetExpectedVariableWithStringType() => "let greetings = \"Hello\"";
+
+    protected override string GetExpectedVariableWithStringName() => "let string = \"Hello\"";
 
     protected override string GetExpectedVariableWithIntLiteral() => "let answer = 42";
 
