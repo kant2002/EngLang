@@ -51,7 +51,7 @@ public class CSharpConverter : ILanguageConverter
 
     private string ConvertTypeIdentifierReference(TypeIdentifierReference identifierReference)
     {
-        var identifier = ConvertToIdentifier(identifierReference.Name);
+        var identifier = ConvertToTypeIdentifier(identifierReference.Name);
         if (identifierReference.IsCollection)
         {
             return $"{identifier}[]";
@@ -112,7 +112,7 @@ public class CSharpConverter : ILanguageConverter
             case StringLiteralExpression stringLiteralExpression:
                 return $"\"{stringLiteralExpression.Value}\"";
             case InchLiteralExpression inchLiteralExpression:
-                return $"{inchLiteralExpression.Value}";
+                return $"{ConvertExpression(inchLiteralExpression.Value)}";
             case RatioLiteralExpression ratioLiteralExpression:
                 return $"{ratioLiteralExpression.Numerator} / {ratioLiteralExpression.Denominator}";
             case NullLiteralExpression nullLiteralExpression:
@@ -140,7 +140,7 @@ public class CSharpConverter : ILanguageConverter
             case PosessiveExpression posessiveExpression:
                 return $"{ConvertExpression(posessiveExpression.Owner)}.{ConvertIdentifierReference(posessiveExpression.Identifier)}";
             case InvocationExpression invocationExpression:
-                return $"{invocationExpression.Marker}({string.Join(", ", invocationExpression.Parameters.Select(_ => ConvertExpression(_)))})";
+                return $"{ConvertToIdentifier(invocationExpression.Marker)}({string.Join(", ", invocationExpression.Parameters.Select(_ => ConvertExpression(_)))})";
             default:
                 throw new NotImplementedException($"Expression of type {expression.GetType()} is not supported");
         }
@@ -200,7 +200,7 @@ public class CSharpConverter : ILanguageConverter
         if (label is not null)
         {
             var primaryMarker = label.Markers.First();
-            var parameterString = string.Join(", ", label.Parameters.Select(_ => _.Name.Name.Replace(" ", "_")));
+            var parameterString = string.Join(", ", label.Parameters.Select(_ => ConvertToTypeIdentifier(_.Type) + " " + ConvertToIdentifier(_.Name)));
             builder.AppendLine($"void {ConvertToIdentifier(primaryMarker)}({parameterString})");
             builder.OpenBraces();
         }
@@ -259,7 +259,7 @@ public class CSharpConverter : ILanguageConverter
                 builder.AppendLine($"return {Convert(resultStatement.Value)};");
                 break;
             case LabeledStatement labeledStatement:
-                var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => ConvertToIdentifier(_.Name)));
+                var parameterString = string.Join(", ", labeledStatement.Parameters.Select(_ => ConvertToIdentifier(_.Name) + " " + ConvertToIdentifier(_.Name)));
                 var primaryMarker = labeledStatement.Marker.Markers.First();
                 builder.AppendLine($"void {ConvertToIdentifier(primaryMarker)}({parameterString})");
                 builder.OpenBraces();
@@ -306,15 +306,35 @@ public class CSharpConverter : ILanguageConverter
     }
 
     private static string ConvertToIdentifier(SymbolName name) => ConvertToIdentifier(name.Name);
+    private static string ConvertToTypeIdentifier(SymbolName name) => ConvertToTypeIdentifier(name.Name);
+
+    private static readonly char[] ExcludedChars = { ' ', '-', '(', ')', '\'', '/', '#' };
 
     private static string ConvertToIdentifier(string name)
     {
-        string[] reservedWords = ["byte", "string"];
+        string[] reservedWords = ["byte", "string", "double"];
         if (reservedWords.Contains(name))
         {
             return "@" + name;
         }
 
-        return name.Replace(' ', '_').Replace('-', '_').Replace('(', '_').Replace(')', '_').Replace('\'', '_');
+        var builder = new StringBuilder(name.Length);
+        foreach (var c in name)
+        {
+            builder.Append(ExcludedChars.Contains(c) ? '_' : char.ToLowerInvariant(c));
+        }
+
+        return builder.ToString();
+    }
+
+    private static string ConvertToTypeIdentifier(string name)
+    {
+        var builder = new StringBuilder(name.Length);
+        foreach (var c in name)
+        {
+            builder.Append(ExcludedChars.Contains(c) ? '_' : char.ToLowerInvariant(c));
+        }
+
+        return builder.ToString();
     }
 }

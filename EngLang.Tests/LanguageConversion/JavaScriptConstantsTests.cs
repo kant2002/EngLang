@@ -12,4 +12,7 @@ public class JavaScriptConstantsTests : BaseConstantsTests
 
     protected override string GetStringConstantDeclaration() => @"const home_town = ""Kharkiv"";
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetByteConstantDeclaration() => @"let byte = 65;
+".ReplaceLineEndings(NewLine);
 }

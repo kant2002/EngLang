@@ -33,7 +33,7 @@ value /= 42;
 }
 ".ReplaceLineEndings(NewLine);
 
-    protected override string GetExpectedLabeledStatementParametersCode() => @"void calculate_area_from_and(width, height)
+    protected override string GetExpectedLabeledStatementParametersCode() => @"void calculate_area_from_and(width width, height height)
 {
     return 1;
 }

@@ -118,6 +118,8 @@ public class JavaScriptConverter : ILanguageConverter
                 return $"{ConvertExpression(mathExpression.FirstOperand)} {Convert(mathExpression.Operator)} {ConvertExpression(mathExpression.SecondOperand)}";
             case PosessiveExpression posessiveExpression:
                 return $"{ConvertExpression(posessiveExpression.Owner)}.{ConvertIdentifierReference(posessiveExpression.Identifier)}";
+            case InvocationExpression invocationExpression:
+                return $"{ConvertToIdentifier(invocationExpression.Marker)}({string.Join(", ", invocationExpression.Parameters.Select(_ => ConvertExpression(_)))})";
             default:
                 throw new NotImplementedException($"Expression of type {expression.GetType()} is not supported");
         }

@@ -27,4 +27,9 @@ public class CSharpIfTests : BaseIfTests
     return 42;
 }
 ".ReplaceLineEndings(NewLine);
+
+    protected override string GetExpectedIfWithFlagSetStatement() => @"if (is_set(flag)) {
+    return 42;
+}
+".ReplaceLineEndings(NewLine);
 }

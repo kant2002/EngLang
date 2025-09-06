@@ -36,4 +36,19 @@ public abstract class BaseConstantsTests
     }
 
     protected abstract string GetStringConstantDeclaration();
+
+    [Fact]
+    public void ConvertByteConstantDeclaration()
+    {
+        var sentence = "The byte is a byte equal to 65.";
+        var parseResult = EngLangParser.Parse(sentence);
+        var converter = CreateConverter();
+
+        var result = converter.Convert(parseResult);
+
+        var expectedCode = GetByteConstantDeclaration();
+        Assert.Equal(expectedCode, result);
+    }
+
+    protected abstract string GetByteConstantDeclaration();
 }
