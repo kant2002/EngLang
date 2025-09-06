@@ -441,4 +441,18 @@ To calculate area from a width and a height ->
         Assert.Equal(identifier, resultStatement.Identifier.Name.Name);
         Assert.Equal(expressionValue, Assert.IsType<StringLiteralExpression>(resultStatement.Value).Value);
     }
+
+    [Theory]
+    [InlineData("A billion is 1000 millions.", "billion", 1000, "million")]
+    public void AliasDeclarations(string sentence, string newUnit, long multiplier, string baseUnit)
+    {
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var resultStatement = Assert.IsType<UnitAliasDeclarationStatement>(statement);
+        Assert.Equal(newUnit, resultStatement.Identifier.Name.Name);
+        Assert.Equal(multiplier, Assert.IsType<IntLiteralExpression>(resultStatement.Value).Value);
+        Assert.Equal(baseUnit, resultStatement.BaseUnit.Name.Name);
+    }
 }

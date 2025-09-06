@@ -48,6 +48,7 @@
             InvalidStatement invalidStatement => typeName + "(" + string.Join(" ", invalidStatement.Tokens.Select(t => t.Text)) + ")",
             PointerDeclarationStatement pointerDeclarationStatement => GetNodeText(pointerDeclarationStatement.BaseType) + " -> " + GetNodeText(pointerDeclarationStatement.PointerType.Name),
             ConstantDeclarationStatement constantDeclarationStatement => GetNodeText(constantDeclarationStatement.Identifier) + " -> " + GetNodeText(constantDeclarationStatement.Value),
+            AliasDeclarationStatement aliasDeclarationStatement => GetNodeText(aliasDeclarationStatement.Identifier) + " <-> " + GetNodeText(aliasDeclarationStatement.Value) + " of " + GetNodeText(aliasDeclarationStatement.BaseUnit.Name),
             SymbolName sn => typeName + "(" + sn.Name + ")",
             _ => typeName,
         };

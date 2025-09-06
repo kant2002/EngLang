@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace EngLang.LanguageConversion;
 
@@ -29,7 +30,7 @@ public class JavaScriptConverter : ILanguageConverter
             case IdentifierReference identifierReference:
                 return ConvertIdentifierReference(identifierReference);
             default:
-                throw new NotImplementedException();
+                throw new NotImplementedException($"Syntax node {node} is not supported");
         }
     }
 
@@ -118,7 +119,7 @@ public class JavaScriptConverter : ILanguageConverter
             case PosessiveExpression posessiveExpression:
                 return $"{ConvertExpression(posessiveExpression.Owner)}.{ConvertIdentifierReference(posessiveExpression.Identifier)}";
             default:
-                throw new NotImplementedException();
+                throw new NotImplementedException($"Expression of type {expression.GetType()} is not supported");
         }
     }
 
@@ -243,6 +244,9 @@ public class JavaScriptConverter : ILanguageConverter
             case ConstantDeclarationStatement constantDeclarationStatement:
                 builder.AppendLine("const " + ConvertIdentifierReference(constantDeclarationStatement.Identifier) + " = " + ConvertExpression(constantDeclarationStatement.Value) + ";");
                 break;
+            case UnitAliasDeclarationStatement aliasDeclarationStatement:
+                builder.AppendLine("const " + ConvertIdentifierReference(aliasDeclarationStatement.Identifier) + " = " + ConvertExpression(aliasDeclarationStatement.Value) + " * " + ConvertIdentifierReference(aliasDeclarationStatement.BaseUnit) + ";");
+                break;
             case InvalidStatement invalidStatement:
                 var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));
                 builder.AppendLine("#error " + invalidStatementString);
@@ -251,7 +255,7 @@ public class JavaScriptConverter : ILanguageConverter
                 ConvertParagraph(builder, paragraph);
                 break;
             default:
-                throw new NotImplementedException();
+                throw new NotImplementedException($"Statement of type {statement.GetType()} is not supported by converter");
         }
     }
 

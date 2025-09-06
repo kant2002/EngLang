@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using Yoakke.SynKit.Lexer;
 using Yoakke.SynKit.Parser;
@@ -24,6 +23,7 @@ public partial class EngLangParser : IEngLangParser
     private const string Identifier = "Identifier";
     private const string ConstantDeclarationRule = "constant_declaration";
     private const string PointerTypeDeclarationRule = "pointer_type_declaration_statement";
+    private const string UnitAliasDeclarationRule = "unit_alias_declaration_statement";
 
     [Rule($"{LongIdentifier} : ({Identifier} | 'if')+")]
     private static IReadOnlyList<SymbolName> MakeLongIdentifier(IReadOnlyList<IToken<EngLangTokenType>> identifierParts)
@@ -184,11 +184,27 @@ public partial class EngLangParser : IEngLangParser
         return new TypeIdentifierReference(typeName, true, new Yoakke.SynKit.Text.Range(indefiniteArticleKeyword.Range, identifiersList.Last().Range));
     }
 
-
     [Rule($"{ConstantDeclarationRule} : {DefiniteIdentifierReference} 'is' constant_expression")]
     private static ConstantDeclarationStatement MakeConstantDeclaration(IdentifierReference identifier, IToken<EngLangTokenType> _token, Expression value)
     {
         return new ConstantDeclarationStatement(identifier, value, new Yoakke.SynKit.Text.Range(identifier.Range, value.Range));
+    }
+
+    [Rule($"{UnitAliasDeclarationRule} : {IndefiniteIdentifierReference} 'is' constant_expression {LongIdentifier}")]
+    private static UnitAliasDeclarationStatement MakeUnitAliasDeclaration(IdentifierReference identifier, IToken<EngLangTokenType> _token, Expression value, IReadOnlyList<SymbolName> symbols)
+    {
+        if (symbols.Count > 1)
+        {
+            throw new InvalidOperationException("The units should consist from single word");
+        }
+
+        var symbol = symbols.First();
+        if (symbol.Name.EndsWith("s"))
+        {
+            symbol = new SymbolName(symbol.Name[..^1], symbol.Range);
+        }
+
+        return new UnitAliasDeclarationStatement(identifier, value, new IdentifierReference(symbol, symbol, null, symbol.Range), new Yoakke.SynKit.Text.Range(identifier.Range, symbol.Range));
     }
 
     [Rule($"{PointerTypeDeclarationRule} : {IdentifierReference} 'is' 'a' 'pointer' 'to' {TypeIdentifierReference}")]
@@ -538,6 +554,7 @@ public partial class EngLangParser : IEngLangParser
     [Rule("simple_statement : variable_declaration_statement")]
     [Rule($"simple_statement : {PointerTypeDeclarationRule}")]
     [Rule($"simple_statement : {ConstantDeclarationRule}")]
+    [Rule($"simple_statement : {UnitAliasDeclarationRule}")]
     [Rule("simple_statement : if_statement")]
     [Rule("simple_statement : shape_declaration_statement")]
     [Rule("simple_statement : statementyy")]
