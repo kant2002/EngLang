@@ -174,6 +174,18 @@ public partial class EngLangParser : IEngLangParser
         var typeName = string.Join(" ", identifiersList.SkipLast(1).Select(_ => _.Name).Append(identifiersList[identifiersList.Count - 1].Name.Singularize()));
         return new TypeIdentifierReference(typeName, true, new Yoakke.SynKit.Text.Range(indefiniteArticleKeyword.Range, identifiersList.Last().Range));
     }
+    [Rule($"pointer_type_declaration_statement : {IdentifierReference} 'is' 'a' 'pointer' 'to' {TypeIdentifierReference}")]
+    private static PointerDeclarationStatement MakePointerDeclarationStatement(
+        IdentifierReference pointerTypeName,
+        IToken<EngLangTokenType> isKeyword,
+        IToken<EngLangTokenType> indefiniteArticleKeyword,
+        IToken<EngLangTokenType> pointerKeyword,
+        IToken<EngLangTokenType> toKeyword,
+        TypeIdentifierReference baseType)
+    {
+        var range = new Yoakke.SynKit.Text.Range(pointerKeyword.Range, baseType.Range);
+        return new PointerDeclarationStatement(pointerTypeName, baseType, range);
+    }
 
     [Rule($"variable_expression : {IdentifierReference}")]
     private static VariableExpression MakeVariableExpression(IdentifierReference e) => new (e, e.Range);
@@ -496,6 +508,7 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule("simple_statement : expression_or_return_statement")]
     [Rule("simple_statement : variable_declaration_statement")]
+    [Rule("simple_statement : pointer_type_declaration_statement")]
     [Rule("simple_statement : if_statement")]
     [Rule("simple_statement : shape_declaration_statement")]
     [Rule("simple_statement : statementyy")]

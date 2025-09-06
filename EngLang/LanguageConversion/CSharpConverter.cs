@@ -29,6 +29,8 @@ public class CSharpConverter : ILanguageConverter
                 return ConvertShapeDeclaration(shapeDeclaration);
             case IdentifierReference identifierReference:
                 return ConvertIdentifierReference(identifierReference);
+            case TypeIdentifierReference typeIdentifierReference:
+                return ConvertTypeIdentifierReference(typeIdentifierReference);
             default:
                 throw new NotImplementedException($"Syntax node {node} is not supported");
         }
@@ -253,6 +255,10 @@ public class CSharpConverter : ILanguageConverter
                 }
 
                 builder.AppendLine(invocationStatementText);
+                break;
+            case PointerDeclarationStatement pointerDeclarationStatement:
+                builder.AppendLine("public class " + ConvertIdentifierReference(pointerDeclarationStatement.PointerType)
+                    + "(" + Convert(pointerDeclarationStatement.BaseType) + " " + ConvertToIdentifier(pointerDeclarationStatement.BaseType.Name) + "); // pointer");
                 break;
             case InvalidStatement invalidStatement:
                 var invalidStatementString = string.Join(" ", invalidStatement.Tokens.Select(_ => _.Text));
