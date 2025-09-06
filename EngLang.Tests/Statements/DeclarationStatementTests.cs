@@ -139,11 +139,6 @@ a pen has
     a width or
     a size at the width.
 """)]
-    [InlineData("""
-a pen has
-    a width or
-    a size at the width.
-""")]
     public void ShapeDeclarationWithSlotsAndAlias(string sentence)
     {
         var parseResult = EngLangParser.Parse(sentence);

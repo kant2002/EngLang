@@ -405,7 +405,7 @@ public partial class EngLangParser : IEngLangParser
                          .ToArray();
     }
 
-    private static Expression NegateConstantExpression(IToken<EngLangTokenType>? token, Expression expression)
+    private static Expression NegateConstantExpression(IToken<EngLangTokenType> token, Expression expression)
     {
         if (expression is IntLiteralExpression intLiteralExpression)
         {
