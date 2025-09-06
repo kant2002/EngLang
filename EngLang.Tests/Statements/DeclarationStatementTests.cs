@@ -314,4 +314,61 @@ a pen has
         Assert.NotNull(pointerDeclarationStatement.BaseType);
         Assert.Equal("data", pointerDeclarationStatement.BaseType.Name);
     }
+
+    [Fact]
+    public void TypedVariableWithIntConstantDeclaration()
+    {
+        var sentence = "The apple is an fruit equal to 5.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var variableStatement = Assert.IsType<VariableDeclarationStatement>(statement);
+        var variableDeclaration = variableStatement.Declaration;
+        Assert.Equal("apple", variableDeclaration.Name);
+        Assert.Equal("fruit", variableDeclaration.TypeName.Name);
+        Assert.NotNull(variableDeclaration.Expression);
+        var literal = Assert.IsType<IntLiteralExpression>(variableDeclaration.Expression);
+        Assert.Equal(5, literal.Value);
+    }
+
+    [Fact]
+    public void TypedVariableWithRatioConstantDeclaration()
+    {
+        var sentence = "The apple is an fruit equal to 5/2.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var variableStatement = Assert.IsType<VariableDeclarationStatement>(statement);
+        var variableDeclaration = variableStatement.Declaration;
+        Assert.Equal("apple", variableDeclaration.Name);
+        Assert.Equal("fruit", variableDeclaration.TypeName.Name);
+        Assert.NotNull(variableDeclaration.Expression);
+        var literal = Assert.IsType<RatioLiteralExpression>(variableDeclaration.Expression);
+        Assert.Equal(5, literal.Numerator);
+        Assert.Equal(2, literal.Denominator);
+    }
+
+    [Fact]
+    public void TypedVariableWithInchConstantDeclaration()
+    {
+        var sentence = "The apple is an fruit equal to 5/2 inch.";
+
+        var parseResult = EngLangParser.Parse(sentence);
+
+        var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
+        var statement = Assert.Single(paragraph.Statements);
+        var variableStatement = Assert.IsType<VariableDeclarationStatement>(statement);
+        var variableDeclaration = variableStatement.Declaration;
+        Assert.Equal("apple", variableDeclaration.Name);
+        Assert.Equal("fruit", variableDeclaration.TypeName.Name);
+        Assert.NotNull(variableDeclaration.Expression);
+        var inchLiteral = Assert.IsType<InchLiteralExpression>(variableDeclaration.Expression);
+        var literal = Assert.IsType<RatioLiteralExpression>(inchLiteral.Value);
+        Assert.Equal(5, literal.Numerator);
+        Assert.Equal(2, literal.Denominator);
+    }
 }

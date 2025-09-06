@@ -36,6 +36,8 @@
             IdentifierReference ir => typeName + "(" + ir.Name + ")",
             TypeIdentifierReference ir => typeName + "(" + ir.Name + ")",
             IntLiteralExpression ile => typeName + "(" + ile.Value + ")",
+            RatioLiteralExpression rle => typeName + $"({rle.Numerator}/{rle.Denominator})",
+            InchLiteralExpression ile => typeName + "(" + GetNodeText(ile.Value) + ")",
             LabeledStatement ls => typeName + "(" + ls.Marker + ")(" + string.Join(", ", ls.Parameters.Select(GetNodeText)) + ")",
             LogicalExpression le => typeName + "(" + le.Operator + ")",
             MathExpression me => typeName + "(" + me.Operator + ")",
