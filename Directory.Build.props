@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
         <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
-        <LangVersion>12</LangVersion>
+        <LangVersion>preview</LangVersion>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     </PropertyGroup>
 </Project>
