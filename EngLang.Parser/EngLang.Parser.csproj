@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <!--<DefineConstants>SPACY</DefineConstants>-->
@@ -13,6 +13,7 @@
         <PackageReference Include="Catalyst.Spacy" Version="1.0.54164" />
         <PackageReference Include="Catalyst.Models.English" Version="1.0.30952" />
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
+        <PackageReference Include="NuGet.CommandLine" Version="5.11.6" />
     </ItemGroup>
 
     <ItemGroup>
