@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -8,15 +8,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Blazorise.Bootstrap5" Version="1.8.1" />
-        <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.8.1" />
-        <PackageReference Include="Blazorise.TreeView" Version="1.8.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0-rc.1.25451.107" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0-rc.1.25451.107" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
-        <PackageReference Include="NuGet.CommandLine" Version="5.11.6" />
-        <PackageReference Include="Catalyst" Version="1.0.54164" />
-        <PackageReference Include="Catalyst.Models.English" Version="1.0.30952" />
+        <PackageReference Include="Blazorise.Bootstrap5" />
+        <PackageReference Include="Blazorise.Icons.FontAwesome" />
+        <PackageReference Include="Blazorise.TreeView" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.Web.LibraryManager.Build" />
+        <PackageReference Include="NuGet.CommandLine" />
+        <PackageReference Include="Catalyst" />
+        <PackageReference Include="Catalyst.Models.English" />
     </ItemGroup>
 
     <ItemGroup>

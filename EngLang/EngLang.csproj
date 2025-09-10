@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Humanizer.Core" Version="2.14.1" />
-    <PackageReference Include="Yoakke.SynKit.Lexer" Version="2025.4.30-3.6.42-nightly" />
-    <PackageReference Include="Yoakke.SynKit.Lexer.Generator" Version="2025.4.30-3.6.42-nightly" />
-    <PackageReference Include="Yoakke.SynKit.Parser" Version="2025.4.30-3.6.42-nightly" />
-    <PackageReference Include="Yoakke.SynKit.Parser.Generator" Version="2025.4.30-3.6.42-nightly" />
+    <PackageReference Include="Humanizer.Core" />
+    <PackageReference Include="Yoakke.SynKit.Lexer" />
+    <PackageReference Include="Yoakke.SynKit.Lexer.Generator" />
+    <PackageReference Include="Yoakke.SynKit.Parser" />
+    <PackageReference Include="Yoakke.SynKit.Parser.Generator" />
   </ItemGroup>
 
 </Project>
