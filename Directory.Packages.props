@@ -3,8 +3,8 @@
     <PackageVersion Include="Blazorise.Bootstrap5" Version="1.8.1" />
     <PackageVersion Include="Blazorise.Icons.FontAwesome" Version="1.8.1" />
     <PackageVersion Include="Blazorise.TreeView" Version="1.8.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0-rc.1.25451.107" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0-rc.1.25451.107" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
     <PackageVersion Include="NuGet.CommandLine" Version="5.11.6" />
     <PackageVersion Include="Catalyst" Version="1.0.54164" />
@@ -16,7 +16,7 @@
     <PackageVersion Include="Yoakke.SynKit.Parser.Generator" Version="2025.4.30-3.6.42-nightly" />
     <PackageVersion Include="Catalyst.Spacy" Version="1.0.54164" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
