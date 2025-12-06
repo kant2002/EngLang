@@ -100,14 +100,8 @@ public class JavaScriptConverter : ILanguageConverter
                 return $"new byte[] {{ {string.Join(", ", byteArrayLiteralExpression.Value)} }}";
             case VariableExpression variableExpression:
                 return $"{ConvertIdentifierReference(variableExpression.Identifier)}";
-            case InPlaceAdditionExpression additionExpression:
-                return $"{ConvertIdentifierReference(additionExpression.TargetVariable)} += {ConvertExpression(additionExpression.Addend)}";
-            case InPlaceSubtractExpression substractExpression:
-                return $"{ConvertIdentifierReference(substractExpression.TargetVariable)} -= {ConvertExpression(substractExpression.Subtrahend)}";
-            case InPlaceMultiplyExpression multiplyExpression:
-                return $"{ConvertIdentifierReference(multiplyExpression.TargetVariable)} *= {ConvertExpression(multiplyExpression.Factor)}";
-            case InPlaceDivisionExpression divisionExpression:
-                return $"{ConvertIdentifierReference(divisionExpression.TargetVariable)} /= {ConvertExpression(divisionExpression.Denominator)}";
+            case InPlaceMathExpression inplaceMathExpression:
+                return $"{ConvertIdentifierReference(inplaceMathExpression.TargetVariable)} {Convert(inplaceMathExpression.Operator)}= {ConvertExpression(inplaceMathExpression.ChangeValue)}";
             case AssignmentExpression assignmentExpression:
                 return $"{ConvertIdentifierReference(assignmentExpression.Variable)} = {ConvertExpression(assignmentExpression.Expression)}";
             case InvalidExpression invalidExpression:

@@ -80,4 +80,15 @@ public class VirtualMachineTests
         var variableValue = vm.GetVariableValue("value");
         Assert.Equal(30, (long)variableValue);
     }
+    [Fact]
+    public void Multiply()
+    {
+        var sentence = "let a value equals 10. multiply a value by 42.\n";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(420, (long)variableValue);
+    }
 }

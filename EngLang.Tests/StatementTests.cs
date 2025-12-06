@@ -14,10 +14,11 @@ public class StatementTests
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
         var additionStatement = Assert.IsType<ExpressionStatement>(Assert.Single(paragraph.Statements));
-        var additionExpression = Assert.IsType<InPlaceAdditionExpression>(additionStatement.Expression);
-        var addend = Assert.IsType<IntLiteralExpression>(additionExpression.Addend);
+        var additionExpression = Assert.IsType<InPlaceMathExpression>(additionStatement.Expression);
+        var addend = Assert.IsType<IntLiteralExpression>(additionExpression.ChangeValue);
         Assert.Equal(42, addend.Value);
         Assert.Equal("value", additionExpression.TargetVariable.Name.Name);
+        Assert.Equal(MathOperator.Plus, additionExpression.Operator);
     }
 
     [Fact]
@@ -29,10 +30,10 @@ public class StatementTests
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
         Assert.Equal(4, paragraph.Statements.Count);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression);
-        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression);
-        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression);
-        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression);
+        Assert.Equal(MathOperator.Plus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression).Operator);
+        Assert.Equal(MathOperator.Minus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression).Operator);
+        Assert.Equal(MathOperator.Multiply, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression).Operator);
+        Assert.Equal(MathOperator.Divide, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression).Operator);
     }
 
     [Fact]
@@ -44,10 +45,10 @@ public class StatementTests
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
         Assert.Equal(4, paragraph.Statements.Count);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression);
-        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression);
-        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression);
-        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression);
+        Assert.Equal(MathOperator.Plus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression).Operator);
+        Assert.Equal(MathOperator.Minus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression).Operator);
+        Assert.Equal(MathOperator.Multiply, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression).Operator);
+        Assert.Equal(MathOperator.Divide, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression).Operator);
     }
 
     [Fact]
@@ -65,10 +66,10 @@ divide a value by 42.
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
         var blockStatement = paragraph;
         Assert.Equal(4, blockStatement.Statements.Count);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
-        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
-        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[2]).Expression);
-        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[3]).Expression);
+        Assert.Equal(MathOperator.Plus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression).Operator);
+        Assert.Equal(MathOperator.Minus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression).Operator);
+        Assert.Equal(MathOperator.Multiply, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression).Operator);
+        Assert.Equal(MathOperator.Divide, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression).Operator);
     }
 
     [Fact]
@@ -83,10 +84,10 @@ divide a value by 42.";
 
         var paragraph = Assert.Single(Assert.IsType<ParagraphList>(parseResult).Paragraphs);
         Assert.Equal(4, paragraph.Statements.Count);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression);
-        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression);
-        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression);
-        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression);
+        Assert.Equal(MathOperator.Plus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression).Operator);
+        Assert.Equal(MathOperator.Minus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression).Operator);
+        Assert.Equal(MathOperator.Multiply, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression).Operator);
+        Assert.Equal(MathOperator.Divide, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[3]).Expression).Operator);
     }
 
     [Fact]
@@ -107,12 +108,12 @@ divide a value by 42.
         var paragraph = paragraphs[0];
         var blockStatement = paragraph;
         Assert.Equal(3, blockStatement.Statements.Count);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[0]).Expression);
-        Assert.IsType<InPlaceSubtractExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[1]).Expression);
-        Assert.IsType<InPlaceMultiplyExpression>(Assert.IsType<ExpressionStatement>(blockStatement.Statements[2]).Expression);
+        Assert.Equal(MathOperator.Plus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[0]).Expression).Operator);
+        Assert.Equal(MathOperator.Minus, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[1]).Expression).Operator);
+        Assert.Equal(MathOperator.Multiply, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph.Statements[2]).Expression).Operator);
 
         var paragraph2 = paragraphs[1];
-        Assert.IsType<InPlaceDivisionExpression>(Assert.IsType<ExpressionStatement>(Assert.Single(paragraph2.Statements)).Expression);
+        Assert.Equal(MathOperator.Divide, Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(paragraph2.Statements[0]).Expression).Operator);
     }
 
     [Fact]

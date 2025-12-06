@@ -16,7 +16,7 @@ public class IfTests
         var statement = Assert.Single(paragraph.Statements);
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
+        Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
     }
 
     [Theory]
@@ -40,7 +40,7 @@ public class IfTests
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         var logicalExpression = Assert.IsType<LogicalExpression>(ifStatement.Condition);
         Assert.Equal(expected, logicalExpression.Operator);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
+        Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class IfTests
         var statement = Assert.Single(paragraph.Statements);
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
+        Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(ifStatement.Then).Expression);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class IfTests
         IfStatement ifStatement = Assert.IsType<IfStatement>(statement);
         Assert.IsType<LogicalExpression>(ifStatement.Condition);
         var thenBlock = Assert.IsType<BlockStatement>(ifStatement.Then);
-        Assert.IsType<InPlaceAdditionExpression>(Assert.IsType<ExpressionStatement>(thenBlock.Statements[0]).Expression);
+        Assert.IsType<InPlaceMathExpression>(Assert.IsType<ExpressionStatement>(thenBlock.Statements[0]).Expression);
         Assert.IsType<InvocationStatement>(thenBlock.Statements[1]);
     }
 

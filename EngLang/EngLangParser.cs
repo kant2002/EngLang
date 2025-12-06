@@ -320,50 +320,50 @@ public partial class EngLangParser : IEngLangParser
 
     [Rule($"inplace_addition_expression : 'add' math_expression 'to' {IdentifierReference}")]
     [Rule($"inplace_addition_expression : 'Add' math_expression 'to' {IdentifierReference}")]
-    private static InPlaceAdditionExpression MakeInPlaceAdditionExpression(
+    private static InPlaceMathExpression MakeInPlaceAdditionExpression(
         EngLangToken addToken,
         Expression literalExpression,
         EngLangToken toToken,
         IdentifierReference identifierReference)
     {
         var range = new Yoakke.SynKit.Text.Range(addToken.Range, identifierReference.Range);
-        return new(literalExpression, identifierReference, range);
+        return new(MathOperator.Plus, literalExpression, identifierReference, range);
     }
 
     [Rule($"inplace_subtract_expression : 'subtract' math_expression 'from' {IdentifierReference}")]
     [Rule($"inplace_subtract_expression : 'Subtract' math_expression 'from' {IdentifierReference}")]
-    private static InPlaceSubtractExpression MakeInPlaceSubtractExpression(
+    private static InPlaceMathExpression MakeInPlaceSubtractExpression(
         EngLangToken subtractToken,
         Expression literalExpression,
         EngLangToken fromToken,
         IdentifierReference identifierReference)
     {
         var range = new Yoakke.SynKit.Text.Range(subtractToken.Range, identifierReference.Range);
-        return new(literalExpression, identifierReference, range);
+        return new(MathOperator.Minus, literalExpression, identifierReference, range);
     }
 
     [Rule($"inplace_multiply_expression : 'multiply' {IdentifierReference} 'by' math_expression")]
     [Rule($"inplace_multiply_expression : 'Multiply' {IdentifierReference} 'by' math_expression")]
-    private static InPlaceMultiplyExpression MakeInPlaceMultiplyExpression(
+    private static InPlaceMathExpression MakeInPlaceMultiplyExpression(
         EngLangToken multiplyToken,
         IdentifierReference identifierReference,
         EngLangToken byToken,
         Expression literalExpression)
     {
         var range = new Yoakke.SynKit.Text.Range(multiplyToken.Range, literalExpression.Range);
-        return new(literalExpression, identifierReference, range);
+        return new(MathOperator.Multiply, literalExpression, identifierReference, range);
     }
 
     [Rule($"inplace_divide_expression : 'divide' {IdentifierReference} 'by' math_expression")]
     [Rule($"inplace_divide_expression : 'Divide' {IdentifierReference} 'by' math_expression")]
-    private static InPlaceDivisionExpression MakeInPlaceDivisionExpression(
+    private static InPlaceMathExpression MakeInPlaceDivisionExpression(
         EngLangToken multiplyToken,
         IdentifierReference identifierReference,
         EngLangToken byToken,
         Expression literalExpression)
     {
         var range = new Yoakke.SynKit.Text.Range(multiplyToken.Range, literalExpression.Range);
-        return new(literalExpression, identifierReference, range);
+        return new(MathOperator.Divide, literalExpression, identifierReference, range);
     }
 
     [Rule("literal_expression : StringLiteral")]

@@ -1,9 +1,0 @@
-using System.Collections.Generic;
-
-namespace EngLang;
-
-public record InPlaceSubtractExpression(Expression Subtrahend, IdentifierReference TargetVariable, Yoakke.SynKit.Text.Range Range) : Expression(Range)
-{
-    public override IEnumerable<SyntaxNode> Children => new SyntaxNode[] { Subtrahend, TargetVariable };
-}
-

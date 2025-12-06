@@ -91,13 +91,22 @@ public class EngLangVm
                         setter(EvaluateExpression(assignmentExpression.Expression));
                         return;
                     }
-                    if (expressionStatement.Expression is InPlaceAdditionExpression inplaceExpression)
+                    if (expressionStatement.Expression is InPlaceMathExpression inplaceMathExpression)
                     {
-                        var variableName = inplaceExpression.TargetVariable.Name.Name;
-                        var getter = GetVariableGetter(inplaceExpression.TargetVariable);
-                        var setter = GetVariableSetter(inplaceExpression.TargetVariable);
-                        var addend = EvaluateExpression(inplaceExpression.Addend);
-                        setter((long)getter() + (long)addend);
+                        var variableName = inplaceMathExpression.TargetVariable.Name.Name;
+                        var getter = GetVariableGetter(inplaceMathExpression.TargetVariable);
+                        var setter = GetVariableSetter(inplaceMathExpression.TargetVariable);
+                        var oldValue = (long)getter();
+                        var addend = (long)EvaluateExpression(inplaceMathExpression.ChangeValue);
+                        var newValue = inplaceMathExpression.Operator switch
+                        {
+                            MathOperator.Plus => oldValue + addend,
+                            MathOperator.Minus => oldValue - addend,
+                            MathOperator.Multiply => oldValue * addend,
+                            MathOperator.Divide => oldValue / addend,
+                            _ => throw new InvalidOperationException($"Unsupported inplace math operation {inplaceMathExpression.Operator}"),
+                        };
+                        setter(newValue);
                         return;
                     }
                     Debug.Assert(false, $"Expression statements which are not assignment expressions are not yet supported. Expression type {expressionStatement.Expression.GetType().Name}");
