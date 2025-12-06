@@ -58,4 +58,26 @@ public class VirtualMachineTests
         var variableValue = vm.GetVariableValue("greeting");
         Assert.Equal("Hello", (string)variableValue);
     }
+    [Fact]
+    public void ImplmicitVariableDeclaration()
+    {
+        var sentence = "let a value equals 10.";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(10, (long)variableValue);
+    }
+    [Fact]
+    public void Addition()
+    {
+        var sentence = "let a value equals 10. add 20 to a value.";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(30, (long)variableValue);
+    }
 }

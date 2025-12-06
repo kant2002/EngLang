@@ -50,31 +50,58 @@ public class EngLangVm
                 Debug.Assert(false, "Block statements are not yet supported.");
                 break;
             case VariableDeclarationStatement variableDeclarationStatement:
-                var declaration = variableDeclarationStatement.Declaration;
-                if (this.variables.ContainsKey(declaration.Name))
                 {
-                    throw new EngLangRuntimeException($"Variable '{declaration.Name}' is already declared.");
-                }
+                    var declaration = variableDeclarationStatement.Declaration;
+                    if (this.variables.ContainsKey(declaration.Name))
+                    {
+                        throw new EngLangRuntimeException($"Variable '{declaration.Name}' is already declared.");
+                    }
 
-                var variableType = new VmTypeIdentifierReference()
-                {
-                    Type = declaration.TypeName.Name
-                };
-                this.variables.Add(declaration.Name, new VmVariableDeclaration(declaration.Name, variableType));
-                if (declaration.Expression is { } expression)
-                {
-                    this.variableValues.Add(declaration.Name, EvaluateExpression(expression));
-                }
-                else
-                {
-                    this.variableValues.Add(declaration.Name, null);
+                    var variableName = declaration.Name;
+                    var variableType = new VmTypeIdentifierReference()
+                    {
+                        Type = declaration.TypeName.Name
+                    };
+                    RegisterVariable(variableName, variableType);
+                    if (declaration.Expression is { } expression)
+                    {
+                        this.variableValues.Add(variableName, EvaluateExpression(expression));
+                    }
+                    else
+                    {
+                        this.variableValues.Add(variableName, null);
+                    }
                 }
                 break;
             case ShapeDeclarationStatement shapeDeclarationStatement:
                 Debug.Assert(false, "Shape declaration statements are not yet supported.");
                 break;
             case ExpressionStatement expressionStatement:
-                Debug.Assert(false, "Expression statements are not yet supported.");
+                {
+                    if (expressionStatement.Expression is AssignmentExpression assignmentExpression)
+                    {
+                        var variableName = assignmentExpression.Variable.Name.Name;
+                        var variableType = assignmentExpression.Variable.Type.Name;
+                        if (GetVariableDeclaration(variableName) is null)
+                        {
+                            RegisterVariable(variableName, new() { Type = variableType });
+                        }
+
+                        var setter = GetVariableSetter(assignmentExpression.Variable);
+                        setter(EvaluateExpression(assignmentExpression.Expression));
+                        return;
+                    }
+                    if (expressionStatement.Expression is InPlaceAdditionExpression inplaceExpression)
+                    {
+                        var variableName = inplaceExpression.TargetVariable.Name.Name;
+                        var getter = GetVariableGetter(inplaceExpression.TargetVariable);
+                        var setter = GetVariableSetter(inplaceExpression.TargetVariable);
+                        var addend = EvaluateExpression(inplaceExpression.Addend);
+                        setter((long)getter() + (long)addend);
+                        return;
+                    }
+                    Debug.Assert(false, $"Expression statements which are not assignment expressions are not yet supported. Expression type {expressionStatement.Expression.GetType().Name}");
+                }
                 break;
             case IfStatement expressionStatement:
                 Debug.Assert(false, "If statements are not yet supported.");
@@ -105,6 +132,41 @@ public class EngLangVm
             default:
                 throw new NotImplementedException($"Statement of type {statement.GetType()} is not supported by converter");
         }
+    }
+
+    private void RegisterVariable(string variableName, VmTypeIdentifierReference variableType)
+    {
+        this.variables.Add(variableName, new VmVariableDeclaration(variableName, variableType));
+    }
+
+    private Action<object?> GetVariableSetter(IdentifierReference variable)
+    {
+        Debug.Assert(variable.Owner is null, "Variable owners are not yet supported.");
+        Debug.Assert(variable.Type is null || variable.Type.Name == variable.Name.Name, "Variable types is not supported");
+        var variableName = variable.Name.Name;
+        return (Action<object?>)(value =>
+        {
+            if (!this.variables.ContainsKey(variableName))
+            {
+                throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+            }
+            this.variableValues[variableName] = value;
+        });
+    }
+
+    private Func<object?> GetVariableGetter(IdentifierReference variable)
+    {
+        Debug.Assert(variable.Owner is null, "Variable owners are not yet supported.");
+        Debug.Assert(variable.Type is null || variable.Type.Name == variable.Name.Name, "Variable types is not supported");
+        var variableName = variable.Name.Name;
+        return (Func<object?>)(() =>
+        {
+            if (!this.variables.ContainsKey(variableName))
+            {
+                throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+            }
+            return this.variableValues.TryGetValue(variableName, out var value) ? value : null;
+        });
     }
 
     private object? EvaluateExpression(Expression expression)
