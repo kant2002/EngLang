@@ -1213,7 +1213,7 @@ public partial class EngLangParser : IEngLangParser
 
     }
 
-    private static ParagraphList ParseParagraphList(string sourceCode, string? compilationContext = null)
+    private static ParagraphList ParseParagraphList(string sourceCode, string? compilationContext)
     {
         var lexer = new EngLangLexer(sourceCode);
         var parser = new EngLangParser(lexer);
