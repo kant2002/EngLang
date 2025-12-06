@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 namespace EngLang.Vm;
 
@@ -11,6 +10,7 @@ namespace EngLang.Vm;
 public class EngLangVm
 {
     private Dictionary<string, VmVariableDeclaration> variables = new();
+    private Dictionary<string, object?> variableValues = new();
 
     public void ExecuteCode(string sentence)
     {
@@ -24,6 +24,13 @@ public class EngLangVm
     public VmVariableDeclaration? GetVariableDeclaration(string variableName)
     {
         return this.variables.TryGetValue(variableName, out var declaration) ? declaration : null;
+    }
+
+    public object GetVariableValue(string variableName)
+    {
+        return variableValues.TryGetValue(variableName, out var value)
+            ? value
+            : throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
     }
 
     private void InterpretParagraph(Paragraph paragraph)
@@ -54,6 +61,14 @@ public class EngLangVm
                     Type = declaration.TypeName.Name
                 };
                 this.variables.Add(declaration.Name, new VmVariableDeclaration(declaration.Name, variableType));
+                if (declaration.Expression is { } expression)
+                {
+                    this.variableValues.Add(declaration.Name, EvaluateExpression(expression));
+                }
+                else
+                {
+                    this.variableValues.Add(declaration.Name, null);
+                }
                 break;
             case ShapeDeclarationStatement shapeDeclarationStatement:
                 Debug.Assert(false, "Shape declaration statements are not yet supported.");
@@ -90,5 +105,19 @@ public class EngLangVm
             default:
                 throw new NotImplementedException($"Statement of type {statement.GetType()} is not supported by converter");
         }
+    }
+
+    private object? EvaluateExpression(Expression expression)
+    {
+        switch (expression)
+        {
+            case NullLiteralExpression nullLiteralExpression:
+                return null;
+            case IntLiteralExpression intLiteralExpression:
+                return intLiteralExpression.Value;
+            case StringLiteralExpression stringLiteralExpression:
+                return stringLiteralExpression.Value;
+        }
+        throw new NotImplementedException($"Expression of type {expression.GetType().Name} is not supported.");
     }
 }

@@ -36,4 +36,26 @@ public class VirtualMachineTests
             Assert.Equal("Variable 'width' is already declared.", ex.Message);
         }
     }
+    [Fact]
+    public void NewVariableDeclarationWithIntInitializer()
+    {
+        var sentence = "the width is a number equals to 5.";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("width");
+        Assert.Equal(5, (long)variableValue);
+    }
+    [Fact]
+    public void NewVariableDeclarationWithStringInitializer()
+    {
+        var sentence = "the greeting is a string equals to \"Hello\".";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("greeting");
+        Assert.Equal("Hello", (string)variableValue);
+    }
 }
