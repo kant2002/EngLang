@@ -294,3 +294,4 @@ look really wierd.
 - [17] https://link.springer.com/article/10.1007/s10462-015-9449-3
 - [18] http://www.bitsavers.org/pdf/univac/flow-matic/U1518_FLOW-MATIC_Programming_System_1958.pdf
 - [19] https://en.wikipedia.org/wiki/Discourse_representation_theory (I should study this part)
+- [20] https://alistairmavin.com/ears/
