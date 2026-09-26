@@ -113,7 +113,12 @@ public class EngLangVm
                 }
                 break;
             case IfStatement expressionStatement:
-                Debug.Assert(false, "If statements are not yet supported.");
+                var conditionValue = EvaluateExpression(expressionStatement.Condition);
+                if (AsBoolean(conditionValue))
+                {
+                    InterpretStatement(expressionStatement.Then);
+                }
+
                 break;
             case ResultStatement resultStatement:
                 Debug.Assert(false, "Result statements are not yet supported.");
@@ -188,7 +193,56 @@ public class EngLangVm
                 return intLiteralExpression.Value;
             case StringLiteralExpression stringLiteralExpression:
                 return stringLiteralExpression.Value;
+            case VariableExpression variableExpression:
+                var getter = GetVariableGetter(variableExpression.Identifier);
+                return getter();
+            case LogicalExpression logicalExpression:
+                var first = (long)EvaluateExpression(logicalExpression.FirstOperand);
+                switch (logicalExpression.Operator)
+                {
+                    case LogicalOperator.Equals:
+                        {
+                            var second = (long)EvaluateExpression(logicalExpression.SecondOperand);
+                            return AsLogicalValue(first == second);
+                        }
+                    case LogicalOperator.NotEquals:
+                        {
+                            var second = (long)EvaluateExpression(logicalExpression.SecondOperand);
+                            return AsLogicalValue(first != second);
+                        }
+                    case LogicalOperator.Less:
+                        {
+                            var second = (long)EvaluateExpression(logicalExpression.SecondOperand);
+                            return AsLogicalValue(first < second);
+                        }
+                    case LogicalOperator.Greater:
+                        {
+                            var second = (long)EvaluateExpression(logicalExpression.SecondOperand);
+                            return AsLogicalValue(first > second);
+                        }
+                    case LogicalOperator.LessOrEquals:
+                        {
+                            var second = (long)EvaluateExpression(logicalExpression.SecondOperand);
+                            return AsLogicalValue(first <= second);
+                        }
+                    case LogicalOperator.GreaterOrEquals:
+                        {
+                            var second = (long)EvaluateExpression(logicalExpression.SecondOperand);
+                            return AsLogicalValue(first >= second);
+                        }
+                    default:
+                        throw new NotImplementedException($"Logical expression with operator {logicalExpression.Operator} is not supported.");
+                }
         }
         throw new NotImplementedException($"Expression of type {expression.GetType().Name} is not supported.");
+    }
+
+    bool AsBoolean(object value)
+    {
+        return (long)value == 1;
+    }
+    long AsLogicalValue(bool value)
+    {
+        return value ? 1L : 0L;
     }
 }
