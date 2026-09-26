@@ -8,7 +8,7 @@ dependencies = [
     "nltk>=3.10.3",
     "pip>=25.3",
     "spacy>=3.8.16",
-    "stanza>=1.11.0",
+    "stanza>=1.14.0",
 ]
 
 [build]
