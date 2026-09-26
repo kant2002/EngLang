@@ -91,4 +91,81 @@ public class VirtualMachineTests
         var variableValue = vm.GetVariableValue("value");
         Assert.Equal(420, (long)variableValue);
     }
+    [Fact]
+    public void ConditionalExpressionTrueCase()
+    {
+        var sentence = "let a value equals 10. if a value is 10 then multiply a value by 42.\n";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(420, (long)variableValue);
+    }
+    [Fact]
+    public void ConditionalExpressionFalseCase()
+    {
+        var sentence = "let a value equals 10. if a value is 11 then multiply a value by 42.\n";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(10, (long)variableValue);
+    }
+    [Fact]
+    public void LogicalExpressionNotEqual()
+    {
+        var sentence = "let a value equals 10. if a value is not 11 then multiply a value by 42.\n";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(420, (long)variableValue);
+    }
+    [Fact]
+    public void LogicalExpressionLess()
+    {
+        var sentence = "let a value equals 10. if a value less than 11 then multiply a value by 42.\n";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(420, (long)variableValue);
+    }
+    [Fact]
+    public void LogicalExpressionGreater()
+    {
+        var sentence = "let a value equals 10. if a value greater than 10 then multiply a value by 42.\n";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(10, (long)variableValue);
+    }
+    [Fact]
+    public void LogicalExpressionLessThan()
+    {
+        var sentence = "let a value equals 10. if a value at most 10 then multiply a value by 6. if a value at most 9 then multiply a value by 7.\n";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(60, (long)variableValue);
+    }
+    [Fact]
+    public void LogicalExpressionGreaterOrEqual()
+    {
+        var sentence = "let a value equals 10. if a value at least 10 then multiply a value by 6. if a value at least 9 then multiply a value by 7.\n";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var variableValue = vm.GetVariableValue("value");
+        Assert.Equal(420, (long)variableValue);
+    }
 }
