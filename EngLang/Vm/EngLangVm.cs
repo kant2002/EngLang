@@ -9,8 +9,25 @@ namespace EngLang.Vm;
 /// </summary>
 public class EngLangVm
 {
-    private Dictionary<string, VmVariableDeclaration> variables = new();
-    private Dictionary<string, object?> variableValues = new();
+    private ExecutionScope globalScope = new();
+    private Dictionary<string, VmFunctionDeclaration> functions = new();
+
+    public object GetVariableValue(string variableName)
+    {
+        return globalScope.GetVariableValue(variableName);
+    }
+
+    public VmVariableDeclaration? GetVariableDeclaration(string variableName)
+    {
+        return globalScope.GetVariableDeclaration(variableName);
+    }
+
+    public VmFunctionDeclaration? GetVmFunction(string functionName)
+    {
+        return functions.TryGetValue(functionName, out var func)
+            ? func
+            : null;
+    }
 
     public void ExecuteCode(string sentence)
     {
@@ -21,25 +38,22 @@ public class EngLangVm
         }
     }
 
-    public VmVariableDeclaration? GetVariableDeclaration(string variableName)
-    {
-        return this.variables.TryGetValue(variableName, out var declaration) ? declaration : null;
-    }
-
-    public object GetVariableValue(string variableName)
-    {
-        return variableValues.TryGetValue(variableName, out var value)
-            ? value
-            : throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
-    }
-
     private void InterpretParagraph(Paragraph paragraph)
     {
-        Debug.Assert(paragraph.Label is null, "Paragraph labels are not yet supported.");
-        foreach (var statement in paragraph.Statements)
+        if (paragraph.Label is { } label)
         {
-            this.InterpretStatement(statement);
+            var name = string.Join("", label.Markers);
+            functions.Add(name + "@" + label.Parameters.Length,
+                new VmFunctionDeclaration(name, label.Parameters.Length));
         }
+        else
+        {
+            foreach (var statement in paragraph.Statements)
+            {
+                this.InterpretStatement(statement);
+            }
+        }
+        
     }
 
     private void InterpretStatement(Statement statement)
@@ -52,7 +66,7 @@ public class EngLangVm
             case VariableDeclarationStatement variableDeclarationStatement:
                 {
                     var declaration = variableDeclarationStatement.Declaration;
-                    if (this.variables.ContainsKey(declaration.Name))
+                    if (this.globalScope.GetVariableDeclaration(declaration.Name) is { })
                     {
                         throw new EngLangRuntimeException($"Variable '{declaration.Name}' is already declared.");
                     }
@@ -62,15 +76,9 @@ public class EngLangVm
                     {
                         Type = declaration.TypeName.Name
                     };
-                    RegisterVariable(variableName, variableType);
-                    if (declaration.Expression is { } expression)
-                    {
-                        this.variableValues.Add(variableName, EvaluateExpression(expression));
-                    }
-                    else
-                    {
-                        this.variableValues.Add(variableName, null);
-                    }
+                    globalScope.RegisterVariable(variableName, variableType);
+                    globalScope.RegisterVariableValue(variableName,
+                        declaration.Expression is { } expression ? EvaluateExpression(expression) : null);
                 }
                 break;
             case ShapeDeclarationStatement shapeDeclarationStatement:
@@ -82,20 +90,20 @@ public class EngLangVm
                     {
                         var variableName = assignmentExpression.Variable.Name.Name;
                         var variableType = assignmentExpression.Variable.Type.Name;
-                        if (GetVariableDeclaration(variableName) is null)
+                        if (globalScope.GetVariableDeclaration(variableName) is null)
                         {
-                            RegisterVariable(variableName, new() { Type = variableType });
+                            globalScope.RegisterVariable(variableName, new() { Type = variableType });
                         }
 
-                        var setter = GetVariableSetter(assignmentExpression.Variable);
+                        var setter = globalScope.GetVariableSetter(assignmentExpression.Variable);
                         setter(EvaluateExpression(assignmentExpression.Expression));
                         return;
                     }
                     if (expressionStatement.Expression is InPlaceMathExpression inplaceMathExpression)
                     {
                         var variableName = inplaceMathExpression.TargetVariable.Name.Name;
-                        var getter = GetVariableGetter(inplaceMathExpression.TargetVariable);
-                        var setter = GetVariableSetter(inplaceMathExpression.TargetVariable);
+                        var getter = globalScope.GetVariableGetter(inplaceMathExpression.TargetVariable);
+                        var setter = globalScope.GetVariableSetter(inplaceMathExpression.TargetVariable);
                         var oldValue = (long)getter();
                         var addend = (long)EvaluateExpression(inplaceMathExpression.ChangeValue);
                         var newValue = inplaceMathExpression.Operator switch
@@ -148,41 +156,6 @@ public class EngLangVm
         }
     }
 
-    private void RegisterVariable(string variableName, VmTypeIdentifierReference variableType)
-    {
-        this.variables.Add(variableName, new VmVariableDeclaration(variableName, variableType));
-    }
-
-    private Action<object?> GetVariableSetter(IdentifierReference variable)
-    {
-        Debug.Assert(variable.Owner is null, "Variable owners are not yet supported.");
-        Debug.Assert(variable.Type is null || variable.Type.Name == variable.Name.Name, "Variable types is not supported");
-        var variableName = variable.Name.Name;
-        return (Action<object?>)(value =>
-        {
-            if (!this.variables.ContainsKey(variableName))
-            {
-                throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
-            }
-            this.variableValues[variableName] = value;
-        });
-    }
-
-    private Func<object?> GetVariableGetter(IdentifierReference variable)
-    {
-        Debug.Assert(variable.Owner is null, "Variable owners are not yet supported.");
-        Debug.Assert(variable.Type is null || variable.Type.Name == variable.Name.Name, "Variable types is not supported");
-        var variableName = variable.Name.Name;
-        return (Func<object?>)(() =>
-        {
-            if (!this.variables.ContainsKey(variableName))
-            {
-                throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
-            }
-            return this.variableValues.TryGetValue(variableName, out var value) ? value : null;
-        });
-    }
-
     private object? EvaluateExpression(Expression expression)
     {
         switch (expression)
@@ -194,7 +167,7 @@ public class EngLangVm
             case StringLiteralExpression stringLiteralExpression:
                 return stringLiteralExpression.Value;
             case VariableExpression variableExpression:
-                var getter = GetVariableGetter(variableExpression.Identifier);
+                var getter = globalScope.GetVariableGetter(variableExpression.Identifier);
                 return getter();
             case LogicalExpression logicalExpression:
                 var first = (long)EvaluateExpression(logicalExpression.FirstOperand);
