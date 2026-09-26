@@ -168,4 +168,21 @@ public class VirtualMachineTests
         var variableValue = vm.GetVariableValue("value");
         Assert.Equal(420, (long)variableValue);
     }
+    [Fact]
+    public void DeclareFunction()
+    {
+        var sentence = @"To Calculate factorial of a number: if a number is 0 then result is 1.
+if a number is 1 then result is 1.
+let a previous number is a number minus 1.
+calculate factorial of a previous number into a previous factorial.
+result is a previous factorial multiply a number.
+
+";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var factorialFunction = vm.GetVmFunction("Calculate factorial of@1");
+        Assert.NotNull(factorialFunction);
+    }
 }
