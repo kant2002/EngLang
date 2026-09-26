@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework Condition="$(MSBuildProjectExtension) == '.csproj'">net11.0</TargetFramework>
         <!-- Visual Studio don't know how to handle .NET 11 rc1, so locally I would use .NET 10, should not matter-->
-        <TargetFramework Condition="$(MSBuildProjectExtension) == '.csproj' and $(BuildingInsideVisualStudio) == true">net10.0</TargetFramework>
+        <TargetFramework Condition="$(MSBuildProjectExtension) == '.csproj' and ($(BuildingInsideVisualStudio) == true or '$(BuildingForLiveUnitTesting)' == 'true')">net10.0</TargetFramework>
         <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
         <LangVersion>preview</LangVersion>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
