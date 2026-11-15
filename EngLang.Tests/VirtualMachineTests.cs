@@ -204,5 +204,7 @@ Calculate factorial of 5 into a factorial.
 
         var variableValue = vm.GetVariableValue("factorial");
         Assert.Equal(120, (long)variableValue);
+        var variableDeclaration = vm.GetVariableDeclaration("factorial");
+        Assert.NotNull(variableDeclaration);
     }
 }

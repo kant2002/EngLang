@@ -9,17 +9,23 @@ namespace EngLang.Vm;
 /// </summary>
 public class EngLangVm
 {
-    private ExecutionScope globalScope = new();
     private Dictionary<string, VmFunctionDeclaration> functions = new(StringComparer.InvariantCultureIgnoreCase);
+
+    internal ExecutionScope GlobalScope { get; } = new();
+
+    public string[] GetVariableNames()
+    {
+        return GlobalScope.GetVariableNames();
+    }
 
     public object GetVariableValue(string variableName)
     {
-        return globalScope.GetVariableValue(variableName);
+        return GlobalScope.GetVariableValue(variableName);
     }
 
     public VmVariableDeclaration? GetVariableDeclaration(string variableName)
     {
-        return globalScope.GetVariableDeclaration(variableName);
+        return GlobalScope.GetVariableDeclaration(variableName);
     }
 
     public VmFunctionDeclaration? GetVmFunction(string functionName)
@@ -34,7 +40,7 @@ public class EngLangVm
         var parseResult = (ParagraphList)EngLangParser.Parse(sentence);
         foreach (var paragraph in parseResult.Paragraphs)
         {
-            this.InterpretParagraph(globalScope, paragraph);
+            this.InterpretParagraph(GlobalScope, paragraph);
         }
     }
 

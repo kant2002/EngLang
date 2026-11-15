@@ -1,0 +1,48 @@
+@using EngLang.Vm
+
+<button class="btn btn-primary" @onclick="RunCode">Run</button>
+@if (startDate.HasValue && endDate.HasValue)
+{
+    <text>Duration: (@(endDate.Value - startDate.Value).TotalSeconds)</text>
+}
+<h3 class="pt-1">Variables</h3>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Variable</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var variableName in vm.GetVariableNames())
+        {
+            <tr>
+                <td>@variableName</td>
+                <td>@vm.GetVariableValue(variableName)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+
+    [Parameter]
+    public string? SourceCode { get; set; }
+
+    EngLangVm vm = new();
+    DateTime? startDate;
+    DateTime? endDate;
+
+    void RunCode()
+    {
+        if (SourceCode is null)
+        {
+            return;
+        }
+
+        startDate = DateTime.Now;
+        vm = new();
+        vm.ExecuteCode(SourceCode);
+        endDate = DateTime.Now;
+    }
+}

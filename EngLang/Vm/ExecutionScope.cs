@@ -15,6 +15,16 @@ internal class ExecutionScope
         this.parentScope = parentScope;
     }
 
+    public string[] GetVariableNames()
+    {
+        var variableNames = new List<string>(this.variables.Keys);
+        if (this.parentScope is not null)
+        {
+            variableNames.AddRange(this.parentScope.GetVariableNames());
+        }
+        return variableNames.ToArray();
+    }
+
     public VmVariableDeclaration? GetVariableDeclaration(string variableName)
     {
         return this.variables.TryGetValue(variableName, out var declaration)
@@ -44,16 +54,23 @@ internal class ExecutionScope
         return (Action<object?>)(value =>
         {
             var declaration = this.GetVariableDeclaration(variableName);
-            if (!this.variables.ContainsKey(variableName) && declaration is not null)
+            if (!this.variables.ContainsKey(variableName))
             {
-                if (parentScope is null)
+                if (declaration is not null)
                 {
-                    throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+                    if (parentScope is null)
+                    {
+                        throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+                    }
+                    else
+                    {
+                        parentScope.GetVariableSetter(variable)(value);
+                        return;
+                    }
                 }
                 else
                 {
-                    parentScope.GetVariableSetter(variable)(value);
-                    return;
+                    this.variables.Add(variableName, new VmVariableDeclaration(variableName, new VmTypeIdentifierReference() { Type = variable.Type?.Name ?? variableName }));
                 }
             }
             this.variableValues[variableName] = value;
