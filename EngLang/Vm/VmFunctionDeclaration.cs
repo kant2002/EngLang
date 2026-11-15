@@ -8,9 +8,14 @@ public class VmFunctionDeclaration
 {
     public string Name { get; }
     public int ParametersCount { get; }
-    public VmFunctionDeclaration(string name, int parametersCount)
+    public List<Statement> Statements { get; }
+    public IdentifierReference[] Parameters { get; }
+
+    public VmFunctionDeclaration(string name, IdentifierReference[] parameters, List<Statement> statements)
     {
         this.Name = name;
-        this.ParametersCount = parametersCount;
+        this.ParametersCount = parameters.Length;
+        this.Parameters = parameters;
+        this.Statements = statements;
     }
 }

@@ -6,17 +6,29 @@ internal class ExecutionScope
 {
     private Dictionary<string, VmVariableDeclaration> variables = new();
     private Dictionary<string, object?> variableValues = new();
+    private ExecutionScope? parentScope;
+    public ExecutionScope()
+    {
+    }
+    public ExecutionScope(ExecutionScope parentScope)
+    {
+        this.parentScope = parentScope;
+    }
 
     public VmVariableDeclaration? GetVariableDeclaration(string variableName)
     {
-        return this.variables.TryGetValue(variableName, out var declaration) ? declaration : null;
+        return this.variables.TryGetValue(variableName, out var declaration)
+            ? declaration
+            : this.parentScope?.GetVariableDeclaration(variableName);
     }
 
-    public object GetVariableValue(string variableName)
+    public object? GetVariableValue(string variableName)
     {
         return variableValues.TryGetValue(variableName, out var value)
             ? value
-            : throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+            : this.parentScope is null
+                ? throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.")
+                : this.parentScope.GetVariableValue(variableName);
     }
 
     public void RegisterVariable(string variableName, VmTypeIdentifierReference variableType)
@@ -31,9 +43,18 @@ internal class ExecutionScope
         var variableName = variable.Name.Name;
         return (Action<object?>)(value =>
         {
-            if (!this.variables.ContainsKey(variableName))
+            var declaration = this.GetVariableDeclaration(variableName);
+            if (!this.variables.ContainsKey(variableName) && declaration is not null)
             {
-                throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+                if (parentScope is null)
+                {
+                    throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+                }
+                else
+                {
+                    parentScope.GetVariableSetter(variable)(value);
+                    return;
+                }
             }
             this.variableValues[variableName] = value;
         });
@@ -46,10 +67,19 @@ internal class ExecutionScope
         var variableName = variable.Name.Name;
         return (Func<object?>)(() =>
         {
-            if (!this.variables.ContainsKey(variableName))
+            var declaration = this.GetVariableDeclaration(variableName);
+            if (!this.variables.ContainsKey(variableName) && declaration is not null)
             {
-                throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+                if (parentScope is null)
+                {
+                    throw new EngLangRuntimeException($"Variable '{variableName}' is not defined.");
+                }
+                else
+                {
+                    return parentScope.GetVariableGetter(variable)();
+                }
             }
+
             return this.variableValues.TryGetValue(variableName, out var value) ? value : null;
         });
     }
