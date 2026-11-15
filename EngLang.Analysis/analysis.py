@@ -5,12 +5,6 @@ import stanza
 from spacy.language import Language
 from nltk.tree import Tree
 
-nlp: Language = spacy.load("en_core_web_lg")
-
-stanza.download('en', logging_level='WARN')
-stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
-
-
 process_spacy = True
 process_nltk = False
 process_stanza = False
@@ -18,6 +12,13 @@ print_sentence_tree = False
 detect_grammar = False
 print_tagged_tokens = True
 print_nltk_tokens = False
+
+if process_spacy:
+    nlp: Language = spacy.load("en_core_web_lg")
+
+if process_stanza:
+    stanza.download('en', logging_level='WARN')
+    stanza = stanza.Pipeline(lang='en', processors='tokenize,pos')
 
 @Language.component("custom_sentence_boundaries")
 def set_custom_boundaries(doc):
