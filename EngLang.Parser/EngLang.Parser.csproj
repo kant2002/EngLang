@@ -12,6 +12,7 @@
         <PackageReference Include="Catalyst.Spacy" />
         <PackageReference Include="Catalyst.Models.English" />
         <PackageReference Include="CommandLineParser" />
+        <PackageReference Include="MessagePack" />
         <PackageReference Include="NuGet.CommandLine" />
     </ItemGroup>
 
