@@ -6,6 +6,7 @@ internal class ExecutionScope
 {
     private Dictionary<string, VmVariableDeclaration> variables = new();
     private Dictionary<string, object?> variableValues = new();
+    private Dictionary<string, VmConstDeclaration> consts = new();
     private ExecutionScope? parentScope;
     public ExecutionScope()
     {
@@ -22,7 +23,17 @@ internal class ExecutionScope
         {
             variableNames.AddRange(this.parentScope.GetVariableNames());
         }
-        return variableNames.ToArray();
+        return [.. variableNames];
+    }
+
+    public string[] GetConstNames()
+    {
+        var constNames = new List<string>(this.consts.Keys);
+        if (this.parentScope is not null)
+        {
+            constNames.AddRange(this.parentScope.GetConstNames());
+        }
+        return [.. constNames];
     }
 
     public VmVariableDeclaration? GetVariableDeclaration(string variableName)
@@ -104,5 +115,19 @@ internal class ExecutionScope
     public void RegisterVariableValue(string variableName, object? value)
     {
         this.variableValues.Add(variableName, value);
+    }
+
+    public VmConstDeclaration GetConstDeclaration(string constName)
+    {
+        return this.consts.TryGetValue(constName, out var declaration)
+            ? declaration
+            : this.parentScope is null
+                ? throw new EngLangRuntimeException($"Const '{constName}' is not defined.")
+                : this.parentScope.GetConstDeclaration(constName);
+    }
+
+    public void RegisterConst(string constName, object? value)
+    {
+        this.consts.Add(constName, new VmConstDeclaration(constName, value));
     }
 }

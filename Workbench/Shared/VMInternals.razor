@@ -63,6 +63,24 @@
         }
     </tbody>
 </table>
+<h3 class="pt-1">Constants</h3>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var constName in vm.GetConstNames())
+        {
+            <tr>
+                <td>@constName</td>
+                <td>@vm.GetConstDeclaration(constName)!.Value</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
 

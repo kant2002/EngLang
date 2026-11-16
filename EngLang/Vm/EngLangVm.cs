@@ -29,6 +29,11 @@ public class EngLangVm
         return [.. types.Keys];
     }
 
+    public string[] GetConstNames()
+    {
+        return GlobalScope.GetConstNames();
+    }
+
     public object GetVariableValue(string variableName)
     {
         return GlobalScope.GetVariableValue(variableName);
@@ -51,6 +56,11 @@ public class EngLangVm
         return types.TryGetValue(typeName, out var type)
             ? type
             : null;
+    }
+
+    public VmConstDeclaration? GetConstDeclaration(string constName)
+    {
+        return GlobalScope.GetConstDeclaration(constName);
     }
 
     public void ExecuteCode(string sentence)
@@ -233,7 +243,11 @@ public class EngLangVm
                 Debug.Assert(false, "Pointer declaration statements are not yet supported.");
                 break;
             case ConstantDeclarationStatement constantDeclarationStatement:
-                Debug.Assert(false, "Constant declaration statements are not yet supported");
+                {
+                    var name = constantDeclarationStatement.Identifier.Name.Name;
+                    var value = EvaluateExpression(scope, constantDeclarationStatement.Value);
+                    scope.RegisterConst(name, value);
+                }
                 break;
             case UnitAliasDeclarationStatement constantDeclarationStatement:
                 Debug.Assert(false, "Unit alias declaration statements are not yet supported");

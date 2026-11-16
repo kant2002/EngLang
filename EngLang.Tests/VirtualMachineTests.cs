@@ -217,9 +217,22 @@ Calculate factorial of 5 into a factorial.
         var vm = new EngLangVm();
         vm.ExecuteCode(sentence);
 
+        // TODO: I don't know should I register variable for shape declaration automatically or not.
         //var variableDeclaration = vm.GetVariableDeclaration("button");
         //Assert.NotNull(variableDeclaration);
         var typeDeclaration = vm.GetTypeDeclaration("button");
         Assert.NotNull(typeDeclaration);
+    }
+
+    [Fact]
+    public void ConstDeclaration()
+    {
+        var sentence = @"the rectangle width is 1.";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        var constDeclaration = vm.GetConstDeclaration("rectangle width");
+        Assert.NotNull(constDeclaration);
     }
 }
