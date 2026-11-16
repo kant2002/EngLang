@@ -10,12 +10,23 @@ namespace EngLang.Vm;
 public class EngLangVm
 {
     private Dictionary<string, VmFunctionDeclaration> functions = new(StringComparer.InvariantCultureIgnoreCase);
+    private Dictionary<string, VmTypeDeclaration> types = new(StringComparer.InvariantCultureIgnoreCase);
 
     internal ExecutionScope GlobalScope { get; } = new();
 
     public string[] GetVariableNames()
     {
         return GlobalScope.GetVariableNames();
+    }
+
+    public string[] GetFunctionNames()
+    {
+        return [.. functions.Keys];
+    }
+
+    public string[] GetTypeNames()
+    {
+        return [.. types.Keys];
     }
 
     public object GetVariableValue(string variableName)
@@ -28,10 +39,17 @@ public class EngLangVm
         return GlobalScope.GetVariableDeclaration(variableName);
     }
 
-    public VmFunctionDeclaration? GetVmFunction(string functionName)
+    public VmFunctionDeclaration? GetFunctionDeclaration(string functionName)
     {
         return functions.TryGetValue(functionName, out var func)
             ? func
+            : null;
+    }
+
+    public VmTypeDeclaration? GetTypeDeclaration(string typeName)
+    {
+        return types.TryGetValue(typeName, out var type)
+            ? type
             : null;
     }
 
@@ -91,7 +109,25 @@ public class EngLangVm
                 }
                 break;
             case ShapeDeclarationStatement shapeDeclarationStatement:
-                Debug.Assert(false, "Shape declaration statements are not yet supported.");
+                {
+                    var declaration = shapeDeclarationStatement.Declaration;
+                    var name = declaration.Name.Name;
+                    Debug.Assert(!types.ContainsKey(name), $"Type {name} is already declared.");
+                    Debug.Assert(declaration.BaseShapeName is null || declaration.BaseShapeName.Name == "thing", "Base shapes are not yet supported.");
+                    Debug.Assert(declaration.BaseShapeName is null || !declaration.BaseShapeName.IsCollection, "Base shape collection are not yet supported.");
+                    var typeDeclaration = new VmTypeDeclaration(name);
+                    if (declaration.WellKnownSlots is { })
+                    {
+                        foreach (var slot in declaration.WellKnownSlots.Slots)
+                        {
+                            var slotName = slot.Name;
+                            var slotType = slot.TypeName;
+                            typeDeclaration.Properties.Add(slotName, new VmTypeDeclaration(slotType));
+                        }
+                    }
+
+                    types.Add(name, typeDeclaration);
+                }
                 break;
             case ExpressionStatement expressionStatement:
                 {
@@ -163,7 +199,7 @@ public class EngLangVm
                     parametersCount--;
                     haveResult = true;
                 }
-                var func = GetVmFunction($"{marker}@{parametersCount}") ?? throw new InvalidOperationException($"Function `{marker}@{parametersCount}` not found");
+                var func = GetFunctionDeclaration($"{marker}@{parametersCount}") ?? throw new InvalidOperationException($"Function `{marker}@{parametersCount}` not found");
                 var functionScope = new ExecutionScope(scope);
                 for (int i = 0; i < func.Parameters.Length; i++)
                 {

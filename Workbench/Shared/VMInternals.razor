@@ -24,6 +24,46 @@
     </tbody>
 </table>
 
+
+<h3 class="pt-1">Functions</h3>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Function</th>
+            <th>Parameters</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var functionName in vm.GetFunctionNames())
+        {
+            <tr>
+                <td>@functionName</td>
+                <td>@string.Join(", ", vm.GetFunctionDeclaration(functionName)!.Parameters.Select(p => p.Name.Name))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<h3 class="pt-1">Types</h3>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Properties</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var typeName in vm.GetTypeNames())
+        {
+            <tr>
+                <td>@typeName</td>
+                <td>@string.Join(", ", vm.GetTypeDeclaration(typeName)!.Properties.Select(pair => $"{pair.Key}: {pair.Value.Name}"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
 @code {
 
     [Parameter]

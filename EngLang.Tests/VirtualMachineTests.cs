@@ -183,7 +183,7 @@ result is a previous factorial multiply a number.
         var vm = new EngLangVm();
         vm.ExecuteCode(sentence);
 
-        var factorialFunction = vm.GetVmFunction("Calculate factorial of@1");
+        var factorialFunction = vm.GetFunctionDeclaration("Calculate factorial of@1");
         Assert.NotNull(factorialFunction);
     }
 
@@ -206,5 +206,20 @@ Calculate factorial of 5 into a factorial.
         Assert.Equal(120, (long)variableValue);
         var variableDeclaration = vm.GetVariableDeclaration("factorial");
         Assert.NotNull(variableDeclaration);
+    }
+
+    [Fact]
+    public void ShapeDeclaration()
+    {
+        var sentence = @"a button is a thing with a roundy box and a name.
+";
+
+        var vm = new EngLangVm();
+        vm.ExecuteCode(sentence);
+
+        //var variableDeclaration = vm.GetVariableDeclaration("button");
+        //Assert.NotNull(variableDeclaration);
+        var typeDeclaration = vm.GetTypeDeclaration("button");
+        Assert.NotNull(typeDeclaration);
     }
 }
