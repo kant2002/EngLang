@@ -196,3 +196,12 @@ and
 ```
 the greater value.
 ```
+
+
+# Operation on values
+
+I believe value is abstract concept which we don't really want to normalize initially. Let just operate on values. Probably humans have specialization like Haskell, but with delayed slots.
+
+- We have signature of the operation which logically explain it's goal.
+- We have very specific implementation of the operation which we know (impl sometimes can deviate from generic spirit)
+- Some undefined operation can be specified when people encounter them in real life
