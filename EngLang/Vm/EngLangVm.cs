@@ -34,7 +34,7 @@ public class EngLangVm
         return GlobalScope.GetConstNames();
     }
 
-    public object GetVariableValue(string variableName)
+    public VmValue GetVariableValue(string variableName)
     {
         return GlobalScope.GetVariableValue(variableName);
     }
@@ -159,8 +159,8 @@ public class EngLangVm
                         var variableName = inplaceMathExpression.TargetVariable.Name.Name;
                         var getter = scope.GetVariableGetter(inplaceMathExpression.TargetVariable);
                         var setter = scope.GetVariableSetter(inplaceMathExpression.TargetVariable);
-                        var oldValue = (long)getter();
-                        var addend = (long)EvaluateExpression(scope, inplaceMathExpression.ChangeValue);
+                        var oldValue = getter();
+                        var addend = EvaluateExpression(scope, inplaceMathExpression.ChangeValue);
                         var newValue = inplaceMathExpression.Operator switch
                         {
                             MathOperator.Plus => oldValue + addend,
@@ -264,59 +264,59 @@ public class EngLangVm
         return false;
     }
 
-    private object? EvaluateExpression(ExecutionScope scope, Expression expression)
+    private VmValue? EvaluateExpression(ExecutionScope scope, Expression expression)
     {
         switch (expression)
         {
             case NullLiteralExpression nullLiteralExpression:
                 return null;
             case IntLiteralExpression intLiteralExpression:
-                return intLiteralExpression.Value;
+                return new VmValue(intLiteralExpression.Value);
             case StringLiteralExpression stringLiteralExpression:
-                return stringLiteralExpression.Value;
+                return new VmValue(stringLiteralExpression.Value);
             case VariableExpression variableExpression:
                 var getter = scope.GetVariableGetter(variableExpression.Identifier);
                 return getter();
             case LogicalExpression logicalExpression:
-                var first = (long)EvaluateExpression(scope, logicalExpression.FirstOperand);
+                var first = EvaluateExpression(scope, logicalExpression.FirstOperand);
                 switch (logicalExpression.Operator)
                 {
                     case LogicalOperator.Equals:
                         {
-                            var second = (long)EvaluateExpression(scope, logicalExpression.SecondOperand);
+                            var second = EvaluateExpression(scope, logicalExpression.SecondOperand);
                             return AsLogicalValue(first == second);
                         }
                     case LogicalOperator.NotEquals:
                         {
-                            var second = (long)EvaluateExpression(scope, logicalExpression.SecondOperand);
+                            var second = EvaluateExpression(scope, logicalExpression.SecondOperand);
                             return AsLogicalValue(first != second);
                         }
                     case LogicalOperator.Less:
                         {
-                            var second = (long)EvaluateExpression(scope, logicalExpression.SecondOperand);
+                            var second = EvaluateExpression(scope, logicalExpression.SecondOperand);
                             return AsLogicalValue(first < second);
                         }
                     case LogicalOperator.Greater:
                         {
-                            var second = (long)EvaluateExpression(scope, logicalExpression.SecondOperand);
+                            var second = EvaluateExpression(scope, logicalExpression.SecondOperand);
                             return AsLogicalValue(first > second);
                         }
                     case LogicalOperator.LessOrEquals:
                         {
-                            var second = (long)EvaluateExpression(scope, logicalExpression.SecondOperand);
+                            var second = EvaluateExpression(scope, logicalExpression.SecondOperand);
                             return AsLogicalValue(first <= second);
                         }
                     case LogicalOperator.GreaterOrEquals:
                         {
-                            var second = (long)EvaluateExpression(scope, logicalExpression.SecondOperand);
+                            var second = EvaluateExpression(scope, logicalExpression.SecondOperand);
                             return AsLogicalValue(first >= second);
                         }
                     default:
                         throw new NotImplementedException($"Logical expression with operator {logicalExpression.Operator} is not supported.");
                 }
             case MathExpression mathExpression:
-                var firstOperand = (long)EvaluateExpression(scope, mathExpression.FirstOperand);
-                var secondOperand = (long)EvaluateExpression(scope, mathExpression.SecondOperand);
+                var firstOperand = EvaluateExpression(scope, mathExpression.FirstOperand);
+                var secondOperand = EvaluateExpression(scope, mathExpression.SecondOperand);
                 return mathExpression.Operator switch
                 {
                     MathOperator.Plus => firstOperand + secondOperand,
@@ -329,12 +329,12 @@ public class EngLangVm
         throw new NotImplementedException($"Expression of type {expression.GetType().Name} is not supported.");
     }
 
-    bool AsBoolean(object value)
+    bool AsBoolean(VmValue value)
     {
-        return (long)value == 1;
+        return (long)value.Value == 1;
     }
-    long AsLogicalValue(bool value)
+    VmValue AsLogicalValue(bool value)
     {
-        return value ? 1L : 0L;
+        return value ? new VmValue(1L) : new VmValue(0L);
     }
 }

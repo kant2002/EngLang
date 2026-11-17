@@ -3,9 +3,9 @@ namespace EngLang.Vm;
 public class VmConstDeclaration
 {
     public string Name { get; }
-    public object? Value { get; }
+    public VmValue? Value { get; }
 
-    public VmConstDeclaration(string name, object? value)
+    public VmConstDeclaration(string name, VmValue? value)
     {
         this.Name = name;
         this.Value = value;

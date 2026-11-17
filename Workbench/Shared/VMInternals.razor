@@ -18,7 +18,7 @@
         {
             <tr>
                 <td>@variableName</td>
-                <td>@vm.GetVariableValue(variableName)</td>
+                <td><VMValueView Value=@(vm.GetVariableValue(variableName)) /></td>
             </tr>
         }
     </tbody>
@@ -76,7 +76,7 @@
         {
             <tr>
                 <td>@constName</td>
-                <td>@vm.GetConstDeclaration(constName)!.Value</td>
+                <td><VMValueView Value=@(vm.GetConstDeclaration(constName)!.Value) /></td>
             </tr>
         }
     </tbody>

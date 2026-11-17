@@ -5,7 +5,7 @@ using System.Diagnostics;
 internal class ExecutionScope
 {
     private Dictionary<string, VmVariableDeclaration> variables = new();
-    private Dictionary<string, object?> variableValues = new();
+    private Dictionary<string, VmValue?> variableValues = new();
     private Dictionary<string, VmConstDeclaration> consts = new();
     private ExecutionScope? parentScope;
     public ExecutionScope()
@@ -43,7 +43,7 @@ internal class ExecutionScope
             : this.parentScope?.GetVariableDeclaration(variableName);
     }
 
-    public object? GetVariableValue(string variableName)
+    public VmValue? GetVariableValue(string variableName)
     {
         return variableValues.TryGetValue(variableName, out var value)
             ? value
@@ -57,12 +57,12 @@ internal class ExecutionScope
         this.variables.Add(variableName, new VmVariableDeclaration(variableName, variableType));
     }
 
-    public Action<object?> GetVariableSetter(IdentifierReference variable)
+    public Action<VmValue?> GetVariableSetter(IdentifierReference variable)
     {
         Debug.Assert(variable.Owner is null, "Variable owners are not yet supported.");
         Debug.Assert(variable.Type is null || variable.Type.Name == variable.Name.Name, "Variable types is not supported");
         var variableName = variable.Name.Name;
-        return (Action<object?>)(value =>
+        return (Action<VmValue?>)(value =>
         {
             var declaration = this.GetVariableDeclaration(variableName);
             if (!this.variables.ContainsKey(variableName))
@@ -88,12 +88,12 @@ internal class ExecutionScope
         });
     }
 
-    public Func<object?> GetVariableGetter(IdentifierReference variable)
+    public Func<VmValue?> GetVariableGetter(IdentifierReference variable)
     {
         Debug.Assert(variable.Owner is null, "Variable owners are not yet supported.");
         Debug.Assert(variable.Type is null || variable.Type.Name == variable.Name.Name, "Variable types is not supported");
         var variableName = variable.Name.Name;
-        return (Func<object?>)(() =>
+        return (Func<VmValue?>)(() =>
         {
             var declaration = this.GetVariableDeclaration(variableName);
             if (!this.variables.ContainsKey(variableName) && declaration is not null)
@@ -112,7 +112,7 @@ internal class ExecutionScope
         });
     }
 
-    public void RegisterVariableValue(string variableName, object? value)
+    public void RegisterVariableValue(string variableName, VmValue? value)
     {
         this.variableValues.Add(variableName, value);
     }
@@ -126,7 +126,7 @@ internal class ExecutionScope
                 : this.parentScope.GetConstDeclaration(constName);
     }
 
-    public void RegisterConst(string constName, object? value)
+    public void RegisterConst(string constName, VmValue? value)
     {
         this.consts.Add(constName, new VmConstDeclaration(constName, value));
     }

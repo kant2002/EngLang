@@ -1,0 +1,28 @@
+@using EngLang.Vm
+@if (Value == null)
+{
+    <span class="text-muted">null</span>
+}
+else if (Value.Type == VmValue.VmValueType.String)
+{
+    <span class="text-success">@Value.Value</span>
+}
+else if (Value.Type == VmValue.VmValueType.Long)
+{
+    <span class="text-success">@Value.Value</span>
+}
+else if (Value.Type == VmValue.VmValueType.Rational)
+{
+    <span class="text-success">@Value.Value / @Value.Divisor</span>
+}
+else
+{
+    <span class="text-danger">Type: @Value.Type (@Value.Value)</span>
+}
+
+@code {
+
+    [Parameter]
+    public VmValue? Value { get; set; }
+
+}
